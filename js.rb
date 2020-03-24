@@ -8,6 +8,85 @@ require 'active_model'
 require_relative 'html'
 
 module El
+  module HTML
+    module Utils
+      def render_content(content)
+        content.map { |elem| render_element(elem) }.join('')
+      end
+
+      def render_element(elem)
+        if elem.respond_to?(:to_html)
+          elem.to_html
+        else
+          elem.to_s
+        end
+      end
+    end
+
+    class Tag
+      include HTML::Utils
+
+      attr_reader :name, :attributes, :content
+
+      def initialize(name, attributes = {}, *content)
+        @name       = name
+        @attributes = attributes
+        @content    = content
+      end
+
+      def to_html
+        if attributes.empty?
+          "<#{name}>#{render_content(content)}</#{name}>"
+        else
+          "<#{name} #{render_attributes}>#{render_content(content)}</#{name}>"
+        end
+      end
+
+      def +(value)
+        case value
+        when Array
+          l = TagList[*value]
+          l.unshift(self)
+        else
+          TagList[self, value]
+        end
+      end
+
+      private
+
+      def render_attributes
+        attributes.reduce([]) do |attrs, (name, value)|
+          if value == true
+            attrs << name.to_s
+          elsif value == false || value.nil?
+            attrs
+          else
+            attrs << "#{name}=\"#{value}\""
+          end
+        end.join(' ')
+      end
+    end
+
+    class TagList < Array
+      include HTML::Utils
+
+      def to_html
+        render_content(self)
+      end
+
+      alias orig_concat +
+      def +(value)
+        case value
+        when Array
+          TagList[*self.orig_concat(value)]
+        else
+          l = TagList[*self]
+          l << value
+        end
+      end
+    end
+  end
+
   module JavaScript
     def select(pattern)
       Query.new(pattern)
@@ -135,7 +214,7 @@ module El
 
     def render(component, *args)
       instance = component.new(*args)
-      io.puts instance.html
+      io.puts instance.to_html
 #      unless component.events.empty?
 #        io.puts "<script>"
 #        component.events.each do |event|
@@ -197,6 +276,7 @@ module El
           end
       end
 
+      # TODO: add ActiveModel-like, callbacks for events
       def on(name, &blk)
         event_names << name
         define_method name, &blk
@@ -234,8 +314,18 @@ module El
       end
     end
 
-    def html
-      @html ||= "<#{tag_name} id=\"#{html_id}\" class=\"#{html_class}\" #{events_html}>#{content}</#{tag_name}>"
+    def to_html
+      "<#{tag_name} id=\"#{html_id}\" class=\"#{html_class}\" #{events_html}>#{content}</#{tag_name}>"
+    end
+
+    def +(value)
+      case value
+      when Array
+        l = HTML::TagList[*value]
+        l.unshift(self)
+      else
+        HTML::TagList[self, value]
+      end
     end
 
     def events
@@ -348,7 +438,7 @@ B = Bootstrap4
 
 class Home < El::Component
   content do
-    B::Alert.new("Hello Everyone!")
+    B::Alert.new("Hello Everyone!", style: :warning)
   end
 
   on :click do

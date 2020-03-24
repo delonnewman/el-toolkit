@@ -1,0 +1,118 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+*	html.rb	/^      def *(n)$/;"	f	class:El.HTML.Builder
++	js.rb	/^      def +(value)$/;"	f	class:El.HTML.Tag
++	js.rb	/^      def +(value)$/;"	f	class:El.HTML.Tag.TagList
++	js.rb	/^    def +(value)$/;"	f	class:El.HTML
+<<	html.rb	/^      def <<(other)$/;"	f	class:El.HTML.Builder
+<<	js.rb	/^      def <<(statement)$/;"	f	class:El.HTML.JavaScript.Program
+Alert	js.rb	/^    class Alert$/;"	c	class:El.HTML.JavaScript
+Alert	js.rb	/^  class Alert < El::Component$/;"	c	class:Bootstrap4
+Base	js.rb	/^    class Base$/;"	c	class:El.HTML.JavaScript
+Bootstrap4	js.rb	/^module Bootstrap4$/;"	m
+Builder	html.rb	/^    class Builder$/;"	c	class:El.HTML
+Bus	html.rb	/^    class Bus < BasicObject$/;"	c	class:El.HTML
+Component	js.rb	/^  class Component$/;"	c	class:El.HTML
+El	html.rb	/^module El$/;"	m
+El	js.rb	/^module El$/;"	m
+Finder	js.rb	/^    class Finder < Query$/;"	c	class:El.HTML.JavaScript
+GetQueryInnerText	js.rb	/^    class GetQueryInnerText$/;"	c	class:El.HTML.JavaScript
+Greeter	js.rb	/^class Greeter < El::Component$/;"	c
+HTML	html.rb	/^  module HTML$/;"	m	class:El
+HTML	js.rb	/^  module HTML$/;"	m	class:El
+HTMLSafeString	html.rb	/^    class HTMLSafeString$/;"	c
+Home	js.rb	/^class Home < El::Component$/;"	c
+JavaScript	js.rb	/^  module JavaScript$/;"	m	class:El.HTML
+Program	js.rb	/^    class Program$/;"	c	class:El.HTML.JavaScript
+Query	js.rb	/^    class Query < Base$/;"	c	class:El.HTML.JavaScript
+Rendering	js.rb	/^  module Rendering$/;"	m	class:El.HTML
+Sequence	html.rb	/^    class Sequence < Array$/;"	c	class:El.HTML
+SetQueryInnerText	js.rb	/^    class SetQueryInnerText$/;"	c	class:El.HTML.JavaScript
+Tag	js.rb	/^    class Tag$/;"	c	class:El.HTML
+TagList	js.rb	/^    class TagList < Array$/;"	c	class:El.HTML.Tag
+Utils	js.rb	/^    module Utils$/;"	m	class:El.HTML
+Utils	js.rb	/^    module Utils$/;"	m	class:El.HTML.JavaScript
+add_class	html.rb	/^        def add_class(name)$/;"	f	class:El
+alert	js.rb	/^    def alert(msg)$/;"	f	class:El.HTML.JavaScript
+attrs	html.rb	/^      def attrs$/;"	f	class:El.HTML.Builder
+classes	js.rb	/^      def classes(names)$/;"	f	class:El.HTML.Component
+const_missing	html.rb	/^      def self.const_missing(name)$/;"	F	class:El.HTML.Bus
+content	js.rb	/^      def content(&blk)$/;"	f	class:El.HTML.Component
+custom_events	js.rb	/^      def custom_events$/;"	f	class:El.HTML.Component
+define	html.rb	/^    def define(name, &block)$/;"	f
+dismiss_button	js.rb	/^    def dismiss_button$/;"	f	class:Bootstrap4.Alert
+dismissible?	js.rb	/^    def dismissible?$/;"	f	class:Bootstrap4.Alert
+evaluate	html.rb	/^    def evaluate(form)$/;"	f
+event_names	js.rb	/^      def event_names$/;"	f	class:El.HTML.Component
+events	js.rb	/^      def events(mapping)$/;"	f	class:El.HTML.Component
+events	js.rb	/^    def events$/;"	f	class:El.HTML
+events_html	js.rb	/^    def events_html$/;"	f	class:El.HTML
+expand	html.rb	/^    def expand(form)$/;"	f
+expand1	html.rb	/^    def expand1(form)$/;"	f
+format_attr	html.rb	/^      def format_attr(name, value)$/;"	f
+format_attr_name	html.rb	/^      def format_attr_name(name)$/;"	f
+has_attributes?	html.rb	/^      def has_attributes?(form)$/;"	f
+html	js.rb	/^  def html$/;"	f
+html_class	js.rb	/^    def html_class$/;"	f	class:El.HTML
+html_class_selector	js.rb	/^    def html_class_selector$/;"	f	class:El.HTML
+html_id	js.rb	/^    def html_id$/;"	f	class:El.HTML
+html_id_selector	js.rb	/^    def html_id_selector$/;"	f	class:El.HTML
+html_ident	js.rb	/^    def html_ident$/;"	f	class:El.HTML
+html_safe	html.rb	/^      def html_safe$/;"	f
+initialize	html.rb	/^      def initialize(string)$/;"	f	class:HTMLSafeString
+initialize	html.rb	/^      def initialize(tag = nil, content = [], classes = [])$/;"	f	class:El.HTML.Builder
+initialize	js.rb	/^      def initialize(msg)$/;"	f	class:El.HTML.JavaScript.Alert
+initialize	js.rb	/^      def initialize(name, attributes = {}, *content)$/;"	f	class:El.HTML.Tag
+initialize	js.rb	/^      def initialize(pattern)$/;"	f	class:El.HTML.JavaScript.Query
+initialize	js.rb	/^      def initialize(query)$/;"	f	class:El.HTML.JavaScript.GetQueryInnerText
+initialize	js.rb	/^      def initialize(query, pattern)$/;"	f	class:El.HTML.JavaScript.Finder
+initialize	js.rb	/^      def initialize(query, text)$/;"	f	class:El.HTML.JavaScript.SetQueryInnerText
+initialize	js.rb	/^      def initialize(statements = [])$/;"	f	class:El.HTML.JavaScript.Program
+initialize	js.rb	/^    def initialize(*args)$/;"	f	class:El.HTML
+inner_text	js.rb	/^      def inner_text$/;"	f	class:El.HTML.JavaScript.Query
+inner_text!	js.rb	/^      def inner_text!(text)$/;"	f	class:El.HTML.JavaScript.Query
+inspect	html.rb	/^      def inspect$/;"	f	class:El
+inspect	html.rb	/^      def inspect$/;"	f	class:El.HTML.Sequence
+io	js.rb	/^    def io$/;"	f	class:El.HTML.Rendering
+javascript	js.rb	/^    def javascript$/;"	f	class:El.HTML
+method_missing	html.rb	/^      def method_missing(method, *args)$/;"	f	class:El.HTML.Builder
+method_missing	html.rb	/^      def method_missing(tag, *args)$/;"	f	class:El.HTML.Bus
+mixin	html.rb	/^    def mixin(mod)$/;"	f
+on	js.rb	/^      def on(name, &blk)$/;"	f	class:El.HTML.Component
+parse_tag_name	html.rb	/^      def parse_tag_name(name)$/;"	f
+pretty_print	html.rb	/^      def pretty_print$/;"	f	class:El.HTML.Bus
+render	js.rb	/^    def render(component, *args)$/;"	f	class:El.HTML.Rendering
+render_attributes	html.rb	/^      def render_attributes(attrs)$/;"	f
+render_attributes	js.rb	/^      def render_attributes$/;"	f	class:El.HTML.Tag
+render_content	js.rb	/^      def render_content(content)$/;"	f	class:El.HTML.Utils
+render_element	js.rb	/^      def render_element(elem)$/;"	f	class:El.HTML.Utils
+render_event	js.rb	/^    def render_event(component, event)$/;"	f	class:El.HTML.Rendering
+render_form_list	html.rb	/^      def render_form_list(forms)$/;"	f
+render_tag	html.rb	/^      def render_tag(form)$/;"	f
+renderer	js.rb	/^      def renderer$/;"	f	class:El.HTML.Component
+select	js.rb	/^      def select(pattern)$/;"	f	class:El.HTML.JavaScript.Query
+select	js.rb	/^    def select(pattern)$/;"	f	class:El.HTML
+select	js.rb	/^    def select(pattern)$/;"	f	class:El.HTML.JavaScript
+select_self	js.rb	/^    def select_self$/;"	f	class:El.HTML
+style=	js.rb	/^    def style=(style)$/;"	f	class:Bootstrap4.Alert
+tag	html.rb	/^    def tag(*args)$/;"	f	class:El.HTML
+tag_name	js.rb	/^      def tag_name(tag)$/;"	f	class:El.HTML.Component
+to_a	html.rb	/^      def to_a$/;"	f	class:El.HTML
+to_html	js.rb	/^      def to_html$/;"	f	class:El.HTML.Tag
+to_html	js.rb	/^      def to_html$/;"	f	class:El.HTML.Tag.TagList
+to_html	js.rb	/^    def to_html$/;"	f	class:El.HTML
+to_javascript	js.rb	/^      def to_javascript(value)$/;"	f	class:El.HTML.JavaScript.Utils
+to_js	js.rb	/^      def to_js$/;"	f	class:El.HTML.JavaScript.Alert
+to_js	js.rb	/^      def to_js$/;"	f	class:El.HTML.JavaScript.Finder
+to_js	js.rb	/^      def to_js$/;"	f	class:El.HTML.JavaScript.GetQueryInnerText
+to_js	js.rb	/^      def to_js$/;"	f	class:El.HTML.JavaScript.Program
+to_js	js.rb	/^      def to_js$/;"	f	class:El.HTML.JavaScript.Query
+to_js	js.rb	/^      def to_js$/;"	f	class:El.HTML.JavaScript.SetQueryInnerText
+to_s	html.rb	/^      def to_s$/;"	f	class:El
+to_s	html.rb	/^      def to_s$/;"	f	class:El.HTML.Sequence
+to_s	html.rb	/^      def to_s$/;"	f	class:HTMLSafeString
+update_attrs	html.rb	/^        def update_attrs(attrs)$/;"	f	class:El
