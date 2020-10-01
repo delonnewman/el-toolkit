@@ -87,6 +87,7 @@ module El
     end
   end
 
+  # TODO: Add `document` and `jQuery` methods that return objects that mimick there API's and generate the appropriate code.
   module JavaScript
     def select(pattern)
       Query.new(pattern)
