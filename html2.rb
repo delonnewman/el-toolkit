@@ -48,8 +48,8 @@ module El
       end
     end
 
-    def call
-      instance_eval(&callable)
+    def call(*args)
+      proc.call(*args)
     end
   end
 
