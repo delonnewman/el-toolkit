@@ -75,6 +75,7 @@ PLATFORMS
 
 DEPENDENCIES
   activemodel (= 5.2.4.1)
+  concurrent-ruby
   parser
   pry
   sinatra

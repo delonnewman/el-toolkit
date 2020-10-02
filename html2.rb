@@ -18,15 +18,27 @@ module El
   end
 
   class Action
-    attr_reader :proc, :id
+    attr_reader :id
 
-    def initialize(proc)
-      @proc = proc
+    def initialize(proc, source = nil)
+      raise "proc and source cannot both be nil" if proc.nil? && source.nil?
+
+      @proc   = proc
+      @source = source
+
       @id = object_id.to_s
     end
 
     def to_proc
-      @proc
+      proc
+    end
+
+    def proc
+      @proc ||= eval(source)
+    end
+
+    def source
+      @source ||= serialize
     end
 
     def serialize
@@ -34,22 +46,31 @@ module El
       ast = Parser::CurrentRuby.parse(IO.read(file))
 
       @node
-      find_node(ast, line) { |x| @node = x } # set's the last node that's found
+      find_node(ast, line) { |x| @node = x } # set's the last node that it finds
       Unparser.unparse(@node)
     end
 
+    def call(*args)
+      proc.call(*args)
+    end
+
+    private
+
+    # NOTE: with this approach we're limited to one callback per line (if they start on the same line they collide)
     def find_node(ast, line, tries = 0, &block)
       if ast.nil? || !(AST::Node === ast) || ast.children.empty? || tries > 1000
         nil
-      elsif ast.loc.first_line == line # && ast.loc.last_line == line
+      elsif ast.loc.first_line == line && callable_node?(ast)
         yield ast
       else
         ast.children.map { |node| find_node(node, line, tries + 1, &block) }
       end
     end
 
-    def call(*args)
-      proc.call(*args)
+    CALLABLE_TYPES = Set[:lambda, :proc]
+
+    def callable_node?(node)
+      node.type == :block && node.children[0].type == :send && CALLABLE_TYPES.include?(node.children[0].children[1])
     end
   end
 
@@ -182,4 +203,5 @@ end
 
 html = El::HTML2.new
 (html.script(src: 'runtime.js') +
-    html.a(href: "#", on: { click: ->{ system "say TESTING!!!" } }) { html.strong { "TESTING!!!" } }).to_html
+    html.a(href: "#", on: { click: ->{ system "say TESTING!!!" },
+                            load:  ->{ system "say LOADING!!!" } }) { html.strong { "TESTING!!!" } }).to_html
