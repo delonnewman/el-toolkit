@@ -2,13 +2,6 @@ GEM
   remote: https://rubygems.org/
   specs:
     abstract_type (0.0.7)
-    activemodel (5.2.4.1)
-      activesupport (= 5.2.4.1)
-    activesupport (5.2.4.1)
-      concurrent-ruby (~> 1.0, >= 1.0.2)
-      i18n (>= 0.7, < 2)
-      minitest (~> 5.1)
-      tzinfo (~> 1.1)
     adamantium (0.2.0)
       ice_nine (~> 0.11.0)
       memoizable (~> 0.4.0)
@@ -24,13 +17,10 @@ GEM
     concurrent-ruby (1.1.6)
     diff-lcs (1.4.4)
     equalizer (0.0.11)
-    i18n (1.8.2)
-      concurrent-ruby (~> 1.0)
     ice_nine (0.11.2)
     memoizable (0.4.2)
       thread_safe (~> 0.3, >= 0.3.1)
     method_source (1.0.0)
-    minitest (5.14.0)
     mprelude (0.1.0)
       abstract_type (~> 0.0.7)
       adamantium (~> 0.2.0)
@@ -38,8 +28,6 @@ GEM
       equalizer (~> 0.0.9)
       ice_nine (~> 0.11.1)
       procto (~> 0.0.2)
-    mustermann (1.1.1)
-      ruby2_keywords (~> 0.0.1)
     parser (2.7.1.5)
       ast (~> 2.4.1)
     procto (0.0.3)
@@ -47,18 +35,9 @@ GEM
       coderay (~> 1.1)
       method_source (~> 1.0)
     rack (2.2.3)
-    rack-protection (2.1.0)
-      rack
-    ruby2_keywords (0.0.2)
-    sinatra (2.1.0)
-      mustermann (~> 1.0)
-      rack (~> 2.2)
-      rack-protection (= 2.1.0)
-      tilt (~> 2.0)
+    rack-contrib (2.2.0)
+      rack (~> 2.0)
     thread_safe (0.3.6)
-    tilt (2.0.10)
-    tzinfo (1.2.6)
-      thread_safe (~> 0.1)
     unparser (0.4.9)
       abstract_type (~> 0.0.7)
       adamantium (~> 0.2.0)
@@ -74,11 +53,11 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  activemodel (= 5.2.4.1)
   concurrent-ruby
   parser
   pry
-  sinatra
+  rack
+  rack-contrib
   unparser
 
 BUNDLED WITH

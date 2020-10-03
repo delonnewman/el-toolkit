@@ -17,6 +17,12 @@ module El
     ACTIONS[action.id] = action
   end
 
+  class Application
+    def call(env)
+
+    end
+  end
+
   class Action
     attr_reader :id
 
@@ -47,6 +53,8 @@ module El
 
       @node
       find_node(ast, line) { |x| @node = x } # set's the last node that it finds
+      raise "Failed to serialize action #{proc.inspect}" unless @node
+
       Unparser.unparse(@node)
     end
 
@@ -74,7 +82,7 @@ module El
     end
   end
 
-  class HTML2
+  class HTML
     def method_missing(tag, attributes = nil, &block)
       raise "Unknown HTML tag: #{tag}" unless Element::TAGS.include?(tag)
 
@@ -201,7 +209,7 @@ module El
   end
 end
 
-html = El::HTML2.new
-(html.script(src: 'runtime.js') +
-    html.a(href: "#", on: { click: ->{ system "say TESTING!!!" },
-                            load:  ->{ system "say LOADING!!!" } }) { html.strong { "TESTING!!!" } }).to_html
+# html = El::HTML.new
+# (html.script(src: 'runtime.js') +
+#     html.a(href: "#", on: { click: ->{ system "say TESTING!!!" },
+#                             load:  ->{ system "say LOADING!!!" } }) { html.strong { "TESTING!!!" } }).to_html
