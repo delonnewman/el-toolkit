@@ -78,7 +78,11 @@ module El
       end
 
       def text
-        GetQueryInnerText.new(self)
+        GetQueryAttribute.new(self, :innerText)
+      end
+
+      def value
+        GetQueryAttribute.new(self, :value)
       end
 
       def select(pattern)
@@ -112,19 +116,20 @@ module El
       end
 
       def to_js
-        "#{query.to_js}.forEach(function(e) { e.innerText = #{text.to_json} })"
+        "#{query.to_js}.forEach(function(e) { e.innerText = #{text.to_js} })"
       end
     end
 
-    class GetQueryInnerText
-      attr_reader :query
+    class GetQueryAttribute
+      attr_reader :query, :attribute
 
-      def initialize(query)
+      def initialize(query, attribute)
         @query = query
+        @attribute = attribute
       end
 
       def to_js
-        "#{query.to_js}.text()"
+        "#{query.to_js}[0].#{attribute}"
       end
     end
   end
