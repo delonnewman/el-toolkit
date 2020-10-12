@@ -1,4 +1,6 @@
 class Count < El::Page
+  title "#{Home.title} - Count"
+
   def render html
     @count = 0
     [
