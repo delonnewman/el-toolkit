@@ -1,3 +1,3 @@
-require_relative 'examples'
+require 'el'
 
-run El::Examples.app
+run El::Application.load.app
