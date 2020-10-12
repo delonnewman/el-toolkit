@@ -4,8 +4,11 @@ require 'stringio'
 require 'parser/current'
 require 'unparser'
 require 'erb'
+require 'json'
+require 'date'
 
 require_relative 'el/action'
+require_relative 'el/javascript'
 require_relative 'el/html'
 require_relative 'el/view'
 require_relative 'el/page'
@@ -16,10 +19,16 @@ module El
 
   def self.call_action(id, params = {})
     action = ACTIONS[id]
-    if action
-      action.call
+    raise "Action #{id} not found: #{ACTIONS}" unless action
+
+    result = action.call
+
+    if result.respond_to?(:to_js)
+      [200, { 'Content-Type' => 'application/javascript' }, [result.to_js]]
+    elsif result.respond_to?(:to_html)
+      [200, { 'Content-Type' => 'text/html' }, [result.to_html]]
     else
-      raise "Action #{id} not found: #{ACTIONS}"
+      [200, { 'Content-Type' => 'text/html' }, [result.to_s]]
     end
   end
 

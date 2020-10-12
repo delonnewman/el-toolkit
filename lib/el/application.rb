@@ -1,9 +1,22 @@
 module El
   class Application
+    attr_reader :pages
+
     def initialize(pages)
-      @pages = pages.reduce({}) do |h, page|
-        h.merge!(page.path => page)
+      @pages = pages
+
+      @page_paths = {}
+      @page_names = {}
+
+      pages.each do |page|
+        page.app = self
+        @page_paths[page.path] = page
+        @page_names[page.name.to_sym] = page 
       end
+    end
+
+    def page(name)
+      @page_names[name]
     end
 
     def call(env)
@@ -11,14 +24,13 @@ module El
       
       if path.start_with?('/action')
         El.call_action(path.split('/').last)
-        [200, {'Content-Type' => 'text/html'}, []]
       else
         render_page(path)
       end
     end
 
     def render_page(path)
-      page = @pages[path]
+      page = @page_paths[path]
 
       if page
         [200, { 'Content-Type' => 'text/html' }, [page.render_content]]

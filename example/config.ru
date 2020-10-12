@@ -1,3 +1,3 @@
-require_relative 'hello'
+require_relative 'examples'
 
-run El::Application.new([Hello.new])
+run El::Examples

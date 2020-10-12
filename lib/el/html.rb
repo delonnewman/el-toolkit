@@ -1,5 +1,7 @@
 module El
   class HTML
+    include JavaScript
+
     def method_missing(tag, attributes = nil, &block)
       raise "Unknown HTML tag: #{tag}" unless Element::TAGS.include?(tag)
 
@@ -21,7 +23,8 @@ module El
       attr_reader :tag, :attributes, :content
 
 
-      CONTENT_ELEMENTS = Set[:a, :script, :table, :tr, :td, :th, :strong].freeze
+      CONTENT_ELEMENTS = Set[:a, :script, :table, :tr, :td, :th, :strong, :li, :ul, :ol,
+                             :h1, :h2, :h3, :h4, :h5, :h6, :span].freeze
 
       SINGLETON_ELEMENTS = Set[:br, :img, :link, :meta, :base, :area, :col, :hr, :input,
                                :param, :source, :track, :wbr, :keygen].freeze
@@ -32,16 +35,22 @@ module El
         @tag = tag
         @attributes = attributes
 
-        if content_proc
+        if content_proc.nil?
+          @content = attributes.delete(:content)
+        else
           @content = content_proc.call
         end
 
         if attributes
           @callbacks = attributes.delete(:on) || {}
           @callbacks.each do |name, cb|
-            action = Action.new(cb)
-            attributes[:"on#{name}"] = "el.actions.call(#{action.id}, this)"
-            El.register_action(action)
+            if Proc === cb
+              action = Action.new(cb)
+              attributes[:"on#{name}"] = "el.actions.call(#{action.id}, this)"
+              El.register_action(action)
+            elsif cb.respond_to?(:to_js)
+              attributes[:"on#{name}"] = cb.to_js
+            end
           end
         end
       end
@@ -50,6 +59,16 @@ module El
         case @content
         when Element, ElementList
           @content.to_html
+        when Array
+          buffer = StringIO.new
+          @content.each do |element|
+            if element.respond_to?(:to_html)
+              buffer.puts element.to_html
+            else
+              buffer.puts element.to_s
+            end
+          end
+          buffer.string
         else
           @content.to_s
         end
@@ -89,7 +108,7 @@ module El
       private
 
       def render_attributes
-        attributes.map { |k, v| "#{k}=\"#{v}\"" }.join(' ')
+        attributes.map { |k, v| "#{k}='#{v}'" }.join(' ')
       end
     end
 
