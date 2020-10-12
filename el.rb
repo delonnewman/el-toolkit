@@ -26,6 +26,12 @@ module El
   class Action
     attr_reader :id
 
+    class << self
+      def deserialize(string)
+        new(nil, string)
+      end
+    end
+
     def initialize(proc, source = nil)
       raise "proc and source cannot both be nil" if proc.nil? && source.nil?
 
@@ -49,13 +55,14 @@ module El
 
     def serialize
       file, line = proc.source_location
-      ast = Parser::CurrentRuby.parse(IO.read(file))
+      node = RubyVM::AbstractSyntaxTree.of(proc)
+      ast  = Parser::CurrentRuby.parse(IO.read(file))
 
-      @node
-      find_node(ast, line) { |x| @node = x } # set's the last node that it finds
-      raise "Failed to serialize action #{proc.inspect}" unless @node
+      source = nil
+      find_node(ast, line, node.first_column - 2) { |x| source = x } # set's the last node that it finds
+      raise "Failed to serialize action #{proc.inspect}" unless source
 
-      Unparser.unparse(@node)
+      Unparser.unparse(source)
     end
 
     def call(*args)
@@ -65,17 +72,17 @@ module El
     private
 
     # NOTE: with this approach we're limited to one callback per line (if they start on the same line they collide)
-    def find_node(ast, line, tries = 0, &block)
+    def find_node(ast, line, column, tries = 0, &block)
       if ast.nil? || !(AST::Node === ast) || ast.children.empty? || tries > 1000
         nil
-      elsif ast.loc.first_line == line && callable_node?(ast)
+      elsif ast.loc.first_line == line && ast.loc.column == column && callable_node?(ast)
         yield ast
       else
-        ast.children.map { |node| find_node(node, line, tries + 1, &block) }
+        ast.children.map { |node| find_node(node, line, column, tries + 1, &block) }
       end
     end
 
-    CALLABLE_TYPES = Set[:lambda, :proc]
+    CALLABLE_TYPES = Set[:lambda, :proc].freeze
 
     def callable_node?(node)
       node.type == :block && node.children[0].type == :send && CALLABLE_TYPES.include?(node.children[0].children[1])
@@ -209,7 +216,6 @@ module El
   end
 end
 
-# html = El::HTML.new
-# (html.script(src: 'runtime.js') +
-#     html.a(href: "#", on: { click: ->{ system "say TESTING!!!" },
-#                             load:  ->{ system "say LOADING!!!" } }) { html.strong { "TESTING!!!" } }).to_html
+html = El::HTML.new
+(html.script(src: 'runtime.js') +
+    html.a(href: "#", on: { click: ->{ system "say TESTING!!!" }, load:  ->{ system "say LOADING!!!" } }) { html.strong { "TESTING!!!" } }).to_html
