@@ -1,4 +1,4 @@
-class Confirm < El::Page
+class Confirm < ApplicationPage
   title "#{Home.title} - Confirm"
 
   def render html

@@ -1,4 +1,4 @@
-class Count < El::Page
+class Count < ApplicationPage
   title "#{Home.title} - Count"
 
   def render html

@@ -1,6 +1,16 @@
 # frozen_string_literal: true
 module El
   class View
+    attr_reader :app
+
+    def initialize(app)
+      @app = app
+    end
+
+    def name
+      @name ||= self.class.to_s.split('::').last.downcase
+    end
+
     def content
       value = render(El::HTML.new)
 

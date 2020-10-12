@@ -1,22 +1,78 @@
 module El
   class Application
-    attr_reader :pages
+    class << self
+      def load_components(path)
+        expanded = File.expand_path(path)
+        symbols = Dir["#{expanded}/*.rb"].entries.map do |path|
+          const = File.basename(path, '.rb').split('_').map(&:capitalize).join('').to_sym
+          path  = File.expand_path(path)
+          
+          Object.autoload const, path
+          const
+        end
 
-    def initialize(pages)
-      @pages = pages
+        symbols.map do |const|
+          Object.const_get(const)
+        end
+      end
 
-      @page_paths = {}
-      @page_names = {}
 
-      pages.each do |page|
-        page.app = self
-        @page_paths[page.path] = page
-        @page_names[page.name.to_sym] = page 
+      def load
+        pages = load_components('./pages')
+        views = load_components('./views')        
+
+        app = new(pages, views)
+        yield app if block_given?
+        app
       end
     end
 
+    def initialize(pages, views)
+      @views = views.reduce({}) do |h, view|
+        view = view.new(self)
+        h.merge!(view.name.to_sym => view)
+      end
+
+      @page_paths = {}
+      @page_names = {}
+      @middleware = {}
+
+      pages.each do |page|
+        next if page.abstract?
+        page.new(self).tap do |page|
+          @page_paths[page.path] = page
+          @page_names[page.name.to_sym] = page
+        end
+      end
+    end
+
+    def use(klass, *args)
+      @middleware[klass] = args unless @middleware.key?(klass)
+
+      self
+    end
+
+    # compose middleware and return resulting rack app
+    def app
+      app = @middleware.reduce(self) do |app, (klass, args)|
+        klass.new(app, *args)
+      end
+    end
+
+    def view(name)
+      @views[name.to_sym]
+    end
+
+    def views
+      @views.values
+    end
+
     def page(name)
-      @page_names[name]
+      @page_names[name.to_sym]
+    end
+
+    def pages
+      @page_names.values
     end
 
     def call(env)

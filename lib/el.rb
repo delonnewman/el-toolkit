@@ -6,6 +6,7 @@ require 'unparser'
 require 'erb'
 require 'json'
 require 'date'
+require 'rack'
 
 require_relative 'el/action'
 require_relative 'el/javascript'

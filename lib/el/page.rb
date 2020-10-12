@@ -20,27 +20,41 @@ module El
 
       def stylesheets(*paths)
         if paths.empty?
-          @stylesheets ||= []
+          if @stylesheets
+            @stylesheets
+          else
+            klass = ancestors.select { |klass| klass != self && klass != El::Page && klass.respond_to?(:stylesheets) }.first
+            if klass
+              klass.stylesheets
+            else
+              []
+            end
+          end
         else
           @stylesheets = paths
         end
       end
+
+      def abstract!
+        @abstract = true
+      end
+
+      def abstract?
+        @abstract == true
+      end
     end
 
-    attr_reader :id
+    attr_reader :id, :app
 
-    def initialize
-      @id = object_id
+    def initialize(app)
+      @app = app
+      @id  = object_id
     end
 
     def render_content
       ERB.new(DEFAULT_LAYOUT).result(binding)
     end
     alias to_html render_content
-
-    def name
-      @name ||= self.class.to_s.split('::').last.downcase
-    end
 
     def title
       @title ||= (self.class.title || name.capitalize)
@@ -58,15 +72,6 @@ module El
       RUNTIME_JAVASCRIPT
     end
 
-    def app
-      @app
-    end
-
-    # can only set the app once
-    def app=(value)
-      @app ||= value
-    end
-
     private
 
     DEFAULT_LAYOUT = <<~HTML
@@ -79,7 +84,7 @@ module El
 
         <title><%= title %></title>
         <% stylesheets.each do |stylesheet| %>
-          <link rel="stylesheet" src="<%= stylesheet %>">
+          <link rel="stylesheet" href="<%= stylesheet %>">
         <% end %>
       </head>
       <body id="page-<%= id %>">

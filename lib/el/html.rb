@@ -23,8 +23,8 @@ module El
       attr_reader :tag, :attributes, :content
 
 
-      CONTENT_ELEMENTS = Set[:a, :script, :table, :tr, :td, :th, :strong, :li, :ul, :ol,
-                             :h1, :h2, :h3, :h4, :h5, :h6, :span].freeze
+      CONTENT_ELEMENTS = Set[:div, :p, :a, :script, :table, :tr, :td, :th, :strong, :li, :ul, :ol,
+                             :h1, :h2, :h3, :h4, :h5, :h6, :span, :nav, :button].freeze
 
       SINGLETON_ELEMENTS = Set[:br, :img, :link, :meta, :base, :area, :col, :hr, :input,
                                :param, :source, :track, :wbr, :keygen].freeze

@@ -1,4 +1,4 @@
-class Hello < El::Page
+class Hello < ApplicationPage
   title "#{Home.title} - Hello"
 
   def render html
