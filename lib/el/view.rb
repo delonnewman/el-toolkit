@@ -11,6 +11,16 @@ module El
       @name ||= self.class.to_s.split('::').last.downcase
     end
 
+    def +(other)
+      raise TypeError, "cannot concatenate a view with #{other}:#{other.class}" unless other.respond_to?(:to_html)
+
+      HTML::ElementList.new([self, other])
+    end
+
+    def is?(name)
+      app.view(name) == self
+    end
+
     def content
       value = render(El::HTML.new)
 

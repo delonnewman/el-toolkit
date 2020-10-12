@@ -1,3 +1,3 @@
 require 'el'
 
-run El::Application.load.app
+run El::Application.load('Examples').app

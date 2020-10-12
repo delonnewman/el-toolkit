@@ -1,25 +1,33 @@
 module El
   class Application
     class << self
-      def load_components(path)
+      def load_components(path, mod = Object)
         expanded = File.expand_path(path)
         symbols = Dir["#{expanded}/*.rb"].entries.map do |path|
           const = File.basename(path, '.rb').split('_').map(&:capitalize).join('').to_sym
           path  = File.expand_path(path)
-          
-          Object.autoload const, path
+          mod.autoload const, path
           const
         end
 
         symbols.map do |const|
-          Object.const_get(const)
+          mod.const_get(const)
         end
       end
 
 
-      def load
-        pages = load_components('./pages')
-        views = load_components('./views')        
+      def load(name)
+        mod = Module.new
+        Object.const_set(name, mod)
+
+        pages_mod = Module.new
+        mod.const_set(:Pages, pages_mod)
+
+        views_mod = Module.new
+        mod.const_set(:Views, views_mod)
+
+        pages = load_components('./pages', pages_mod)
+        views = load_components('./views', views_mod)        
 
         app = new(pages, views)
         yield app if block_given?
@@ -65,7 +73,7 @@ module El
     end
 
     def view(name)
-      @views[name.to_sym]
+      @views.fetch(name.to_sym)
     end
 
     def views
@@ -73,7 +81,7 @@ module El
     end
 
     def page(name)
-      @page_names[name.to_sym]
+      @page_names.fetch(name.to_sym)
     end
 
     def pages

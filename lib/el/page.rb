@@ -51,6 +51,10 @@ module El
       @id  = object_id
     end
 
+    def is?(name)
+      app.page(name) == self
+    end
+
     def render_content
       ERB.new(DEFAULT_LAYOUT).result(binding)
     end
@@ -77,22 +81,22 @@ module El
     DEFAULT_LAYOUT = <<~HTML
       <!doctype html>
       <html lang="en">
-      <head>
-        <!-- TODO: generalize this -->
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <head>
+          <!-- TODO: generalize this -->
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-        <title><%= title %></title>
-        <% stylesheets.each do |stylesheet| %>
-          <link rel="stylesheet" href="<%= stylesheet %>">
-        <% end %>
-      </head>
-      <body id="page-<%= id %>">
-        <%= content %>
-        <script>
-          <%= runtime_javascript %>
-        </script>
-      </body>
+          <title><%= title %></title>
+          <% stylesheets.each do |stylesheet| %>
+            <link rel="stylesheet" href="<%= stylesheet %>">
+          <% end %>
+        </head>
+        <body>
+          <%= content %>
+          <script>
+            <%= runtime_javascript %>
+          </script>
+        </body>
       </html>
     HTML
 

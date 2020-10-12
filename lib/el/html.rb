@@ -24,7 +24,7 @@ module El
 
 
       CONTENT_ELEMENTS = Set[:div, :p, :a, :script, :table, :tr, :td, :th, :strong, :li, :ul, :ol,
-                             :h1, :h2, :h3, :h4, :h5, :h6, :span, :nav, :button].freeze
+                             :h1, :h2, :h3, :h4, :h5, :h6, :span, :nav, :main, :header, :button].freeze
 
       SINGLETON_ELEMENTS = Set[:br, :img, :link, :meta, :base, :area, :col, :hr, :input,
                                :param, :source, :track, :wbr, :keygen].freeze
@@ -39,6 +39,10 @@ module El
           @content = attributes.delete(:content)
         else
           @content = content_proc.call
+        end
+
+        if @content.respond_to?(:to_html) # not sure why this is needed
+          @content = @content.to_html
         end
 
         if attributes
@@ -138,7 +142,13 @@ module El
       end
 
       def to_html
-        @elements.join('')
+        @elements.map do |element|
+          if element.respond_to?(:to_html)
+            element.to_html
+          else
+            element.to_s
+          end
+        end.join('')
       end
       alias to_s to_html
     end
