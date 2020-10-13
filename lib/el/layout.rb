@@ -1,4 +1,4 @@
 module El
-  class Layout < View
+  class Layout < Page
   end
 end

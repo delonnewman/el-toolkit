@@ -3,8 +3,9 @@ require 'sequel'
 module Examples
   module Pages
     class Crud < Application
-      DB = Sequel.sqlite # in memory db
+      title "#{Home.title} - CRUD"
 
+      DB = Sequel.sqlite # in memory db
       DB.create_table?(:people) do
         String :name
         Integer :age
@@ -42,19 +43,17 @@ module Examples
         html.form do
           [ html.input(id: 'crud-name', type: 'text'),
             html.input(id: 'crud-age', type: 'text'),
-            html.button(type: 'button', on: { click: add_row }, content: 'Add')
+            html.button(type: 'button', class: 'btn btn-primary', on: { click: add_row! }, content: 'Add')
           ]
         end
       end
 
-      def add_row
-        #lambda do
-          html.select('#crud-name').value.then(->(name) {
-            html.select('#crud-age').value.then(->(age) {
-              DB[:people].insert(name: name, age: age)
-            })
+      def add_row!
+        select('#crud-name').value.then(->(name) {
+          select('#crud-age').value.then(->(age) {
+            DB[:people].insert(name: name, age: age)
           })
-        #end
+        })
       end
 
       def row(person)

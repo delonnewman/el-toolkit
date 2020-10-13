@@ -104,11 +104,8 @@ module El
       @page_names.values
     end
 
-    def page_by_path(path)
-      return @page_paths[path]&.new(self) unless cache?
-
-      @pages ||= {}
-      @pages[path] ||= @page_paths[path]&.new(self)
+    def page_by_path(path, params)
+      @page_paths[path]&.new(self, params)
     end
     alias page page_by_path
 
@@ -119,15 +116,15 @@ module El
       if path.start_with?('/action')
         El.call_action(path.split('/').last, params)
       else
-        render_page(path)
+        render_page(path, params)
       end
     end
 
-    def render_page(path)
-      page = page_by_path(path)
+    def render_page(path, params)
+      page = page_by_path(path, params)
 
       if page
-        [200, { 'Content-Type' => 'text/html' }, [page.render_content]]
+        [200, page.headers, [page.render_content]]
       else
         [404, { 'Content-Type' => 'text/html' }, ["<h1>Not Found</h1>"]]
       end

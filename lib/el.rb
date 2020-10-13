@@ -8,13 +8,15 @@ require 'json'
 require 'date'
 require 'rack'
 
+require_relative 'el/utils'
 require_relative 'el/base'
 require_relative 'el/action'
 require_relative 'el/javascript'
 require_relative 'el/html'
 require_relative 'el/view'
 require_relative 'el/page'
-require_relative 'el/predicate_string'
+require_relative 'el/html_page'
+require_relative 'el/json_page'
 require_relative 'el/application'
 
 module El
