@@ -48,13 +48,13 @@ module Examples
       end
 
       def add_row(html)
-        lambda do
+        #lambda do
           html.select('#crud-name').value.then(->(name) {
             html.select('#crud-age').value.then(->(age) {
               DB[:people].insert(name: name, age: age)
             })
           })
-        end
+        #end
       end
 
       def row(html, person)
