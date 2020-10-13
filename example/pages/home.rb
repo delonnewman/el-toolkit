@@ -9,7 +9,7 @@ module Examples
       style Rouge::Themes::Github.render(scope: '.highlight')
 
       def render
-        app.view(:navbar) +
+        view(:navbar) +
           html.main(class: 'container') {
             views.map { |view|
               html.h2(name: view.name, content: view.name.capitalize) +
@@ -22,7 +22,9 @@ module Examples
       private
 
       def views
-        views = app.views.reject { |v| v.is?(:navbar) || v.is?(:pagelist) }
+        app.views
+          .reject { |v| v.is?(:navbar) || v.is?(:pagelist) }
+          .map { |v| view(v) }
       end
 
       def formatted_source(view)

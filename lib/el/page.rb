@@ -6,7 +6,7 @@ module El
         if string
           @title = string
         else
-          @title
+          @title || name
         end
       end
 
@@ -14,7 +14,7 @@ module El
         if string
           @path = string
         else
-          @path
+          @path || "/#{symbol}"
         end
       end
 
@@ -44,8 +44,29 @@ module El
       end
     end
 
-    def is?(name)
-      app.page(name) == self
+    attr_reader :id, :app
+
+    def initialize(app)
+      @app = app
+      @id  = object_id
+    end
+
+    def cache?
+      app.cache?
+    end
+
+    def view_cache
+      @view_cache ||= {}
+    end
+
+    def view(name)
+      return app.view_for(self, name) unless cache?
+
+      view_cache[name] ||= app.view_for(self, name)
+    end
+
+    def is?(path)
+      app.page(path) == self
     end
 
     def render_content
@@ -54,11 +75,11 @@ module El
     alias to_html render_content
 
     def title
-      @title ||= (self.class.title || name.capitalize)
+      self.class.title
     end
 
     def path
-      @path ||= (self.class.path || "/#{name}")
+      self.class.path
     end
 
     def stylesheets

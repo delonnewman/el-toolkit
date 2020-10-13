@@ -14,7 +14,7 @@ module Examples
       DB[:people].insert(name: 'Delon', age: 57)
 
       def render
-        app.view(:navbar) +
+        view(:navbar) +
           html.div(class: 'container') {
             table + form
           }

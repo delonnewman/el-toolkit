@@ -14,6 +14,7 @@ require_relative 'el/javascript'
 require_relative 'el/html'
 require_relative 'el/view'
 require_relative 'el/page'
+require_relative 'el/predicate_string'
 require_relative 'el/application'
 
 module El

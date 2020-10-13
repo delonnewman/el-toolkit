@@ -3,29 +3,52 @@ module El
   class View < Base
     include JavaScript
 
-    attr_reader :id, :app
+    class << self
+      def symbol
+        name.to_sym
+      end
 
-    def initialize(app)
-      @app = app
-      @id  = object_id
+      def name
+        @name ||= to_s.split('::').last.downcase
+      end
+
+      def is?(name)
+        symbol == name.to_sym
+      end
+    end
+
+    attr_reader :id, :page
+
+    def initialize(page)
+      @page = page
+      @id   = object_id
     end
 
     def html
       @html ||= HTML.new
     end
 
+    def view(name)
+      page.view(name)
+    end
+
+    def app
+      page.app
+    end
+
+    def symbol
+      self.class.symbol
+    end
+    alias to_sym symbol
+
     def name
-      @name ||= self.class.to_s.split('::').last.downcase
+      symbol.to_s
     end
 
     def +(other)
       raise TypeError, "cannot concatenate a view with #{other}:#{other.class}" unless other.respond_to?(:to_html)
 
       HTML::ElementList.new([self, other])
-    end
-
-    def is?(name)
-      app.view(name) == self
     end
 
     def content

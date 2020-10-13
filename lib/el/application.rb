@@ -18,7 +18,7 @@ module El
       end
 
 
-      def load(name)
+      def load(name, opts = {})
         mod = Module.new
         Object.const_set(name.to_sym, mod)
 
@@ -31,7 +31,7 @@ module El
         pages = load_components('./pages', pages_mod)
         views = load_components('./views', views_mod)        
 
-        app = new(pages, views)
+        app = new(pages, views, opts)
         yield app if block_given?
 
         app.use Rack::Static, root: "public",
@@ -42,10 +42,11 @@ module El
       end
     end
 
-    def initialize(pages, views)
+    def initialize(pages, views, opts)
+      @cache = opts.fetch(:cache) { env.production? }
+
       @views = views.reduce({}) do |h, view|
-        view = view.new(self)
-        h.merge!(view.name.to_sym => view)
+        h.merge!(view.symbol => view)
       end
 
       @page_paths = {}
@@ -54,12 +55,19 @@ module El
 
       pages.each do |page|
         next if page.abstract?
-        p page
-        page.new(self).tap do |page|
+        page.tap do |page|
           @page_paths[page.path] = page
-          @page_names[page.name.to_sym] = page
+          @page_names[page.symbol] = page
         end
       end
+    end
+
+    def cache?
+      @cache == true
+    end
+
+    def env
+      PredicateString.new(ENV.fetch('RACK_ENV') { 'development' })
     end
 
     def use(klass, *args)
@@ -75,21 +83,34 @@ module El
       end
     end
 
-    def view(name)
-      @views.fetch(name.to_sym)
+    def view_for(page, name)
+      case name
+      when Class
+        name.new(page)
+      else
+        @views.fetch(name.to_sym).new(page)
+      end
     end
 
     def views
       @views.values
     end
 
-    def page(name)
+    def page_class(name)
       @page_names.fetch(name.to_sym)
     end
 
     def pages
       @page_names.values
     end
+
+    def page_by_path(path)
+      return @page_paths[path]&.new(self) unless cache?
+
+      @pages ||= {}
+      @pages[path] ||= @page_paths[path]&.new(self)
+    end
+    alias page page_by_path
 
     def call(env)
       path = env['REQUEST_PATH']
@@ -103,7 +124,7 @@ module El
     end
 
     def render_page(path)
-      page = @page_paths[path]
+      page = page_by_path(path)
 
       if page
         [200, { 'Content-Type' => 'text/html' }, [page.render_content]]
