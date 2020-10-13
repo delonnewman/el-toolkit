@@ -60,7 +60,6 @@ module El
       Unparser.unparse(source)
     end
 
-    # NOTE: with this approach we're limited to one callback per line (if they start on the same line they collide)
     def find_node(ast, line, column, tries = 0, &block)
       if ast.nil? || !(AST::Node === ast) || ast.children.empty? || tries > 1000
         nil
