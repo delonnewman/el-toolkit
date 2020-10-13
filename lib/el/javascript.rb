@@ -42,8 +42,25 @@ module El
       end
     end
 
+    class JSAction < Action
+      def initialize(js, proc)
+        super(proc)
+        @js = js
+        El.register_action(self)
+      end
+
+      def to_js
+        "el.actions.call(#{id}, null, #{@js.to_js})"
+      end
+    end
+
     class Base
       include JavaScript
+
+      # add server side actions to 
+      def then(proc)
+        JSAction.new(self, proc)
+      end
     end
 
     class Alert
@@ -107,7 +124,7 @@ module El
       end
     end
 
-    class SetQueryInnerText
+    class SetQueryInnerText < Base
       attr_reader :query, :text
 
       def initialize(query, text)
@@ -116,11 +133,11 @@ module El
       end
 
       def to_js
-        "#{query.to_js}.forEach(function(e) { e.innerText = #{text.to_js} })"
+        "#{query.to_js}.forEach(function(e) { e.innerText = #{text.to_json} })"
       end
     end
 
-    class GetQueryAttribute
+    class GetQueryAttribute < Base
       attr_reader :query, :attribute
 
       def initialize(query, attribute)

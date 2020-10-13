@@ -90,9 +90,10 @@ module El
 
     def call(env)
       path = env['REQUEST_PATH']
+      params = Rack::Utils.parse_nested_query(env['rack.input'].read)
       
       if path.start_with?('/action')
-        El.call_action(path.split('/').last)
+        El.call_action(path.split('/').last, params)
       else
         render_page(path)
       end

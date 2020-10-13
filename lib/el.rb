@@ -22,9 +22,20 @@ module El
     action = ACTIONS[id]
     raise "Action #{id} not found: #{ACTIONS}" unless action
 
-    result = action.call
+    result = if params['result'] && action.proc.arity == 1
+              action.call(params['result'])
+            else
+              action.call
+            end
 
-    if result.respond_to?(:to_js)
+    if Action === result
+      register_action(result)
+      if result.respond_to?(:to_js)
+        [200, { 'Content-Type' => 'application/json' }, [{ status: 'success', action_id: result.id, js: result.to_js }.to_json]]
+      else
+        [200, { 'Content-Type' => 'application/json' }, [{ status: 'success', action_id: result.id }.to_json]]
+      end
+    elsif result.respond_to?(:to_js)
       [200, { 'Content-Type' => 'application/javascript' }, [result.to_js]]
     elsif result.respond_to?(:to_html)
       [200, { 'Content-Type' => 'text/html' }, [result.to_html]]

@@ -105,17 +105,27 @@ module El
 
           this.el = this.el || {};
           
-          function callAction(actionId, element) {
+          function callAction(actionId, element, result) {
               console.log('calling action', actionId, element);
               var xhr = new XMLHttpRequest();
               xhr.onreadystatechange = function() {
-                  var contentType, status;
+                  var contentType, status, data;
                   if (xhr.readyState === XMLHttpRequest.DONE) {
                       contentType = xhr.getResponseHeader('Content-Type');
                       status = xhr.status;
                       if (status === 0 || (status >= 200 && status < 400)) {
                           if (contentType === 'application/javascript') {
                             eval(xhr.responseText.toString());
+                          }
+                          else if (contentType === 'application/json') {
+                            data = JSON.parse(xhr.responseText.toString());
+                            console.log('JSON Data', data);
+                            if (data.action_id && data.js) {
+                              callAction(data.action_id, element, eval(data.js));
+                            }
+                            else if (data.action_id) {
+                              callAction(data.action_id, element);
+                            }
                           }
                           else {
                             console.log(xhr.responseText);
@@ -125,8 +135,13 @@ module El
                       }
                   }
               };
+
+              var params = new URLSearchParams();
+              // TODO: pass the attributes of the element
+              if (result) params.append('result', result);
+
               xhr.open('POST', '/action/' + actionId);
-              xhr.send();
+              xhr.send(params);
 
               return false;
           }

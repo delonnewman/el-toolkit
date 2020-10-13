@@ -8,11 +8,13 @@ module El
       end
     end
 
-    def initialize(proc, source = nil)
+    def initialize(proc, source = nil, parent = nil)
       raise "proc and source cannot both be nil" if proc.nil? && source.nil?
 
       @proc   = proc
       @source = source
+
+      @parent = parent
 
       @id = object_id.to_s
     end
@@ -25,9 +27,26 @@ module El
       @proc ||= eval(source)
     end
 
+    def call(*args)
+      return proc.call(*args) if @parent.nil?
+
+      result = @parent.call(*args)
+      if proc.arity == 1
+        proc.call(result)
+      else
+        proc.call
+      end
+    end
+
+    def then(proc)
+      self.class.new(proc, nil, self)
+    end
+
     def source
       @source ||= serialize
     end
+
+    private
 
     def serialize
       file, line = proc.source_location
@@ -40,12 +59,6 @@ module El
 
       Unparser.unparse(source)
     end
-
-    def call(*args)
-      proc.call(*args)
-    end
-
-    private
 
     # NOTE: with this approach we're limited to one callback per line (if they start on the same line they collide)
     def find_node(ast, line, column, tries = 0, &block)

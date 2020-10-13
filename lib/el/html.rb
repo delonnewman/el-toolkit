@@ -24,7 +24,8 @@ module El
 
 
       CONTENT_ELEMENTS = Set[:div, :p, :a, :script, :table, :tr, :td, :th, :strong, :li, :ul, :ol,
-                             :h1, :h2, :h3, :h4, :h5, :h6, :span, :nav, :main, :header, :button].freeze
+                             :h1, :h2, :h3, :h4, :h5, :h6, :span, :nav, :main, :header, :button,
+                             :form, :code, :pre, :textarea, :submit, :select, :option].freeze
 
       SINGLETON_ELEMENTS = Set[:br, :img, :link, :meta, :base, :area, :col, :hr, :input,
                                :param, :source, :track, :wbr, :keygen].freeze
@@ -36,7 +37,7 @@ module El
         @attributes = attributes
 
         if content_proc.nil?
-          @content = attributes.delete(:content)
+          @content = attributes&.delete(:content)
         else
           @content = content_proc.call
         end
