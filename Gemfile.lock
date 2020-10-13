@@ -37,6 +37,7 @@ GEM
     rack (2.2.3)
     rack-contrib (2.2.0)
       rack (~> 2.0)
+    rouge (3.23.0)
     sequel (5.37.0)
     sqlite3 (1.4.2)
     thread_safe (0.3.6)
@@ -60,6 +61,7 @@ DEPENDENCIES
   pry
   rack
   rack-contrib
+  rouge
   sequel
   sqlite3
   unparser

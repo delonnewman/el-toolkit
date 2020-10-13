@@ -1,10 +1,17 @@
 # frozen_string_literal: true
 module El
-  class View
-    attr_reader :app
+  class View < Base
+    include JavaScript
+
+    attr_reader :id, :app
 
     def initialize(app)
       @app = app
+      @id  = object_id
+    end
+
+    def html
+      @html ||= HTML.new
     end
 
     def name
@@ -22,7 +29,7 @@ module El
     end
 
     def content
-      value = render(El::HTML.new)
+      value = render
 
       if value.respond_to?(:to_html)
         value.to_html

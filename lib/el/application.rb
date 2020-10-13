@@ -7,18 +7,20 @@ module El
           const = File.basename(path, '.rb').split('_').map(&:capitalize).join('').to_sym
           path  = File.expand_path(path)
           mod.autoload const, path
-          const
+          [const, path]
         end
 
-        symbols.map do |const|
-          mod.const_get(const)
+        symbols.map do |(const, path)|
+          mod.const_get(const).tap do |klass|
+            klass.file = path
+          end
         end
       end
 
 
       def load(name)
         mod = Module.new
-        Object.const_set(name, mod)
+        Object.const_set(name.to_sym, mod)
 
         pages_mod = Module.new
         mod.const_set(:Pages, pages_mod)
@@ -52,6 +54,7 @@ module El
 
       pages.each do |page|
         next if page.abstract?
+        p page
         page.new(self).tap do |page|
           @page_paths[page.path] = page
           @page_names[page.name.to_sym] = page

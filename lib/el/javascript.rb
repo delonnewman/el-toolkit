@@ -5,11 +5,11 @@ module El
     end
 
     def alert(msg)
-      Alert.new(msg)
+      Return.new(FunctionCall.new(:alert, [msg]))
     end
 
     def confirm(msg)
-      Alert.new(msg)
+      Return.new(FunctionCall.new(:confirm, [msg]))
     end
 
     module Utils
@@ -63,23 +63,32 @@ module El
       end
     end
 
-    class Alert
+    class Return
       include Utils
 
-      attr_reader :message
+      attr_reader :expression
 
-      def initialize(msg)
-        @message = msg
+      def initialize(expression)
+        @expression = expression
       end
 
       def to_js
-        "alert(#{to_javascript(message)})"
+        "return #{to_javascript(expression)}"
       end
     end
 
-    class Confirm < Alert
+    class FunctionCall
+      include Utils
+
+      attr_reader :name, :arguments
+
+      def initialize(name, arguments)
+        @name = name
+        @arguments = arguments
+      end
+
       def to_js
-        "confirm(#{to_javascript(message)})"
+        "#{name}(#{arguments.map { |arg| to_javascript(arg) }.join(', ')})"
       end
     end
 

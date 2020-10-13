@@ -13,16 +13,16 @@ module Examples
       DB[:people].insert(name: 'Jackie', age: 38)
       DB[:people].insert(name: 'Delon', age: 57)
 
-      def render html
+      def render
         app.view(:navbar) +
           html.div(class: 'container') {
-            table(html) + form(html)
+            table + form
           }
       end
 
       private
 
-      def table(html)
+      def table
         html.table(class: 'table') do
           [
             html.thead do
@@ -31,23 +31,23 @@ module Examples
             end,
             html.tbody do
               DB[:people].map do |person|
-                row(html, person)
+                row person
               end
             end
           ]
         end
       end
 
-      def form(html)
+      def form
         html.form do
           [ html.input(id: 'crud-name', type: 'text'),
             html.input(id: 'crud-age', type: 'text'),
-            html.button(type: 'button', on: { click: add_row(html) }, content: 'Add')
+            html.button(type: 'button', on: { click: add_row }, content: 'Add')
           ]
         end
       end
 
-      def add_row(html)
+      def add_row
         #lambda do
           html.select('#crud-name').value.then(->(name) {
             html.select('#crud-age').value.then(->(age) {
@@ -57,7 +57,7 @@ module Examples
         #end
       end
 
-      def row(html, person)
+      def row(person)
         html.tr do
           html.td(content: person[:name]) + html.td(content: person[:age])
         end

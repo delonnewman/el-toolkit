@@ -8,6 +8,7 @@ require 'json'
 require 'date'
 require 'rack'
 
+require_relative 'el/base'
 require_relative 'el/action'
 require_relative 'el/javascript'
 require_relative 'el/html'

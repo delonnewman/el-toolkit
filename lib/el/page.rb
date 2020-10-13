@@ -18,6 +18,14 @@ module El
         end
       end
 
+      def style(string = nil)
+        styles << string
+      end
+
+      def styles
+        @styles ||= []
+      end
+
       def stylesheets(*paths)
         if paths.empty?
           if @stylesheets
@@ -34,21 +42,6 @@ module El
           @stylesheets = paths
         end
       end
-
-      def abstract!
-        @abstract = true
-      end
-
-      def abstract?
-        @abstract == true
-      end
-    end
-
-    attr_reader :id, :app
-
-    def initialize(app)
-      @app = app
-      @id  = object_id
     end
 
     def is?(name)
@@ -72,6 +65,10 @@ module El
       self.class.stylesheets
     end
 
+    def styles
+      self.class.styles
+    end
+
     def runtime_javascript
       RUNTIME_JAVASCRIPT
     end
@@ -88,7 +85,11 @@ module El
 
           <title><%= title %></title>
           <% stylesheets.each do |stylesheet| %>
-            <link rel="stylesheet" href="<%= stylesheet %>">
+          <link rel="stylesheet" href="<%= stylesheet %>">
+          <% end %>
+
+          <% styles.each do |style| %>
+          <style><%= style %></style>
           <% end %>
         </head>
         <body>

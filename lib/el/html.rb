@@ -138,8 +138,14 @@ module El
         self.class.new(elems)
       end
 
-      def +(list)
-        self.class.new(@elements + list.elements)
+      def +(other)
+        case other
+        when ElementList
+          self.class.new(@elements + other.elements)
+        else
+          elems = @elements.dup
+          self.class.new(elems << other)
+        end
       end
 
       def to_html

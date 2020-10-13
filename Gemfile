@@ -10,4 +10,5 @@ gem 'concurrent-ruby'
 group :development do
   gem 'sqlite3'
   gem 'sequel'
+  gem 'rouge'
 end
