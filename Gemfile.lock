@@ -37,6 +37,8 @@ GEM
     rack (2.2.3)
     rack-contrib (2.2.0)
       rack (~> 2.0)
+    sequel (5.37.0)
+    sqlite3 (1.4.2)
     thread_safe (0.3.6)
     unparser (0.4.9)
       abstract_type (~> 0.0.7)
@@ -58,6 +60,8 @@ DEPENDENCIES
   pry
   rack
   rack-contrib
+  sequel
+  sqlite3
   unparser
 
 BUNDLED WITH

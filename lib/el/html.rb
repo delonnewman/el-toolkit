@@ -25,7 +25,7 @@ module El
 
       CONTENT_ELEMENTS = Set[:div, :p, :a, :script, :table, :tr, :td, :th, :strong, :li, :ul, :ol,
                              :h1, :h2, :h3, :h4, :h5, :h6, :span, :nav, :main, :header, :button,
-                             :form, :code, :pre, :textarea, :submit, :select, :option].freeze
+                             :form, :code, :pre, :textarea, :submit, :select, :option, :thead, :tbody].freeze
 
       SINGLETON_ELEMENTS = Set[:br, :img, :link, :meta, :base, :area, :col, :hr, :input,
                                :param, :source, :track, :wbr, :keygen].freeze
