@@ -31,7 +31,7 @@ module El
         pages = load_components('./pages', pages_mod)
         views = load_components('./views', views_mod)        
 
-        app = new(pages, views, opts)
+        app = new(name, pages, views, opts)
         yield app if block_given?
 
         app.use Rack::Static, root: "public",
@@ -42,7 +42,10 @@ module El
       end
     end
 
-    def initialize(pages, views, opts)
+    attr_reader :name
+
+    def initialize(name, pages, views, opts)
+      @name  = name
       @cache = opts.fetch(:cache) { env.production? }
 
       @views = views.reduce({}) do |h, view|
@@ -104,6 +107,10 @@ module El
       @page_names.values
     end
 
+    def page_instances
+      pages.map { |p| p.new(self) }
+    end
+
     def page_by_path(path, params)
       @page_paths[path]&.new(self, params)
     end
@@ -124,7 +131,7 @@ module El
       page = page_by_path(path, params)
 
       if page
-        [200, page.headers, [page.render_content]]
+        [200, page.headers, page.render_content]
       else
         [404, { 'Content-Type' => 'text/html' }, ["<h1>Not Found</h1>"]]
       end

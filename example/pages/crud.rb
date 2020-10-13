@@ -27,8 +27,8 @@ module Examples
         html.table(class: 'table') do
           [
             html.thead do
-              [ html.th(content: 'Name'),
-                html.th(content: 'Age') ]
+              html.th(content: 'Name') +
+                html.th(content: 'Age')
             end,
             html.tbody do
               DB[:people].map do |person|
@@ -41,10 +41,9 @@ module Examples
 
       def form
         html.form do
-          [ html.input(id: 'crud-name', type: 'text'),
-            html.input(id: 'crud-age', type: 'text'),
-            html.button(type: 'button', class: 'btn btn-primary', on: { click: add_row! }, content: 'Add')
-          ]
+          html.input(id: 'crud-name', type: 'text') +
+            html.input(id: 'crud-age', type: 'text') +
+              html.button(type: 'button', class: 'btn btn-primary', on: { click: add_row! }, content: 'Add')
         end
       end
 

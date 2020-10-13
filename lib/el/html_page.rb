@@ -43,7 +43,7 @@ module El
     end
 
     def render_content
-      ERB.new(DEFAULT_LAYOUT).result(binding)
+      [ ERB.new(DEFAULT_LAYOUT).result(binding) ]
     end
     alias to_html render_content
 

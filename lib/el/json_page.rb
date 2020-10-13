@@ -4,7 +4,7 @@ module El
     content_type 'application/json'
 
     def render_content
-      render.to_json
+      [ render.to_json ]
     end
   end
 end

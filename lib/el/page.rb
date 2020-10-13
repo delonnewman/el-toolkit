@@ -5,7 +5,15 @@ module El
 
     class << self
       def content_type(string = nil)
-        @@content_type ||= (string || 'text/plain')
+        return @content_type = string if string
+        return @content_type          if @content_type
+
+        klass = ancestors.select { |klass| klass != self && klass != Page && klass.respond_to?(:content_type) }.first
+        if klass
+          klass.content_type
+        else
+          'text/plain'
+        end
       end
 
       def path(string = nil)
@@ -19,7 +27,7 @@ module El
 
     attr_reader :id, :app, :params
 
-    def initialize(app, params)
+    def initialize(app, params = {})
       @app    = app
       @params = params
       @id     = object_id
@@ -34,9 +42,11 @@ module El
     end
 
     def view(name)
-      return app.view_for(self, name) unless cache?
-
       view_cache[name] ||= app.view_for(self, name)
+    end
+
+    def views
+      @view_cache.values
     end
 
     def is?(path)
