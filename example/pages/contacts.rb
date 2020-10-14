@@ -43,7 +43,7 @@ module Examples
         html.form(class: 'form-inline') do
           html.input(id: 'crud-name', class: 'form-control ml-2', type: 'text') +
             html.input(id: 'crud-age', class: 'form-control ml-2', type: 'text') +
-              html.button(type: 'button', class: 'btn btn-primary ml-2', on: { click: add_row! }, content: 'Add')
+              link_to('Add', '#', type: 'button', class: 'btn btn-primary ml-2', on: { click: add_row! })
         end
       end
 

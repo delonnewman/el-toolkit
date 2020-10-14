@@ -50,19 +50,6 @@ module El
         if @content.respond_to?(:to_html) # not sure why this is needed
           @content = @content.to_html
         end
-
-        if attributes
-          @callbacks = attributes.delete(:on) || {}
-          @callbacks.each do |name, cb|
-            if Proc === cb
-              action = Action.new(cb)
-              attributes[:"on#{name}"] = "return el.actions.call(#{action.id}, this)"
-              El.register_action(action)
-            elsif cb.respond_to?(:to_js)
-              attributes[:"on#{name}"] = cb.to_js
-            end
-          end
-        end
       end
 
       def content

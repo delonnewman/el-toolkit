@@ -2,7 +2,7 @@ module Examples
   module Views
     class Alert < El::View
       def render
-        html.a(href: '#alert', on: { click: alert("Testing!") }, content: "Click Me!")
+        link_to 'Click Me!', '#alert', on: { click: alert("Testing!") }
       end
     end
   end

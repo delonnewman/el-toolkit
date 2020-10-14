@@ -5,7 +5,7 @@ module Examples
         html.ul(class: 'list-group') do
           (1..10).map do |index|
             html.li(class: 'list-group-item') do
-              html.a href: "#links?n=#{index}", on: { click: ->{ system "say \"Number #{index}\"" } } do
+              link_to "#links?n=#{index}", on: { click: ->{ system "say \"Number #{index}\"" } } do
                 html.strong { "Number #{index}" }
               end
             end

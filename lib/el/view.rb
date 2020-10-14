@@ -2,6 +2,7 @@
 module El
   class View < Base
     include JavaScript
+    include HTMLHelpers
 
     class << self
       def symbol

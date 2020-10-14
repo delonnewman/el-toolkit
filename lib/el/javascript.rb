@@ -31,11 +31,10 @@ module El
       def initialize(js, proc)
         super(proc)
         @js = js
-        El.register_action(self)
       end
 
       def to_js
-        "el.actions.call(#{id}, null, #{@js.to_js})"
+        "el.actions.call(#{id}, null, #{Utils.to_javascript(@js)})"
       end
     end
 

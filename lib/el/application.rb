@@ -65,6 +65,10 @@ module El
       end
     end
 
+    def action_registry
+      @action_registry ||= ActionRegistry.new
+    end
+
     def cache?
       @cache == true
     end
@@ -121,11 +125,13 @@ module El
       params = Rack::Utils.parse_nested_query(env['rack.input'].read)
       
       if path.start_with?('/action')
-        El.call_action(path.split('/').last, params)
+        call_action(path.split('/').last, params)
       else
         render_page(path, params)
       end
     end
+
+    private
 
     def render_page(path, params)
       page = page_by_path(path, params)
@@ -134,6 +140,32 @@ module El
         [200, page.headers, page.render_content]
       else
         [404, { 'Content-Type' => 'text/html' }, ["<h1>Not Found</h1>"]]
+      end
+    end
+
+    def call_action(id, params = {})
+      action = action_registry.find(id)
+      raise "Action #{id} not found" unless action
+
+      result = if params['result'] && action.proc.arity == 1
+                action.call(params['result'])
+              else
+                action.call
+              end
+
+      if Action === result
+        action_registry.register(result)
+        if result.respond_to?(:to_js)
+          [200, { 'Content-Type' => 'application/json' }, [{ status: 'success', action_id: result.id, js: result.to_js }.to_json]]
+        else
+          [200, { 'Content-Type' => 'application/json' }, [{ status: 'success', action_id: result.id }.to_json]]
+        end
+      elsif result.respond_to?(:to_js)
+        [200, { 'Content-Type' => 'application/javascript' }, [result.to_js]]
+      elsif result.respond_to?(:to_html)
+        [200, { 'Content-Type' => 'text/html' }, [result.to_html]]
+      else
+        [200, { 'Content-Type' => 'text/plain' }, [result.to_s]]
       end
     end
   end

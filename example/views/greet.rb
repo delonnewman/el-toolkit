@@ -4,7 +4,7 @@ module Examples
       def render
         html.form(class: 'form-inline', action: '#greet', method: 'get') do
           html.input(id: 'greet-name', class: 'form-control', type: 'text', name: 'name') +
-            html.button(type: 'button', class: 'btn btn-primary ml-2', on: { click: get_name_and_say_hi! }, content: 'Say Hi!')
+            link_to('Say Hi!', '#', class: 'btn btn-primary ml-2', on: { click: get_name_and_say_hi! })
         end
       end
 
@@ -12,7 +12,7 @@ module Examples
 
       def get_name_and_say_hi!
         document.querySelector('#greet-name').value
-            .then(->(name){ system("say \"Hi #{name}\"") })
+                .then(->(name){ system("say \"Hi #{name}\"") })
       end
     end
   end
