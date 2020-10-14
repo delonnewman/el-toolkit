@@ -85,7 +85,27 @@ module El
       (function() {
 
           this.el = this.el || {};
+
+          function isElement(obj) {
+              return !!(obj && obj.nodeType === 1);
+          }
           
+          function datafyElement(element) {
+            return {
+              type: 'element',
+              tag: element.tagName.toLowerCase(),
+              attributes: Array.prototype.reduce.call(element.attributes, function(obj, attr) {
+                obj[attr.name] = attr.value;
+                return obj;
+              }, {}),
+              content: Array.prototype.map.call(element.children, datafyElement)
+            };
+          }
+
+          function serializeElement(element) {
+              return JSON.stringify(datafyElement(element));
+          }
+
           function callAction(actionId, element, result) {
               console.log('calling action', actionId, element);
               var xhr = new XMLHttpRequest();
@@ -119,7 +139,10 @@ module El
 
               var params = new URLSearchParams();
               // TODO: pass the attributes of the element
-              if (result) params.append('result', result);
+              if (result) {
+                result = isElement(result) ? serializeElement(element) : result;
+                params.append('result', result);
+              }
 
               xhr.open('POST', '/action/' + actionId);
               xhr.send(params);
@@ -128,7 +151,10 @@ module El
           }
       
           this.el.actions = {
-              call: callAction
+              call: callAction,
+              isElement: isElement,
+              serializeElement: serializeElement,
+              datafyElement: datafyElement
           };
       
       }.call(window));

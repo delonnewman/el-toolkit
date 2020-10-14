@@ -20,7 +20,7 @@ module El
     end
 
     class Element
-      attr_reader :tag, :attributes, :content
+      attr_reader :tag, :attributes
 
 
       CONTENT_ELEMENTS = Set[:div, :p, :a, :script, :table, :tr, :td, :th, :strong, :li, :ul, :ol,
@@ -32,47 +32,37 @@ module El
 
       TAGS = (CONTENT_ELEMENTS + SINGLETON_ELEMENTS).freeze
 
-      def self.[](tag, attributes)
+      def self.cache
         @cache ||= {}
-        @cache[[tag, attributes]] ||= new(tag, attributes, nil)
       end
 
-      def initialize(tag, attributes, content_proc)
+      def self.[](tag, attributes)
+        cache[[tag, attributes]] ||= new(tag, attributes)
+      end
+
+      def initialize(tag, attributes, proc = nil, content = nil)
         @tag = tag
         @attributes = attributes
 
-        if content_proc.nil?
-          @content = attributes&.delete(:content)
+        if attributes.key?(:content)
+          @content = attributes.delete(:content)
         else
-          @content = content_proc.call
+          @content = content
         end
 
-        if @content.respond_to?(:to_html) # not sure why this is needed
-          @content = @content.to_html
-        end
+        @proc = proc
       end
 
       def content
-        case @content
-        when Element, ElementList
-          @content.to_html
-        when Array
-          buffer = StringIO.new
-          @content.each do |element|
-            if element.respond_to?(:to_html)
-              buffer.puts element.to_html
-            else
-              buffer.puts element.to_s
-            end
-          end
-          buffer.string
-        else
-          @content.to_s
-        end
+        @content ||= @proc&.call
+      end
+
+      def with_attributes(attributes)
+        self.class.new(tag, self.attributes.merge(attributes), nil, content)
       end
 
       def has_attributes?
-        !@attributes.nil?
+        !@attributes.nil? or !@attributes.empty?
       end
 
       def singleton?
@@ -90,14 +80,15 @@ module El
           ElementList.new([self, element])
         end
       end
+      alias << +
 
       def to_html
         if has_attributes?
-          "<#{tag} #{render_attributes}>#{content}</#{tag}>"
+          "<#{tag} #{render_attributes}>#{render_content}</#{tag}>"
         elsif singleton?
           "<#{tag}>"
         else
-          "<#{tag}>#{content}</#{tag}>"
+          "<#{tag}>#{render_content}</#{tag}>"
         end
       end
       alias to_s to_html
@@ -106,6 +97,25 @@ module El
 
       def render_attributes
         attributes.map { |k, v| "#{k}='#{v}'" }.join(' ')
+      end
+
+      def render_content
+        case content
+        when Element, ElementList
+          content.to_html
+        when Array
+          buffer = StringIO.new
+          content.each do |element|
+            if element.respond_to?(:to_html)
+              buffer.puts element.to_html
+            else
+              buffer.puts element.to_s
+            end
+          end
+          buffer.string
+        else
+          content.to_s
+        end
       end
     end
 

@@ -2,19 +2,27 @@ module Examples
   module Views
     class Eval < El::View
       def render
-        html.textarea(id: "eval-code", class: 'form-control', placeholder: "Enter Ruby Code") +
+        define :output
+        define :code do |value|
+          html.textarea(class: 'form-control', placeholder: 'Enter Ruby Code', content: value)
+        end
+
+        get(:code) +
           link_to('eval', '#eval', class: 'btn btn-primary mt-2', on: { click: eval_code! }) +
             html.br +
-              html.code(id: "eval-output", class: 'mt-2')
+              html.code(class: 'mt-2', content: get(:output))
       end
 
       private
 
       def eval_code!
-        document
-          .querySelector('#eval-code')
-          .value
-          .then(->(code){ document.querySelector('#eval-output').innerText!(eval(code).to_json) })
+        # document
+        #   .querySelector('#eval-code')
+        #   .value
+        #   .then(->(code) { document.querySelector('#eval-output').innerText!(eval(code).to_json) })
+        get(:code) do |value|
+          update(:output) { value }
+        end
       end
     end
   end

@@ -25,6 +25,29 @@ module El
       @id   = object_id
     end
 
+    def fragments
+      @fragments ||= {}
+    end
+
+    def define(name, value)
+      fragments[name] ||= Fragment.new(self, value)
+    end
+
+    def get(name)
+      fragments.fetch(name)
+    end
+
+    def update(name, &block)
+      f = fragments.fetch(name)
+      ->{ document.querySelector("#fragment-#{f.id}").innerText!(f.update(block)) }
+    end
+
+    def action(&block)
+      Action.new(block).tap do |action|
+        app.action_registry.register(action)
+      end
+    end
+
     def html
       HTML.instance
     end
