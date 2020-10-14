@@ -21,6 +21,9 @@ module El
             app.action_registry.register(action)
           elsif cb.respond_to?(:to_js)
             attributes[:"on#{name}"] = cb.to_js
+            if Action === cb
+              app.action_registry.register(cb)
+            end
           end
         end
       end

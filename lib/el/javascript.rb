@@ -55,6 +55,11 @@ module El
           method = method_.slice(0, method_.size - 1).to_sym
         end
 
+        if method === :[]
+          raise 'An argument is require for assignment' if args.size < 1
+          return Proxy.new(UninternedPropertyAccess.new(self, args[0]))
+        end
+
         prop = PropertyAccess.new(self, Ident[method])
 
         if assignment
@@ -164,6 +169,12 @@ module El
 
       def to_js
         "#{Utils.to_javascript(object)}.#{Utils.to_javascript(name)}"
+      end
+    end
+
+    class UninternedPropertyAccess < PropertyAccess
+      def to_js
+        "#{Utils.to_javascript(object)}[#{Utils.to_javascript(name)}]"
       end
     end
 
