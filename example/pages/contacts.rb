@@ -2,8 +2,8 @@ require 'sequel'
 
 module Examples
   module Pages
-    class Crud < Application
-      title "#{Home.title} - CRUD"
+    class Contacts < Application
+      title "#{Home.title} - Contacts"
 
       DB = Sequel.sqlite # in memory db
       DB.create_table?(:people) do
@@ -17,7 +17,7 @@ module Examples
       def render
         view(:navbar) +
           html.div(class: 'container') {
-            table + form
+            html.h1(content: 'Contacts') + table + form
           }
       end
 
@@ -40,16 +40,16 @@ module Examples
       end
 
       def form
-        html.form do
-          html.input(id: 'crud-name', type: 'text') +
-            html.input(id: 'crud-age', type: 'text') +
-              html.button(type: 'button', class: 'btn btn-primary', on: { click: add_row! }, content: 'Add')
+        html.form(class: 'form-inline') do
+          html.input(id: 'crud-name', class: 'form-control ml-2', type: 'text') +
+            html.input(id: 'crud-age', class: 'form-control ml-2', type: 'text') +
+              html.button(type: 'button', class: 'btn btn-primary ml-2', on: { click: add_row! }, content: 'Add')
         end
       end
 
       def add_row!
-        select('#crud-name').value.then(->(name) {
-          select('#crud-age').value.then(->(age) {
+        document.querySelector('#crud-name').value.then(->(name) {
+          document.querySelector('#crud-age').value.then(->(age) {
             DB[:people].insert(name: name, age: age)
           })
         })

@@ -1,15 +1,12 @@
+# frozen_string_literal: true
 module El
   module JavaScript
-    def select(pattern)
-      Query.new(pattern)
-    end
+    extend Forwardable
 
-    def alert(msg)
-      Return.new(FunctionCall.new(:alert, [msg]))
-    end
+    def_delegators :window, :alert, :confirm, :document
 
-    def confirm(msg)
-      Return.new(FunctionCall.new(:confirm, [msg]))
+    def window
+      Window.instance
     end
 
     module Utils
@@ -26,20 +23,8 @@ module El
           end
         end
       end
-    end
 
-    class Program
-      def initialize(statements = [])
-        @statements = statements
-      end
-
-      def <<(statement)
-        @statements << statement
-      end
-
-      def to_js
-        @statements.map(&:to_js).join(";\n") + ";\n"
-      end
+      module_function :to_javascript
     end
 
     class JSAction < Action
@@ -55,17 +40,135 @@ module El
     end
 
     class Base
-      include JavaScript
-
       # add server side actions to 
       def then(proc)
         JSAction.new(self, proc)
       end
     end
 
-    class Return
-      include Utils
+    module Chainable
+      def method_missing(method, *args)
+        method_    = method.to_s
+        assignment = false
 
+        if method_.end_with?('!')
+          assignment = true
+          method = method_.slice(0, method_.size - 1).to_sym
+        end
+
+        prop = PropertyAccess.new(self, Ident[method])
+
+        if assignment
+          raise 'An argument is require for assignment' if args.size < 1
+          Proxy.new(Assignment.new(prop, args[0]))
+        elsif args.empty?
+          Proxy.new(prop)
+        else
+          Proxy.new(FunctionCall.new(prop, args))
+        end
+      end
+
+      def respond_to?(_)
+        true
+      end
+
+      private
+
+      def evaluate_method(method, args)
+        method_ = method.to_s
+        if method_.end_with?('!')
+          Assignment.new()
+        end
+      end
+    end
+
+    class Proxy < Base
+      include Chainable
+
+      def initialize(expression)
+        @expression = expression
+      end
+
+      def to_js
+        Utils.to_javascript(@expression)
+      end
+    end
+
+    class Document < Base
+      include Singleton
+      include Chainable
+
+      def to_js
+        'window.document'
+      end
+    end
+
+    class Window < Base
+      include Singleton
+      include Chainable
+
+      def document
+        Document.instance
+      end
+
+      def alert(message)
+        FunctionCall.new(Ident[:alert], [message])
+      end
+
+      def confirm(message)
+        FunctionCall.new(Ident[:confirm], [message])
+      end
+
+      def prompt(*args)
+        FunctionCall.new(Ident[:prompt], args)
+      end
+
+      def to_js
+        'window'
+      end
+    end
+
+    class Ident < Base
+      def self.[](symbol)
+        @cache ||= {}
+        @cache[symbol.to_sym] ||= new(symbol)
+      end
+
+      def initialize(symbol)
+        @symbol = symbol.to_sym
+        @name   = symbol.to_s
+      end
+
+      def to_js
+        @name
+      end
+    end
+
+    class Assignment < Base
+      def initialize(expression, value)
+        @expression = expression
+        @value = value
+      end
+
+      def to_js
+        "#{Utils.to_javascript(@expression)} = #{Utils.to_javascript(@value)}"
+      end
+    end
+
+    class PropertyAccess < Base
+      attr_reader :object, :name
+
+      def initialize(object, name)
+        @object = object
+        @name   = name
+      end
+
+      def to_js
+        "#{Utils.to_javascript(object)}.#{Utils.to_javascript(name)}"
+      end
+    end
+
+    class Return
       attr_reader :expression
 
       def initialize(expression)
@@ -73,89 +176,20 @@ module El
       end
 
       def to_js
-        "return #{to_javascript(expression)}"
+        "return #{Utils.to_javascript(expression)}"
       end
     end
 
     class FunctionCall
-      include Utils
+      attr_reader :function, :arguments
 
-      attr_reader :name, :arguments
-
-      def initialize(name, arguments)
-        @name = name
+      def initialize(function, arguments)
+        @function  = function
         @arguments = arguments
       end
 
       def to_js
-        "#{name}(#{arguments.map { |arg| to_javascript(arg) }.join(', ')})"
-      end
-    end
-
-    class Query < Base
-      attr_reader :pattern
-
-      def initialize(pattern)
-        @pattern = pattern
-      end
-
-      def text!(text)
-        SetQueryInnerText.new(self, text)
-      end
-
-      def text
-        GetQueryAttribute.new(self, :innerText)
-      end
-
-      def value
-        GetQueryAttribute.new(self, :value)
-      end
-
-      def select(pattern)
-        Finder.new(self, pattern)
-      end
-
-      def to_js
-        "document.querySelectorAll(#{pattern.to_json})"
-      end
-    end
-
-    class Finder < Query
-      attr_reader :query, :pattern
-
-      def initialize(query, pattern)
-        @query = query
-        @pattern = pattern
-      end
-
-      def to_js
-        "#{query.to_js}.find(#{pattern.to_json}"
-      end
-    end
-
-    class SetQueryInnerText < Base
-      attr_reader :query, :text
-
-      def initialize(query, text)
-        @query = query
-        @text  = text
-      end
-
-      def to_js
-        "#{query.to_js}.forEach(function(e) { e.innerText = #{text.to_json} })"
-      end
-    end
-
-    class GetQueryAttribute < Base
-      attr_reader :query, :attribute
-
-      def initialize(query, attribute)
-        @query = query
-        @attribute = attribute
-      end
-
-      def to_js
-        "#{query.to_js}[0].#{attribute}"
+        "#{Utils.to_javascript(function)}(#{arguments.map(&Utils.method(:to_javascript)).join(', ')})"
       end
     end
   end

@@ -11,11 +11,11 @@ module Examples
       private
 
       def count!
-        ->{ select('#count-value').text!(@count += 1) }
+        ->{ document.querySelector('#count-value').innerText!(@count += 1) }
       end
 
       def reset!
-        ->{ select('#count-value').text!(@count = 0) }
+        ->{ document.querySelector('#count-value').innerText!(@count = 0) }
       end
     end
   end

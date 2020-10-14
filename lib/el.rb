@@ -7,6 +7,8 @@ require 'erb'
 require 'json'
 require 'date'
 require 'rack'
+require 'singleton'
+require 'forwardable'
 
 require_relative 'el/utils'
 require_relative 'el/base'

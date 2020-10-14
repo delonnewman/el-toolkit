@@ -25,7 +25,7 @@ module El
     end
 
     def html
-      @html ||= HTML.new
+      HTML.instance
     end
 
     def view(name)

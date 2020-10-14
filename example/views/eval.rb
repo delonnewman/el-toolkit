@@ -11,8 +11,8 @@ module Examples
       private
 
       def eval_code!
-        select('#eval-code').value
-            .then(->(code){ select('#eval-output').text!(eval(code).to_json) })
+        document.querySelector('#eval-code').value
+            .then(->(code){ document.querySelector('#eval-output').innerText!(eval(code).to_json) })
       end
     end
   end

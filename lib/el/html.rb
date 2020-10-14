@@ -1,6 +1,6 @@
 module El
   class HTML
-    include JavaScript
+    include Singleton
 
     def method_missing(tag, attributes = nil, &block)
       raise "Unknown HTML tag: #{tag}" unless Element::TAGS.include?(tag)
@@ -8,7 +8,7 @@ module El
       if block
         Element.new(tag, attributes, block)
       else
-        Element.new(tag, attributes, nil)
+        Element[tag, attributes]
       end
     end
 
@@ -32,6 +32,11 @@ module El
 
       TAGS = (CONTENT_ELEMENTS + SINGLETON_ELEMENTS).freeze
 
+      def self.[](tag, attributes)
+        @cache ||= {}
+        @cache[[tag, attributes]] ||= new(tag, attributes, nil)
+      end
+
       def initialize(tag, attributes, content_proc)
         @tag = tag
         @attributes = attributes
@@ -51,7 +56,7 @@ module El
           @callbacks.each do |name, cb|
             if Proc === cb
               action = Action.new(cb)
-              attributes[:"on#{name}"] = "el.actions.call(#{action.id}, this)"
+              attributes[:"on#{name}"] = "return el.actions.call(#{action.id}, this)"
               El.register_action(action)
             elsif cb.respond_to?(:to_js)
               attributes[:"on#{name}"] = cb.to_js

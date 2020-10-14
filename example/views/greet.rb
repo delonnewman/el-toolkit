@@ -11,7 +11,7 @@ module Examples
       private
 
       def get_name_and_say_hi!
-        select('#greet-name').value
+        document.querySelector('#greet-name').value
             .then(->(name){ system("say \"Hi #{name}\"") })
       end
     end

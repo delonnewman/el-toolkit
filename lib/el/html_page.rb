@@ -38,10 +38,6 @@ module El
       end
     end
 
-    def html
-      @html || HTML.new
-    end
-
     def render_content
       [ ERB.new(DEFAULT_LAYOUT).result(binding) ]
     end
