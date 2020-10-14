@@ -91,15 +91,40 @@ module El
           }
           
           function datafyElement(element) {
-            return {
+            if (element == null) return null;
+
+            var content = [];
+            if (element.value != null && element.value.length !== 0) {
+              content.push(element.value);
+            }
+
+            if (element.innerText != null && element.innerText.length !== 0) {
+              content.push(element.innerText);
+            }
+
+            if (element.children.length !== 0) {
+              Array.prototype.forEach.call(element.children, function(elem) {
+                content.push(datafyElement(elem));
+              });
+            }
+
+            var data = {
               type: 'element',
               tag: element.tagName.toLowerCase(),
               attributes: Array.prototype.reduce.call(element.attributes, function(obj, attr) {
                 obj[attr.name] = attr.value;
                 return obj;
               }, {}),
-              content: Array.prototype.map.call(element.children, datafyElement)
             };
+
+            if (content.length === 1) {
+              data.content = content[0];
+            }
+            else if (content.length !== 0) {
+              data.content = content;
+            } 
+
+            return data;
           }
 
           function serializeElement(element) {
@@ -138,10 +163,13 @@ module El
               };
 
               var params = new URLSearchParams();
-              // TODO: pass the attributes of the element
               if (result) {
-                result = isElement(result) ? serializeElement(element) : result;
-                params.append('result', result);
+                result = isElement(result) ? datafyElement(result) : result;
+                params.append('result', JSON.stringify(result));
+              }
+
+              if (element) {
+                params.append('element', serializeElement(element));
               }
 
               xhr.open('POST', '/action/' + actionId);

@@ -3,6 +3,10 @@ module El
   class View < Base
     include JavaScript
     include HTMLHelpers
+    include Elemental
+
+    extend Forwardable
+    def_delegators :page, :view, :app
 
     class << self
       def symbol
@@ -29,35 +33,31 @@ module El
       @fragments ||= {}
     end
 
-    def define(name, value)
-      fragments[name] ||= Fragment.new(self, value)
+    def define(name, value = nil, &block)
+      fragments[name] = Fragment.new(self, value, block)
     end
 
-    def get(name)
-      fragments.fetch(name)
+    def get(name, &block)
+      f = fragments.fetch(name)
+      if block
+        f.get(block)
+      else
+        f
+      end
     end
 
     def update(name, &block)
-      f = fragments.fetch(name)
-      ->{ document.querySelector("#fragment-#{f.id}").innerText!(f.update(block)) }
+      fragments.fetch(name).update(block)
+    end
+
+    def reset!(name, value)
+      fragments.fetch(name).reset!(value)
     end
 
     def action(&block)
       Action.new(block).tap do |action|
         app.action_registry.register(action)
       end
-    end
-
-    def html
-      HTML.instance
-    end
-
-    def view(name)
-      page.view(name)
-    end
-
-    def app
-      page.app
     end
 
     def symbol
@@ -67,12 +67,6 @@ module El
 
     def name
       symbol.to_s
-    end
-
-    def +(other)
-      raise TypeError, "cannot concatenate a view with #{other}:#{other.class}" unless other.respond_to?(:to_html)
-
-      HTML::ElementList.new([self, other])
     end
 
     def content

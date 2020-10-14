@@ -2,6 +2,7 @@
 module El
   class Fragment
     include JavaScript
+    include Elemental
 
     attr_reader :id, :view
 
@@ -9,7 +10,7 @@ module El
       @view    = view
       @value   = value
       @id      = object_id
-      @content = content
+      @content = content || value
     end
 
     def html_id
@@ -26,6 +27,19 @@ module El
       end
     end
 
+    def update(proc)
+      reset!(proc.call(@value))
+    end
+
+    def reset!(value)
+      @value = value
+      document.querySelector("##{html_id}").innerHTML!(@value)
+    end
+
+    def get(proc)
+      document.querySelector("##{html_id}").then(proc)
+    end
+
     def render
       content = self.content
       case content
@@ -38,13 +52,5 @@ module El
       end
     end
     alias to_html render
-
-    def update(proc)
-      @value = proc.call(@value)
-    end
-
-    def get(&block)
-      document.querySelector("##{html_id}").then(block)
-    end
   end
 end

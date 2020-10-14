@@ -46,6 +46,10 @@ module El
       @source ||= serialize
     end
 
+    def serialize!
+      serialize or raise "Failed to serialize action #{proc.inspect}"
+    end
+
     private
 
     def serialize
@@ -55,7 +59,7 @@ module El
 
       source = nil
       find_node(ast, line, node.first_column - 2) { |x| source = x } # set's the last node that it finds
-      raise "Failed to serialize action #{proc.inspect}" unless source
+      return nil unless source
 
       Unparser.unparse(source)
     end
@@ -73,7 +77,7 @@ module El
     CALLABLE_TYPES = Set[:lambda, :proc].freeze
 
     def callable_node?(node)
-      node.type == :block && node.children[0].type == :send && CALLABLE_TYPES.include?(node.children[0].children[1])
+      node.type == :block && node.children[0].type == :send #&& CALLABLE_TYPES.include?(node.children[0].children[1])
     end
   end
 end

@@ -1,5 +1,9 @@
 module El
   module HTMLHelpers
+    def html
+      HTML.instance
+    end
+
     def link_to(*args)
       content = attributes = link = nil
 

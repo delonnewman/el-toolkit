@@ -1,4 +1,15 @@
 module El
+  module Elemental
+    def +(element)
+      if HTML::ElementList === element
+        element.cons(self)
+      else
+        HTML::ElementList.new([self, element])
+      end
+    end
+    alias << +
+  end
+
   class HTML
     include Singleton
 
@@ -20,6 +31,8 @@ module El
     end
 
     class Element
+      include Elemental
+
       attr_reader :tag, :attributes
 
 
@@ -31,6 +44,22 @@ module El
                                :param, :source, :track, :wbr, :keygen].freeze
 
       TAGS = (CONTENT_ELEMENTS + SINGLETON_ELEMENTS).freeze
+
+      def self.from_data(data)
+        return nil if data.nil?
+
+        case data
+        when Hash
+          h       = data.dup
+          tag     = h.delete(:tag)
+          content = h.delete(:content)
+          new(tag, h, nil, from_data(content))
+        when Array
+          ElementList.new(data.map(&method(:from_data)))
+        else
+          data
+        end
+      end
 
       def self.cache
         @cache ||= {}
@@ -44,7 +73,7 @@ module El
         @tag = tag
         @attributes = attributes
 
-        if attributes.key?(:content)
+        if attributes && attributes.key?(:content)
           @content = attributes.delete(:content)
         else
           @content = content
@@ -62,7 +91,7 @@ module El
       end
 
       def has_attributes?
-        !@attributes.nil? or !@attributes.empty?
+        !@attributes.nil? && !@attributes.empty?
       end
 
       def singleton?
@@ -72,15 +101,6 @@ module El
       def >>(list)
         list.cons(self)
       end
-
-      def +(element)
-        if ElementList === element
-          element.cons(self)
-        else
-          ElementList.new([self, element])
-        end
-      end
-      alias << +
 
       def to_html
         if has_attributes?
@@ -100,10 +120,9 @@ module El
       end
 
       def render_content
-        case content
-        when Element, ElementList
+        if content.respond_to?(:to_html)
           content.to_html
-        when Array
+        elsif content.respond_to?(:each)
           buffer = StringIO.new
           content.each do |element|
             if element.respond_to?(:to_html)
@@ -120,6 +139,8 @@ module El
     end
 
     class ElementList
+      include Elemental
+
       attr_reader :elements
 
       def initialize(elements)

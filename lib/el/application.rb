@@ -115,7 +115,7 @@ module El
       pages.map { |p| p.new(self) }
     end
 
-    def page_by_path(path, params)
+    def page_by_path(path, params = {})
       @page_paths[path]&.new(self, params)
     end
     alias page page_by_path
@@ -148,7 +148,12 @@ module El
       raise "Action #{id} not found" unless action
 
       result = if params['result'] && action.proc.arity == 1
-                action.call(params['result'])
+                data = JSON.parse(params['result'], symbolize_names: true)
+                if data[:type] == 'element'
+                  action.call(HTML::Element.from_data(data))
+                else
+                  action.call(data)
+                end
               else
                 action.call
               end

@@ -12,6 +12,10 @@ module El
       @store.get(id)
     end
 
+    def actions
+      @store.list
+    end
+
     class InMemory
       def initialize
         @actions = {}
@@ -23,6 +27,10 @@ module El
 
       def get(id)
         @actions[id]
+      end
+
+      def list
+        @actions.values
       end
     end
   end
