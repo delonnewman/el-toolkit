@@ -1,11 +1,30 @@
+require_relative 'markup/schemas'
+require_relative 'markup/element'
+require_relative 'markup/element_list'
+
 module El
   class Markup
+    class << self
+      def [](schema_name)
+        from(Schemas.const_get(schema_name.to_sym))
+      end
+
+      def from(schema)
+        @cache ||= {}
+        @cache[schema.hash] ||= new(schema)
+      end
+    end
+
     attr_reader :tags
 
-    def initialize(schema)
-      @schema = schema
-      @tags   = schema[:content_elements] + schema[:singleton_elements]
-      @xml    = schema[:xml]
+    def initialize(schema = nil)
+      if schema
+        @schema = schema
+        @tags   = schema[:content_elements] + schema[:singleton_elements]
+        @xml    = schema[:xml]
+      else
+        @xml = true
+      end
     end
 
     def xml?
@@ -16,14 +35,38 @@ module El
       @schema[:singleton_elements].include?(tag)
     end
 
-    def method_missing(tag, attributes = nil, &block)
-      raise "Unknown HTML tag: #{tag}" unless tags.include?(tag)
+    def valid_tag?(tag)
+      tags.empty? or tags.include?(tag)
+    end
 
+    def from_json(string)
+      from_data(JSON.parse(string, symbolize_names: true))
+    end
+
+    def from_data(data)
+      return nil if data.nil?
+
+      case data
+      when Hash
+        h       = data.dup
+        tag     = h.delete(:tag)&.to_sym
+        content = h.delete(:content)
+        Element.new(tag, h, content: from_data(content), xml: xml?, singleton: singleton?(tag))
+      when Array
+        ElementList.new(data.map(&method(:from_data)))
+      else
+        data
+      end
+    end
+
+    def method_missing(tag, attributes = nil, &block)
+      raise "Invalid tag: #{tag}" unless valid_tag?(tag)
+      
       Element.new(tag, attributes, content: block, xml: xml?, singleton: singleton?(tag))
     end
 
     def respond_to?(method, include_all = false)
-      return false unless tags.include?(method)
+      return false unless valid_tag?(method)
 
       # this may benefit from caching
       methods(include_all).include?(method)

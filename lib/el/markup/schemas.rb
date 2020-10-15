@@ -17,6 +17,18 @@ module El
       }.freeze
 
       XHTML = HTML5.merge(xml: true)
+
+      private
+
+      EMPTY_SET = Set.new.freeze
+
+      public
+
+      XML = {
+        xml: true,
+        content_elements: EMPTY_SET,
+        singleton_elements: EMPTY_SET
+      }
     end
   end
 end

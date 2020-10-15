@@ -1,11 +1,10 @@
-require 'minitest/autorun'
-require_relative '../../lib/el'
+require_relative '../helpers'
 
 module El
   class MarkupTest < Minitest::Test
     def setup
-      @html = Markup.new(Markup::Schemas::HTML5)
-      @xhtml = Markup.new(Markup::Schemas::XHTML)
+      @html = Markup[:HTML5]
+      @xhtml = Markup[:XHTML]
     end
 
     def test_is_xml
@@ -15,8 +14,8 @@ module El
       assert !@html.br.xml?, "html elements are not xml"
       assert @xhtml.br.xml?, "xhtml elements are xml"
 
-      assert_equal '<br>', @html.br.to_html
-      assert_equal '<br/>', @xhtml.br.to_html
+      assert_equal '<br>', @html.br.to_markup
+      assert_equal '<br/>', @xhtml.br.to_markup
     end
   end
 end
