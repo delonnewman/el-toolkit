@@ -69,7 +69,32 @@ module El
       XCLOSE = '/>'
 
       def render_attributes
-        attributes.map { |k, v| "#{k}='#{v}'" }.join(' ')
+        attributes.map(&method(:render_attribute)).join(' ')
+      end
+
+      def render_attribute(attribute)
+        return render_xml_attribute(attribute) if xml?
+        name, value = attribute
+
+        if value == true or value == false
+          name.to_s
+        elsif value.is_a?(Enumerable)
+          "#{name}='#{value.map { |v| CGI.escapeHTML(v.to_s) }.join(' ')}'"
+        else
+          "#{name}='#{CGI.escapeHTML(value.to_s)}'"
+        end
+      end
+
+      def render_xml_attribute(attribute)
+        name, value = attribute
+
+        if value == true or value == false
+          "#{name}=\"#{name}\""
+        elsif value.is_a?(Enumerable)
+          "#{name}=\"#{value.map { |v| CGI.escapeHTML(v.to_s) }.join(' ')}\""
+        else
+          "#{name}=\"#{CGI.escapeHTML(value.to_s)}\""
+        end
       end
 
       def render_content
@@ -81,12 +106,12 @@ module El
             if element.respond_to?(:to_markup)
               buffer.puts element.to_markup
             else
-              buffer.puts element.to_s
+              buffer.puts CGI.escapeHTML(element.to_s)
             end
           end
           buffer.string
         else
-          content.to_s
+          CGI.escapeHTML(content.to_s)
         end
       end
     end

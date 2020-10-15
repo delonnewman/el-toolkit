@@ -1,3 +1,5 @@
+require 'cgi'
+
 require_relative 'markup/schemas'
 require_relative 'markup/element'
 require_relative 'markup/element_list'
