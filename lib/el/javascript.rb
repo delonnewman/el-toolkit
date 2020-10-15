@@ -1,206 +1,25 @@
-# frozen_string_literal: true
+require 'singleton'
+require 'date'
+require 'json'
+
+require_relative 'action'
+require_relative 'scriptable'
+
+require_relative 'javascript/utils'
+require_relative 'javascript/base'
+require_relative 'javascript/action'
+require_relative 'javascript/assignment'
+require_relative 'javascript/chainable'
+require_relative 'javascript/proxy'
+require_relative 'javascript/ident'
+require_relative 'javascript/property_access'
+require_relative 'javascript/function_call'
+require_relative 'javascript/return'
+require_relative 'javascript/window'
+require_relative 'javascript/document'
+
 module El
   module JavaScript
-    extend Forwardable
-
-    def_delegators :window, :alert, :confirm, :prompt, :document
-
-    def window
-      Window.instance
-    end
-
-    module Utils
-      # TODO: add more data types to serialize
-      def to_javascript(value)
-        if value.respond_to?(:to_js)
-          value.to_js
-        else
-          case value
-          when Date, Time, DateTime
-            "new Date(#{value.to_time.to_i})"
-          else
-            value.to_json
-          end
-        end
-      end
-
-      module_function :to_javascript
-    end
-
-    class JSAction < Action
-      def initialize(js, proc)
-        super(proc)
-        @js = js
-      end
-
-      def to_js
-        "el.actions.call(#{id}, null, #{Utils.to_javascript(@js)})"
-      end
-    end
-
-    class Base
-      # add server side actions to 
-      def then(proc)
-        JSAction.new(self, proc)
-      end
-    end
-
-    module Chainable
-      def method_missing(method, *args)
-        method_    = method.to_s
-        assignment = false
-
-        if method_.end_with?('!')
-          assignment = true
-          method = method_.slice(0, method_.size - 1).to_sym
-        end
-
-        if method === :[]
-          raise 'An argument is require for assignment' if args.size < 1
-          return Proxy.new(UninternedPropertyAccess.new(self, args[0]))
-        end
-
-        prop = PropertyAccess.new(self, Ident[method])
-
-        if assignment
-          raise 'An argument is require for assignment' if args.size < 1
-          Proxy.new(Assignment.new(prop, args[0]))
-        elsif args.empty?
-          Proxy.new(prop)
-        else
-          Proxy.new(FunctionCall.new(prop, args))
-        end
-      end
-
-      def respond_to?(_)
-        true
-      end
-
-      private
-
-      def evaluate_method(method, args)
-        method_ = method.to_s
-        if method_.end_with?('!')
-          Assignment.new()
-        end
-      end
-    end
-
-    class Proxy < Base
-      include Chainable
-
-      def initialize(expression)
-        @expression = expression
-      end
-
-      def to_js
-        Utils.to_javascript(@expression)
-      end
-    end
-
-    class Document < Base
-      include Singleton
-      include Chainable
-
-      def to_js
-        'document'
-      end
-    end
-
-    class Window < Base
-      include Singleton
-      include Chainable
-
-      def document
-        Document.instance
-      end
-
-      def alert(message)
-        FunctionCall.new(Ident[:alert], [message])
-      end
-
-      def confirm(message)
-        FunctionCall.new(Ident[:confirm], [message])
-      end
-
-      def prompt(*args)
-        FunctionCall.new(Ident[:prompt], args)
-      end
-
-      def to_js
-        'window'
-      end
-    end
-
-    class Ident < Base
-      def self.[](symbol)
-        @cache ||= {}
-        @cache[symbol.to_sym] ||= new(symbol)
-      end
-
-      def initialize(symbol)
-        @symbol = symbol.to_sym
-        @name   = symbol.to_s
-      end
-
-      def to_js
-        @name
-      end
-    end
-
-    class Assignment < Base
-      def initialize(expression, value)
-        @expression = expression
-        @value = value
-      end
-
-      def to_js
-        "#{Utils.to_javascript(@expression)} = #{Utils.to_javascript(@value)}"
-      end
-    end
-
-    class PropertyAccess < Base
-      attr_reader :object, :name
-
-      def initialize(object, name)
-        @object = object
-        @name   = name
-      end
-
-      def to_js
-        "#{Utils.to_javascript(object)}.#{Utils.to_javascript(name)}"
-      end
-    end
-
-    class UninternedPropertyAccess < PropertyAccess
-      def to_js
-        "#{Utils.to_javascript(object)}[#{Utils.to_javascript(name)}]"
-      end
-    end
-
-    class Return
-      attr_reader :expression
-
-      def initialize(expression)
-        @expression = expression
-      end
-
-      def to_js
-        "return #{Utils.to_javascript(expression)}"
-      end
-    end
-
-    class FunctionCall < Base
-      attr_reader :function, :arguments
-
-      def initialize(function, arguments)
-        @function  = function
-        @arguments = arguments
-      end
-
-      def to_js
-        "#{Utils.to_javascript(function)}(#{arguments.map(&Utils.method(:to_javascript)).join(', ')})"
-      end
-    end
+    extend El::Scriptable
   end
 end

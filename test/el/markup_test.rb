@@ -3,7 +3,7 @@ require_relative '../helpers'
 module El
   class MarkupTest < Minitest::Test
     def setup
-      @html  = Markup[:HTML5]
+      @html = Markup[:HTML5]
       @xhtml = Markup[:XHTML]
 
       @examples = [
@@ -32,8 +32,8 @@ module El
 
     def test_examples
       @examples.each do |example|
-        assert_equal example[:html], example[:test][@html]
-        assert_equal example[:xhtml], example[:test][@xhtml]
+        assert_equal example[:html], example[:test].call(@html)
+        assert_equal example[:xhtml], example[:test].call(@xhtml)
       end
     end
   end
