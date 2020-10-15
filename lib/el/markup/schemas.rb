@@ -1,6 +1,8 @@
 module El
   class Markup
     module Schemas
+      # TODO: this is far from complete
+
       HTML5 = {
         xml: false,
         content_elements: Set[
@@ -12,7 +14,9 @@ module El
           :br, :img, :link, :meta, :base, :area, :col, :hr, :input,
           :param, :source, :track, :wbr, :keygen
         ].freeze,
-      }.freeze  
+      }.freeze
+
+      XHTML = HTML5.merge(xml: true)
     end
   end
 end

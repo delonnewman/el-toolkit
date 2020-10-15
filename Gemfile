@@ -12,3 +12,7 @@ group :development do
   gem 'sequel'
   gem 'rouge'
 end
+
+group :test do
+  gem 'minitest'
+end
