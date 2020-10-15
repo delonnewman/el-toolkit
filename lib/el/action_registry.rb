@@ -1,6 +1,8 @@
+require_relative 'action_stores/memory'
+
 module El
   class ActionRegistry
-    def initialize(store = InMemory.new)
+    def initialize(store = ActionStores::Memory.new)
       @store = store
     end
 
@@ -14,24 +16,6 @@ module El
 
     def actions
       @store.list
-    end
-
-    class InMemory
-      def initialize
-        @actions = {}
-      end
-
-      def set(action)
-        @actions[action.id] = action
-      end
-
-      def get(id)
-        @actions[id]
-      end
-
-      def list
-        @actions.values
-      end
     end
   end
 end

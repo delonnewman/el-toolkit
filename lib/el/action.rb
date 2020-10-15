@@ -1,3 +1,6 @@
+require 'json'
+require 'unparser'
+
 module El
   class Action
     attr_reader :id
@@ -43,16 +46,18 @@ module El
     end
 
     def source
-      @source ||= serialize
+      @source ||= serialize_proc
     end
 
     def serialize!
-      serialize or raise "Failed to serialize action #{proc.inspect}"
+      source or raise "Failed to serialize action proc #{proc.inspect}"
+
+      { id: id, source: source }.to_json
     end
 
     private
 
-    def serialize
+    def serialize_proc
       file, line = proc.source_location
       node = RubyVM::AbstractSyntaxTree.of(proc)
       ast  = Parser::CurrentRuby.parse(IO.read(file))
