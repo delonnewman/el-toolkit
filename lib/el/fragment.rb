@@ -2,7 +2,7 @@
 module El
   class Fragment
     include JavaScript
-    include Elemental
+    include HTML::Elemental
 
     attr_reader :id, :view
 

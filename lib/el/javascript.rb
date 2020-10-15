@@ -3,7 +3,7 @@ module El
   module JavaScript
     extend Forwardable
 
-    def_delegators :window, :alert, :confirm, :document
+    def_delegators :window, :alert, :confirm, :prompt, :document
 
     def window
       Window.instance
@@ -103,7 +103,7 @@ module El
       include Chainable
 
       def to_js
-        'window.document'
+        'document'
       end
     end
 
@@ -190,7 +190,7 @@ module El
       end
     end
 
-    class FunctionCall
+    class FunctionCall < Base
       attr_reader :function, :arguments
 
       def initialize(function, arguments)

@@ -3,7 +3,7 @@ module El
   class View < Base
     include JavaScript
     include HTMLHelpers
-    include Elemental
+    include HTML::Elemental
 
     extend Forwardable
     def_delegators :page, :view, :app
