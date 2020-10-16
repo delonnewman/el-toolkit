@@ -1,6 +1,9 @@
 require 'cgi'
 
+require_relative 'markup/buffer'
+require_relative 'markup/utils'
 require_relative 'markup/schemas'
+require_relative 'markup/elemental'
 require_relative 'markup/element'
 require_relative 'markup/element_list'
 
@@ -8,7 +11,15 @@ module El
   class Markup
     class << self
       def [](schema_name)
-        from(Schemas.const_get(schema_name.to_sym))
+        markup = from(Schemas.const_get(schema_name.to_sym))
+
+        if block_given?
+          buffer = Buffer.new(markup)
+          buffer.instance_exec(&Proc.new)
+          buffer
+        else
+          markup
+        end
       end
 
       def from(schema)
@@ -31,6 +42,14 @@ module El
 
     def xml?
       @xml == true
+    end
+
+    def doctype
+      @schema && @schema[:doctype]
+    end
+
+    def mime_type
+      @schema && @schema[:mime_type]
     end
 
     def singleton?(tag)

@@ -33,14 +33,8 @@ module El
         end
       end
 
-      def to_html
-        @elements.map do |element|
-          if element.respond_to?(:to_html)
-            element.to_html
-          else
-            element.to_s
-          end
-        end.join('')
+      def to_markup
+        @elements.map(&Utils.method(:to_markup)).join('')
       end
     end
   end
