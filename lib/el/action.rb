@@ -6,12 +6,13 @@ module El
     attr_reader :id
 
     class << self
-      def deserialize(string)
-        new(nil, string)
+      def deserialize(json)
+        data = JSON.parse(json, symbolize_names: true)
+        new(nil, data[:source], nil, data[:id])
       end
     end
 
-    def initialize(proc, source = nil, parent = nil)
+    def initialize(proc, source = nil, parent = nil, id = nil)
       raise "proc and source cannot both be nil" if proc.nil? && source.nil?
 
       @proc   = proc
@@ -19,7 +20,7 @@ module El
 
       @parent = parent
 
-      @id = object_id.to_s
+      @id = id || object_id.to_s
     end
 
     def to_proc
