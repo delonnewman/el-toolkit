@@ -14,5 +14,6 @@ require 'forwardable'
 require_relative 'el/utils'
 require_relative 'el/html_helpers'
 
-require_relative 'el/elemental'
 require_relative 'el/markup'
+require_relative 'el/scriptable'
+require_relative 'el/javascript'

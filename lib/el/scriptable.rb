@@ -10,5 +10,3 @@ module El
     end
   end
 end
-
-require_relative 'javascript'
