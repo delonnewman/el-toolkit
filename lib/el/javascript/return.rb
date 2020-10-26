@@ -1,5 +1,5 @@
 module El
-  module JavaScript
+  class JavaScript
     class Return < Base
       attr_reader :expression
 

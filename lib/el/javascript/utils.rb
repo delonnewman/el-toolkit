@@ -1,5 +1,5 @@
 module El
-  module JavaScript
+  class JavaScript
     module Utils
       # TODO: add more data types to serialize
       def to_javascript(value)

@@ -1,5 +1,5 @@
 module El
-  module JavaScript
+  class JavaScript
     class Window < Base
       include Singleton
       include Chainable

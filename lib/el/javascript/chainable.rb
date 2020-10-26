@@ -1,5 +1,5 @@
 module El
-  module JavaScript
+  class JavaScript
     module Chainable
       def method_missing(method, *args)
         method_    = method.to_s

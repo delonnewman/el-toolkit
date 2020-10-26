@@ -19,7 +19,13 @@ require_relative 'javascript/window'
 require_relative 'javascript/document'
 
 module El
-  module JavaScript
-    extend El::Scriptable
+  class JavaScript
+    extend Forwardable
+
+    def_delegators :window, :alert, :confirm, :prompt, :document
+
+    def window
+      JavaScript::Window.instance
+    end
   end
 end

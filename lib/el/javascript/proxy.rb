@@ -1,5 +1,5 @@
 module El
-  module JavaScript
+  class JavaScript
     class Proxy < Base
       include Chainable
 

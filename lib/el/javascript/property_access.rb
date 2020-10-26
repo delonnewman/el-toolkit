@@ -1,5 +1,5 @@
 module El
-  module JavaScript
+  class JavaScript
     class PropertyAccess < Base
       attr_reader :object, :name
 

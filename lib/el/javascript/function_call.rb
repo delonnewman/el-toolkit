@@ -1,5 +1,5 @@
 module El
-  module JavaScript
+  class JavaScript
     class FunctionCall < Base
       attr_reader :function, :arguments
 

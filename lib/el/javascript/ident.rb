@@ -1,5 +1,5 @@
 module El
-  module JavaScript
+  class JavaScript
     class Ident < Base
       def self.[](symbol)
         @cache ||= {}

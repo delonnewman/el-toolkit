@@ -1,5 +1,5 @@
 module El
-  module JavaScript
+  class JavaScript
     class Assignment < Base
       def initialize(expression, value)
         @expression = expression

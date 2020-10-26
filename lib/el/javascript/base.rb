@@ -1,5 +1,5 @@
 module El
-  module JavaScript
+  class JavaScript
     class Base
       # add server side actions to 
       def then(proc)

@@ -1,5 +1,5 @@
 module El
-  module JavaScript
+  class JavaScript
     class Action < El::Action
       def initialize(js, proc)
         super(proc)
