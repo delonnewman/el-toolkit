@@ -1,7 +1,6 @@
 module El
   class JavaScript
     class Window < Base
-      include Singleton
       include Chainable
 
       def document

@@ -25,7 +25,7 @@ module El
     def_delegators :window, :alert, :confirm, :prompt, :document
 
     def window
-      JavaScript::Window.instance
+      @window ||= JavaScript::Window.new
     end
   end
 end
