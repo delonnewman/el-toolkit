@@ -13,7 +13,7 @@ module El
         { test: ->(markup) { markup.link(rel: 'stylesheet', href: '/styles/app.css').to_markup },
           html: "<link rel='stylesheet' href='/styles/app.css'>",
           xhtml: '<link rel="stylesheet" href="/styles/app.css"/>' },
-        { test: ->(markup) { markup.a(href: '#', required: true, class: %w[ btn btn-primary ]).to_markup },
+        { test: ->(markup) { markup.a(href: '#', required: true, class: %w[btn btn-primary]).to_markup },
           html: "<a href='#' required class='btn btn-primary'></a>",
           xhtml: '<a href="#" required="required" class="btn btn-primary"></a>' }
       ]
@@ -32,8 +32,8 @@ module El
 
     def test_examples
       @examples.each do |example|
-        assert_equal example[:html], example[:test].call(@html)
-        assert_equal example[:xhtml], example[:test].call(@xhtml)
+        assert_equal example[:html], example[:test].call(@html), example[:html]
+        assert_equal example[:xhtml], example[:test].call(@xhtml), example[:xhtml]
       end
     end
 
