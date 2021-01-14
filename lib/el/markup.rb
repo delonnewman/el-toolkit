@@ -1,5 +1,3 @@
-require 'cgi'
-
 require_relative 'markup/buffer'
 require_relative 'markup/utils'
 require_relative 'markup/schemas'

@@ -11,14 +11,14 @@ module El
         end
 
         if method === :[]
-          raise 'An argument is require for assignment' if args.size < 1
+          raise 'An argument is required for assignment' if args.size < 1
           return Proxy.new(UninternedPropertyAccess.new(self, args[0]))
         end
 
         prop = PropertyAccess.new(self, Ident[method])
 
         if assignment
-          raise 'An argument is require for assignment' if args.size < 1
+          raise 'An argument is required for assignment' if args.size < 1
           Proxy.new(Assignment.new(prop, args[0]))
         elsif args.empty?
           Proxy.new(prop)
@@ -29,15 +29,6 @@ module El
 
       def respond_to?(_)
         true
-      end
-
-      private
-
-      def evaluate_method(method, args)
-        method_ = method.to_s
-        if method_.end_with?('!')
-          Assignment.new()
-        end
       end
     end
   end

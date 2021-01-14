@@ -4,7 +4,7 @@ module El
       include Chainable
 
       def document
-        Document.instance
+        @document ||= Document.new
       end
 
       def alert(message)
