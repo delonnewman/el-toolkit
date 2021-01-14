@@ -1,10 +1,5 @@
-require 'singleton'
-require 'date'
-require 'json'
-
 require_relative 'javascript/utils'
 require_relative 'javascript/base'
-require_relative 'javascript/action'
 require_relative 'javascript/assignment'
 require_relative 'javascript/chainable'
 require_relative 'javascript/proxy'

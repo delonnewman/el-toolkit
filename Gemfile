@@ -4,11 +4,7 @@ gem 'rack'
 gem 'rack-contrib'
 gem 'concurrent-ruby'
 
-group :development do
-  gem 'sqlite3'
-  gem 'sequel'
-  gem 'rouge'
-end
+gem 'crass' # css parser
 
 group :test do
   gem 'minitest'
