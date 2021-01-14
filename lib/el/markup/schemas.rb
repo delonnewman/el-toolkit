@@ -20,7 +20,8 @@ module El
       HTML  = HTML5
       XHTML = HTML5.merge(
         xml: true,
-        doctype: '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">'
+        doctype: '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">',
+        mime_type: 'application/xhtml+xml'
       )
 
       XML = {

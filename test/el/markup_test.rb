@@ -36,5 +36,20 @@ module El
         assert_equal example[:xhtml], example[:test].call(@xhtml)
       end
     end
+
+    def test_markup_block
+      code1 = El::Markup[:HTML] do
+        a(href: '#') { 'Testing' } + br
+        br
+      end.to_s
+
+      code2 = El::Markup[:HTML] do |html|
+        html.a(href: '#') { 'Testing' } + html.br
+        html.br
+      end.to_s
+
+      assert_equal "<a href='#'>Testing</a><br><br>", code1.lines.map(&:chomp).join('')
+      assert_equal "<a href='#'>Testing</a><br><br>", code2.lines.map(&:chomp).join('')
+    end
   end
 end

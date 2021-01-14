@@ -8,12 +8,12 @@ require_relative 'markup/element_list'
 module El
   class Markup
     class << self
-      def [](schema_name)
+      def [](schema_name, &block)
         markup = from(Schemas.const_get(schema_name.to_sym))
 
-        if block_given?
+        if block
           buffer = Buffer.new(markup)
-          buffer.instance_exec(&Proc.new)
+          buffer.instance_exec(buffer, &block)
           buffer
         else
           markup
