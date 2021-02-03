@@ -1,5 +1,5 @@
 module El
-  class Markup
+  class Document
     class ElementList
       include Elemental
 

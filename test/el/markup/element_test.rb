@@ -1,7 +1,7 @@
 require_relative '../../helpers'
 
 module El
-  class Markup
+  class Document
     class ElementTest < Minitest::Test
       def test_xml_element_generates_xml
         @element = Element.new(:br, nil, xml: true, singleton: true)

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 module El
-  class Markup
+  class Document
     class Element
       include Elemental
 

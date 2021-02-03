@@ -3,8 +3,8 @@ require_relative '../helpers'
 module El
   class MarkupTest < Minitest::Test
     def setup
-      @html = Markup[:HTML5]
-      @xhtml = Markup[:XHTML]
+      @html = Document[:HTML5]
+      @xhtml = Document[:XHTML]
 
       @examples = [
         { test: ->(markup) { markup.br.to_markup },
@@ -38,12 +38,12 @@ module El
     end
 
     def test_markup_block
-      code1 = El::Markup[:HTML] do
+      code1 = El::Document[:HTML] do
         a(href: '#') { 'Testing' } + br
         br
       end.to_s
 
-      code2 = El::Markup[:HTML] do |html|
+      code2 = El::Document[:HTML] do |html|
         html.a(href: '#') { 'Testing' } + html.br
         html.br
       end.to_s

@@ -1,5 +1,5 @@
 module El
-  class Markup
+  class Document
     module Elemental
       def +(element)
         if ElementList === element
@@ -9,6 +9,10 @@ module El
         end
       end
       alias << +
+
+      def to_markup
+        raise 'not implemented'
+      end
     end
   end
 end

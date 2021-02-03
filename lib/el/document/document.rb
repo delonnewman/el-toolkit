@@ -1,6 +1,6 @@
 module El
-  class Markup
-    class Document
+  class Document
+    class Index
       def initialize
         @by_id_index    = {}
         @by_tag_index   = {}

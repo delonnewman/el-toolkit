@@ -1,5 +1,7 @@
 module El
   class Form
+    include Markup::Elemental
+
     INPUT_TYPES = {
       text:      :text,
       number:    :number,
@@ -38,6 +40,10 @@ module El
         @fields ||= {}
         @fields[name] = options.merge(type: :textarea)
         name
+      end
+
+      def initialize(attributes)
+        @attributes = attributes
       end
     end
   end

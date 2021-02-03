@@ -1,12 +1,12 @@
-require_relative 'markup/buffer'
-require_relative 'markup/utils'
-require_relative 'markup/schemas'
-require_relative 'markup/elemental'
-require_relative 'markup/element'
-require_relative 'markup/element_list'
+require_relative 'document/buffer'
+require_relative 'document/utils'
+require_relative 'document/schemas'
+require_relative 'document/elemental'
+require_relative 'document/element'
+require_relative 'document/element_list'
 
 module El
-  class Markup
+  class Document
     class << self
       def [](schema_name, &block)
         markup = from(Schemas.const_get(schema_name.to_sym))

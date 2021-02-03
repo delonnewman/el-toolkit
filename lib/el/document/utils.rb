@@ -1,5 +1,5 @@
 module El
-  class Markup
+  class Document
     module Utils
       module_function
 
