@@ -1,11 +1,10 @@
 source 'https://rubygems.org'
 
-gem 'rack'
-gem 'rack-contrib'
-gem 'concurrent-ruby'
-gem 'zeitwerk'
+gemspec
 
+gem 'concurrent-ruby'
 gem 'crass' # css parser
+gem 'pendragon'
 
 group :test do
   gem 'minitest'
