@@ -4,8 +4,7 @@ gemspec
 
 gem 'concurrent-ruby'
 gem 'crass' # css parser
-gem 'pendragon'
 
 group :test do
-  gem 'minitest'
+  gem 'rspec'
 end

@@ -2,6 +2,10 @@
 require 'logger'
 require 'pathname'
 require 'zeitwerk'
+require 'pendragon'
+
+require_relative '../el'
+require_relative 'http/helpers'
 
 module El
   # Represents a web application, handles dependency injection.
@@ -14,24 +18,21 @@ module El
   #     public '/'
   #
   #     get '/rooms' do
-  #       Room.all.to_json
+  #       res Room.all.to_json
   #     end
   #
   #     get '/rooms/:id' do |id|
-  #       Room.find(id).to_json
+  #       res Room.find(id).to_json
   #     end
   #
   #     get '/rooms/:id/members' do |id|
-  #       Room.find(id).members.to_json
+  #       res Room.find(id).members.to_json
   #     end
   #
   #     post '/rooms/:id/message' do |id|
-  #       Room.find(id).message.create(params.slice(:user_id, :content))
+  #       res Room.find(id).message.create(params.slice(:user_id, :content))
   #     end
   #   end
-  #
-  # @!attribute [r] loader
-  #   @return [Zeitwerk::Loader] the autoloader used by the application
   #
   # @!attribute [r] env
   #   @return [:test, :development, :production] the environment the application is in
@@ -45,7 +46,7 @@ module El
   # @!attribute [r] system
   #   @return [Hash{Symbol => Object}] the system of dependencies for the application
   class Application
-    attr_reader :loader, :env, :root, :logger, :system, :app
+    attr_reader :env, :root, :logger, :system
 
     class << self
       # A "macro" method to specify paths that should be used to serve static files.
@@ -125,6 +126,8 @@ module El
       raise "A root directory must be specified with :root_path" if root_path.nil?
 
       @system = system
+      @system.freeze unless @system.frozen?
+
       @logger = logger || Logger.new($stdout)
       @root   = Pathname.new(root_path).expand_path
       @env    = ENV.fetch('APP_ENV') { ENV.fetch('RACK_ENV') { :development } }.to_sym
@@ -141,8 +144,10 @@ module El
     def app
       return @app if @app
 
-      @app = Pendragon.new(type: :radix) do
-        self.class.routes.each do |(method, path, options, block)|
+      routes = self.class.routes
+
+      @app = Pendragon.new do
+        routes.each do |(method, path, options, block)|
           route method, path, **options, &block
         end
       end
