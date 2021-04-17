@@ -1,5 +1,3 @@
-require_relative '../../helpers'
-
 module El
   class Document
     class ElementTest < Minitest::Test
