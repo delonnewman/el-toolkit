@@ -2,10 +2,8 @@
 require 'logger'
 require 'pathname'
 require 'zeitwerk'
-require 'pendragon'
 
-require_relative '../el'
-require_relative 'http/helpers'
+require_relative 'router'
 
 module El
   # Represents a web application, handles dependency injection.
@@ -111,8 +109,10 @@ module El
       def route(method, path, **options, &block)
         raise "Invalid method: #{method.inspect}" unless METHODS.include?(method)
 
+        action = options[:to] || block
+
         @routes ||= []
-        @routes << [method, path, options, block]
+        @routes << [method, path, action]
       end
 
       METHODS.each do |method|
@@ -138,17 +138,29 @@ module El
       end
     end
 
+    # Return the router for this application
+    #
+    # @return [Router]
+    def router
+      @router ||= Router.new(self.class.routes)
+    end
+
     # Rack integration for this application
     #
     # @return [#call]
     def app
       return @app if @app
 
-      routes = self.class.routes
+      @app = lambda do |env|
+        req = request(env)
+        res = router.match(req[:method], req[:path]).call(req[:params], req)
 
-      @app = Pendragon.new do
-        routes.each do |(method, path, options, block)|
-          route method, path, **options, &block
+        if res.is_a?(Hash) && res.key?(:status)
+          [res[:status], res.fetch(:headers) { EMPTY_HASH }, res.fetch(:body) { EMPTY_ARRAY }]
+        elsif res.respond_to?(:each)
+          [200, EMPTY_HASH, res]
+        else
+          [200, EMPTY_HASH, [res]]
         end
       end
 
@@ -187,5 +199,16 @@ module El
     EMPTY_ARRAY = [].freeze
     EMPTY_HASH  = {}.freeze
     private_constant :EMPTY_HASH, :EMPTY_ARRAY
+
+    private
+
+    def request(env)
+      {
+        method: env['REQUEST_METHOD'].downcase.to_sym,
+        path: env['PATH_INFO'],
+        params: {},
+        env: env
+      }
+    end
   end
 end

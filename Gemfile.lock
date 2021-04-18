@@ -28,6 +28,7 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.10.0)
     rspec-support (3.10.2)
+    yard (0.9.26)
     zeitwerk (2.4.2)
 
 PLATFORMS
@@ -38,6 +39,7 @@ DEPENDENCIES
   crass
   el!
   rspec
+  yard
 
 BUNDLED WITH
    2.2.16

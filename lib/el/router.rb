@@ -1,7 +1,13 @@
 module El
   class Router
-    def initialize
+    def initialize(routes = nil)
       @table = {}
+
+      if routes
+        routes.each do |(method, path, action)|
+          add(method, path, action)
+        end
+      end
     end
 
     def match(method, path)
