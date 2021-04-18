@@ -4,6 +4,7 @@ require 'pathname'
 require 'zeitwerk'
 
 require_relative 'router'
+require_relative 'utils'
 
 module El
   # Represents a web application, handles dependency injection.
@@ -16,19 +17,19 @@ module El
   #     public '/'
   #
   #     get '/rooms' do
-  #       res Room.all.to_json
+  #       Room.all.to_json
   #     end
   #
   #     get '/rooms/:id' do |id|
-  #       res Room.find(id).to_json
+  #       Room.find(id).to_json
   #     end
   #
   #     get '/rooms/:id/members' do |id|
-  #       res Room.find(id).members.to_json
+  #       Room.find(id).members.to_json
   #     end
   #
   #     post '/rooms/:id/message' do |id|
-  #       res Room.find(id).message.create(params.slice(:user_id, :content))
+  #       Room.find(id).message.create(params.slice(:user_id, :content))
   #     end
   #   end
   #
@@ -62,6 +63,7 @@ module El
       def use(klass, *args)
         @middleware ||= []
         @middleware << [klass, args]
+        self
       end
 
       # Return an array of Rack middleware (used by this application) and their arguments.
@@ -122,13 +124,15 @@ module El
       end
     end
 
-    def initialize(root_path: self.class.root_path, logger: nil, system: self.class.system)
-      raise "A root directory must be specified with :root_path" if root_path.nil?
+    def initialize(**options)
+      root_path = options.fetch(:root_path) do
+        self.class.root_path or raise "A root directory must be specified with :root_path"
+      end
 
-      @system = system
+      @system = options.fetch(:system) { self.class.system }
       @system.freeze unless @system.frozen?
 
-      @logger = logger || Logger.new($stdout)
+      @logger = options.fetch(:logger) { Logger.new($stdout) }
       @root   = Pathname.new(root_path).expand_path
       @env    = ENV.fetch('APP_ENV') { ENV.fetch('RACK_ENV') { :development } }.to_sym
 
@@ -136,44 +140,6 @@ module El
         loader.push_dir(root.join('lib'))
         loader.enable_reloading if env == :development
       end
-    end
-
-    # Return the router for this application
-    #
-    # @return [Router]
-    def router
-      @router ||= Router.new(self.class.routes)
-    end
-
-    # Rack integration for this application
-    #
-    # @return [#call]
-    def app
-      return @app if @app
-
-      @app = lambda do |env|
-        req = request(env)
-        res = router.match(req[:method], req[:path]).call(req[:params], req)
-
-        if res.is_a?(Hash) && res.key?(:status)
-          [res[:status], res.fetch(:headers) { EMPTY_HASH }, res.fetch(:body) { EMPTY_ARRAY }]
-        elsif res.respond_to?(:each)
-          [200, EMPTY_HASH, res]
-        else
-          [200, EMPTY_HASH, [res]]
-        end
-      end
-
-      unless (middleware = self.class.middleware).empty?
-        @app = Rack::Builder.new do
-          middleware.each do |(klass, args)|
-            use klass, *args
-            run @app
-          end
-        end
-      end
-
-      @app
     end
 
     # Return the named component of the application.
@@ -196,19 +162,58 @@ module El
       self
     end
 
-    EMPTY_ARRAY = [].freeze
-    EMPTY_HASH  = {}.freeze
-    private_constant :EMPTY_HASH, :EMPTY_ARRAY
+    # Return the router for this application
+    #
+    # @return [Router]
+    def router
+      @router ||= Router.new(self.class.routes)
+    end
+
+    # Rack integration for this application
+    #
+    # @return [#call]
+    def app
+      return @app if @app
+
+      @app = lambda do |env|
+        req   = request(env)
+        match = router.match(req[:method], req[:path])
+
+        return [404, EMPTY_HASH, ['Not Found']] unless match
+        params = req[:params].merge(match[:params])
+        res    = match[:action].call(params, req)
+
+        if res.is_a?(Hash) && res.key?(:status)
+          [res[:status], res.fetch(:headers) { EMPTY_HASH }, res.fetch(:body) { EMPTY_ARRAY }]
+        elsif res.respond_to?(:each)
+          [200, EMPTY_HASH, res]
+        else
+          [200, EMPTY_HASH, [res.to_s]]
+        end
+      end
+
+      unless (middleware = self.class.middleware).empty?
+        @app = Rack::Builder.new do
+          middleware.each do |(klass, args)|
+            use klass, *args
+            run @app
+          end
+        end
+      end
+
+      @app
+    end
 
     private
 
     def request(env)
+      # TODO: parse query string and body (on post / put requests) for params
       {
         method: env['REQUEST_METHOD'].downcase.to_sym,
         path: env['PATH_INFO'],
         params: {},
         env: env
-      }
+      }.freeze
     end
   end
 end

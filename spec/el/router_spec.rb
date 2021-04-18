@@ -7,9 +7,13 @@ RSpec.describe El::Router do
     it 'should add routes to the routing table' do
       $test = 1
 
-      router
-        .add(:get, '/user', ->{ $test = 2 })
-        .match(:get, '/user').call
+      match =
+        router
+          .add(:get, '/user', ->{ $test = 2 })
+          .match(:get, '/user')
+
+      expect(match).not_to be false
+      match[:action].call
 
       expect($test).to eq 2
     end
@@ -19,9 +23,14 @@ RSpec.describe El::Router do
     it 'should match simple paths' do
       $test = 1
 
-      router
-        .add(:get, '/testing', ->{ $test = 3 })
-        .match(:get, '/testing').call
+      match =
+        router
+          .add(:get, '/testing', ->{ $test = 3 })
+          .match(:get, '/testing')
+      
+      expect(match).not_to be false
+
+      match[:action].call
 
       expect($test).to eq 3
     end
@@ -34,13 +43,22 @@ RSpec.describe El::Router do
         .add(:get, '/user/:id/settings', ->{ $test = 5 })
         .add(:get, '/user/:id/packages/:package_id', ->{ $test = 6 })
 
-      router.match(:get, '/user/1').call
+      match = router.match(:get, '/user/1')
+      expect(match).not_to be false
+
+      match[:action].call
       expect($test).to eq 4
 
-      router.match(:get, '/user/1/settings').call
+      match = router.match(:get, '/user/1/settings')
+      expect(match).not_to be false
+
+      match[:action].call
       expect($test).to eq 5
 
-      router.match(:get, '/user/1/packages/abad564').call
+      match = router.match(:get, '/user/1/packages/abad564')
+      expect(match).not_to be false
+
+      match[:action].call
       expect($test).to eq 6
     end
   end
