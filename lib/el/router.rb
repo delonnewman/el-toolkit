@@ -6,7 +6,7 @@ module El
 
       if routes
         routes.each do |(method, path, action)|
-          add(method, path, action)
+          add!(method, path, action)
         end
       end
     end
@@ -28,7 +28,7 @@ module El
     end
     alias call match
 
-    def add(method, path, action)
+    def add!(method, path, action)
       @table[method] ||= []
       @table[method] << [parse(path), action]
       self

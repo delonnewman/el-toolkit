@@ -9,7 +9,7 @@ RSpec.describe El::Router do
 
       match =
         router
-          .add(:get, '/user', ->{ $test = 2 })
+          .add!(:get, '/user', ->{ $test = 2 })
           .match(:get, '/user')
 
       expect(match).not_to be false
@@ -25,11 +25,10 @@ RSpec.describe El::Router do
 
       match =
         router
-          .add(:get, '/testing', ->{ $test = 3 })
+          .add!(:get, '/testing', ->{ $test = 3 })
           .match(:get, '/testing')
       
       expect(match).not_to be false
-
       match[:action].call
 
       expect($test).to eq 3
@@ -39,9 +38,9 @@ RSpec.describe El::Router do
       $test = 1
 
       router
-        .add(:get, '/user/:id', ->{ $test = 4 })
-        .add(:get, '/user/:id/settings', ->{ $test = 5 })
-        .add(:get, '/user/:id/packages/:package_id', ->{ $test = 6 })
+        .add!(:get, '/user/:id', ->{ $test = 4 })
+        .add!(:get, '/user/:id/settings', ->{ $test = 5 })
+        .add!(:get, '/user/:id/packages/:package_id', ->{ $test = 6 })
 
       match = router.match(:get, '/user/1')
       expect(match).not_to be false
