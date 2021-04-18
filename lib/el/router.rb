@@ -1,14 +1,39 @@
 # frozen_string_literal: true
 module El
   class Router
-    def initialize(routes = nil)
-      @table = {}
-
-      if routes
+    class << self
+      def from(routes)
+        table = {}
+  
         routes.each do |(method, path, action)|
-          add!(method, path, action)
+          table[method] ||= []
+          table[method] << [parse(path), action]
         end
+
+        new(table)
       end
+
+      def parse(str)
+        str   = str.start_with?('/') ? str[1, str.size] : str
+        names = []
+  
+        route = str.split(/\/+/).each_with_index.map do |part, i|
+          if part.start_with?(':')
+            names[i] = part[1, part.size].to_sym
+            NAME_PATTERN
+          elsif part.end_with?('*')
+            /^#{part[0, part.size - 1]}/i
+          else
+            part
+          end
+        end
+  
+        { names: names, path: route }
+      end
+    end
+
+    def initialize(table)
+      @table = table
     end
 
     def match(method, path)
@@ -25,13 +50,6 @@ module El
       end
 
       false
-    end
-    alias call match
-
-    def add!(method, path, action)
-      @table[method] ||= []
-      @table[method] << [parse(path), action]
-      self
     end
 
     private
@@ -51,24 +69,6 @@ module El
       end
 
       params
-    end
-
-    def parse(str)
-      str   = str.start_with?('/') ? str[1, str.size] : str
-      names = []
-
-      route = str.split(/\/+/).each_with_index.map do |part, i|
-        if part.start_with?(':')
-          names[i] = part[1, part.size].to_sym
-          NAME_PATTERN
-        elsif part.end_with?('*')
-          /^#{part[0, part.size - 1]}/i
-        else
-          part
-        end
-      end
-
-      { names: names, path: route }
     end
 
     NAME_PATTERN = /\A\w+\z/.freeze

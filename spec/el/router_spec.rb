@@ -1,32 +1,32 @@
 require 'el/router'
 
 RSpec.describe El::Router do
-  let(:router) { described_class.new }
+  describe '.from' do
+    it 'should return a router instance from the given routing data' do
+      paths   = ['/test', '/testing', '/a/b/c/d']
+      routing = paths.map { |path| [:get, path, ->{ path }] }
+      router  = described_class.from(routing)
 
-  describe '#add' do
-    it 'should add routes to the routing table' do
-      $test = 1
+      paths.each do |path|
+        expect(router.match(:get, path)[:action].call).to be path
+      end
+    end
+  end
 
-      match =
-        router
-          .add!(:get, '/user', ->{ $test = 2 })
-          .match(:get, '/user')
+  describe '.parse' do
+    it 'should return a compiled route hash' do
+      route = described_class.parse('/user')
 
-      expect(match).not_to be false
-      match[:action].call
-
-      expect($test).to eq 2
+      expect(route[:names]).to be_empty
+      expect(route[:path]).to eq ['user']
     end
   end
 
   describe '#match' do
     it 'should match simple paths' do
       $test = 1
-
-      match =
-        router
-          .add!(:get, '/testing', ->{ $test = 3 })
-          .match(:get, '/testing')
+      router = described_class.from([[:get, '/testing', ->{ $test = 3 }]])
+      match  = router.match(:get, '/testing')
       
       expect(match).not_to be false
       match[:action].call
@@ -37,10 +37,11 @@ RSpec.describe El::Router do
     it 'should match paths with variables' do
       $test = 1
 
-      router
-        .add!(:get, '/user/:id', ->{ $test = 4 })
-        .add!(:get, '/user/:id/settings', ->{ $test = 5 })
-        .add!(:get, '/user/:id/packages/:package_id', ->{ $test = 6 })
+      router = described_class.from([
+        [:get, '/user/:id', ->{ $test = 4 }],
+        [:get, '/user/:id/settings', ->{ $test = 5 }],
+        [:get, '/user/:id/packages/:package_id', ->{ $test = 6 }]
+      ])
 
       match = router.match(:get, '/user/1')
       expect(match).not_to be false

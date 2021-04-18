@@ -166,7 +166,7 @@ module El
     #
     # @return [Router]
     def router
-      @router ||= Router.new(self.class.routes)
+      @router ||= Router.from(self.class.routes)
     end
 
     # Rack integration for this application
