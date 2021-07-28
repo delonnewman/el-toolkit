@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'document/buffer'
 require_relative 'document/utils'
 require_relative 'document/schemas'
@@ -6,6 +8,7 @@ require_relative 'document/element'
 require_relative 'document/element_list'
 
 module El
+  # TODO: Add support for JSON
   class Document
     class << self
       def [](schema_name, &block)
@@ -80,15 +83,14 @@ module El
 
     def method_missing(tag, attributes = nil, &block)
       raise "Invalid tag: #{tag}" unless valid_tag?(tag)
-      
+
       Element.new(tag, attributes, content: block, xml: xml?, singleton: singleton?(tag))
     end
 
-    def respond_to?(method, include_all = false)
-      return false unless valid_tag?(method)
+    def respond_to_missing?(method)
+      return true if valid_tag?(method)
 
-      # this may benefit from caching
-      methods(include_all).include?(method)
+      false
     end
   end
 end

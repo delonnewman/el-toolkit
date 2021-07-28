@@ -1,14 +1,14 @@
-require_relative 'lib/el/version'
+require_relative 'lib/el/document/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "el"
-  spec.version       = El::VERSION
+  spec.name          = "el-document"
+  spec.version       = El::Document::VERSION
   spec.authors       = ["Delon Newman"]
   spec.email         = ["contact@delonnewman.name"]
 
-  spec.summary       = %q{A standard library for web development}
+  spec.summary       = %q{DSL & DOM for generatring markup}
   spec.description   = spec.summary
-  spec.homepage      = "https://github.com/delonnewman/el"
+  spec.homepage      = "https://github.com/delonnewman/el-document"
   spec.license       = "MIT"
   spec.required_ruby_version = Gem::Requirement.new(">= 2.3.0")
 
@@ -26,8 +26,4 @@ Gem::Specification.new do |spec|
   spec.bindir        = "exe"
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
-
-  spec.add_dependency "rack"
-  spec.add_dependency "rack-contrib"
-  spec.add_dependency "zeitwerk"
 end
