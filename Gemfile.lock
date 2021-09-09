@@ -1,10 +1,7 @@
 PATH
-  remote: .
+  remote: el-dom
   specs:
-    el (0.1.0)
-      rack
-      rack-contrib
-      zeitwerk
+    el-dom (0.1.0)
 
 GEM
   remote: https://rubygems.org/
@@ -12,9 +9,6 @@ GEM
     concurrent-ruby (1.1.8)
     crass (1.0.6)
     diff-lcs (1.4.4)
-    rack (2.2.3)
-    rack-contrib (2.3.0)
-      rack (~> 2.0)
     rspec (3.10.0)
       rspec-core (~> 3.10.0)
       rspec-expectations (~> 3.10.0)
@@ -29,7 +23,6 @@ GEM
       rspec-support (~> 3.10.0)
     rspec-support (3.10.2)
     yard (0.9.26)
-    zeitwerk (2.4.2)
 
 PLATFORMS
   ruby
@@ -37,7 +30,7 @@ PLATFORMS
 DEPENDENCIES
   concurrent-ruby
   crass
-  el!
+  el-dom!
   rspec
   yard
 

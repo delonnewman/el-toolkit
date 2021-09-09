@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-gemspec
+gem 'el-dom', path: './el-dom'
 
 gem 'concurrent-ruby'
 gem 'crass' # css parser

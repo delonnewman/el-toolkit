@@ -8,7 +8,6 @@ require_relative 'document/element'
 require_relative 'document/element_list'
 
 module El
-  # TODO: Add support for JSON
   class Document
     class << self
       def [](schema_name, &block)

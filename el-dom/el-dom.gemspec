@@ -1,8 +1,8 @@
-require_relative 'lib/el/document/version'
+require_relative 'lib/el/dom/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "el-document"
-  spec.version       = El::Document::VERSION
+  spec.name          = "el-dom"
+  spec.version       = El::DOM::VERSION
   spec.authors       = ["Delon Newman"]
   spec.email         = ["contact@delonnewman.name"]
 

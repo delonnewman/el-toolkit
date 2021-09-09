@@ -1,11 +1,11 @@
 # frozen_string_literal: true
+
 require 'cgi'
 require 'set'
 require 'stringio'
 require 'erb'
 require 'json'
 require 'date'
-require 'rack'
 require 'forwardable'
 
 require_relative 'el/utils'

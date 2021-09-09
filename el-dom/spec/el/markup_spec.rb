@@ -1,3 +1,5 @@
+require 'el-dom'
+
 RSpec.describe El::Document do
   let(:html) { described_class[:HTML] }
   let(:xhtml) { described_class[:XHTML] }
