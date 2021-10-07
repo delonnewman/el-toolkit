@@ -7,7 +7,6 @@ require 'el/hash_delegator'
 require_relative 'entity/attribute'
 require_relative 'entity/validation'
 require_relative 'entity/types'
-require_relative 'entity/associations'
 
 module El
   # Represents a domain entity that will be modeled. Provides dynamic checks and
@@ -18,7 +17,6 @@ module El
     extend Forwardable
     extend Validation
     extend Types
-    extend Associations
 
     class << self
       def has(name, type = Object, **options, &block)
@@ -105,10 +103,18 @@ module El
         @attributes.key?(name)
       end
 
-      def [](init_value)
-        ensure!(init_value)
+      def ensure!(value)
+        case value
+        when self
+          value
+        when Hash
+          new(value)
+        else
+          raise TypeError, "#{value.inspect}:#{value.class} cannot be coerced into #{self}"
+        end
       end
-      alias call []
+      alias call ensure!
+      alias [] ensure!
 
       def to_proc
         ->(attributes) { call(attributes) }
