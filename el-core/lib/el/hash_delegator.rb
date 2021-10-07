@@ -4,7 +4,33 @@ require 'set'
 require_relative 'core_ext/hash'
 
 module El
-  # Provides delegation and basic validation for Hashes
+  # Thread-safe immutable objects that provide delegation and basic validation to hashes.
+  #
+  # @example
+  #   class Person < HashDelegator
+  #     required :first_name, :last_name
+  #     transform_keys(&:to_sym)
+  #
+  #     def name
+  #       "#{first_name} #{last_name}"
+  #     end
+  #   end
+  #
+  #   person = Person.new(first_name: "Mary", last_name: "Lamb", age: 32)
+  #   person.age # => 32
+  #   person.name # => "Mary Lamb"
+  #
+  #   # it supports all non-mutating methods of Hash
+  #   person.merge!(favorite_food: "Thai") # => NoMethodError
+  #   person.merge(favorite_food: "Thai") # => #<Person { first_name: "Mary", last_name: "Lamb", age: 32 }>
+  #
+  #   # respects inheritance
+  #   class Employee < Person
+  #     required :employee_id
+  #   end
+  #
+  #   Employee.new(age: 32, employee_id: 1234) # => Error, first_name attribute is required
+  #   Employee.new(first_name: "John", last_name: "Smith", age: 23, employee_id: 3456) # => #<Employee ...>
   class HashDelegator
     class << self
       # Return required attributes or nil
