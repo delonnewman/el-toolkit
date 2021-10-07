@@ -11,9 +11,7 @@ module El
         return @repository_class if @repository_class
 
         class_name = repository_class_name
-        @repository_class = const_get(class_name) if const_defined?(
-                                                       class_name
-                                                     )
+        @repository_class = const_get(class_name) if const_defined?(class_name)
         @repository_class || Repository
       end
 
@@ -51,47 +49,16 @@ module El
       #
       #   Product.repository # returns an instance of ProductRepository
       #
-      # @example
-      #   class ProductRepo < Repository
-      #     def random
-      #       to_a.sample
-      #     end
-      #   end
-      #
-      #   class Product < Entity
-      #     repository class: ProductRepo
-      #   end
-      #
-      #   Product.repository # returns an instance of ProductRepo
-      #
-      # @example
-      #   class Product < Entity
-      #     repository class_name: 'ProductRepo'
-      #   end
-      #
-      #   Product.repository # returns and instance of ProductRepo
-      #
-      # @param options [Hash]
-      # @option class_name [String] the name of a user defined subclass of Repository
-      # @option class [Class] a user defined subclass of Repository
       # @param block [Proc] a class body for an anonymous Repository subclass
       #
       # @return [Repository]
-      def repository(**options, &block)
-        if (klass = options[:class])
-          repository_class(klass)
-        elsif (class_name = options[:class_name])
-          repository_class_name(class_name)
-        elsif block
+      def repository(dataset:, &block)
+        if block
           repository_class Class.new(Repository)
           repository_class.class_eval(&block)
         end
 
-        @repository ||=
-          repository_class.new(
-            Drn::Mentoring.app.db[repository_table_name.to_sym],
-            self
-          )
+        @repository ||= repository_class.new(self, dataset)
       end
     end
   end

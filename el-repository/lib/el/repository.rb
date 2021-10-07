@@ -1,10 +1,13 @@
 # frozen_string_literal: true
 
+require 'el/base'
 require 'el/constants'
+
+require_relative 'sql_utils'
 
 module El
   # Represents the storage and retrival of a given entity class.
-  class Repository
+  class Repository < Base
     include Enumerable
 
     class << self
@@ -17,17 +20,19 @@ module El
       end
     end
 
-    attr_reader :entity_class, :dataset, :fields, :db, :component_attributes
+    attr_assign_once :logger
+    attr_reader :dataset, :fields, :db, :logger, :component_attributes
 
-    def initialize(dataset, entity_class)
+    def initialize(entity_class, dataset, logger: nil)
       @entity_class = entity_class
       @db = dataset.db
+      @logger = logger
 
       @component_attributes = @entity_class.component_attributes
 
       @fields = entity_class.attributes
-                  .reject { |a| entity_class.exclude_for_storage.include?(a.name) }
-                  .map { |a| Sequel[table_name][a.name] }
+                            .reject { |a| entity_class.exclude_for_storage.include?(a.name) }
+                            .map { |a| Sequel[table_name][a.name] }
 
       @dataset = dataset
       @simple_dataset = dataset
@@ -37,7 +42,7 @@ module El
         @fields += data.flat_map { |x| x[:fields] }
 
         @dataset = data.reduce(@dataset) { |ds, data| ds.join(data[:table], id: data[:ref]) }
-                     .select(*fields)
+                       .select(*fields)
       end
 
       @fields.freeze
@@ -137,16 +142,6 @@ module El
 
     def build_entity(hash)
       SqlUtils.build_entity(entity_class, hash)
-    end
-
-    private
-
-    # TODO: remove
-    # delegate logger and db to Drn::Mentoring.app
-    %i[logger db].each do |method|
-      define_method method do
-        Drn::Mentoring.app.send(method)
-      end
     end
   end
 end

@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
-require_relative "lib/el/model/version"
+require_relative "lib/el/repository/version"
 
 Gem::Specification.new do |spec|
-  spec.name          = "el-model"
+  spec.name          = "el-repository"
   spec.version       = El::Model::VERSION
   spec.authors       = ["Delon Newman"]
   spec.email         = ["contact@delonnewman.name"]
 
-  spec.summary       = "Entities and Repositories"
+  spec.summary       = "An implementation of the Repository pattern built on Sequel and el-entity"
   spec.description   = spec.summary
   spec.homepage      = "https://github.com/delonnewman/el-toolkit/el-model"
   spec.license       = "MIT"
