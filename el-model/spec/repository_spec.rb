@@ -1,11 +1,11 @@
 require 'spec_helper'
-include Drn::Framework
+require 'el/repository'
 
-class Ordered < Repository
+class Ordered < El::Repository
   order_by :sort_order
 end
 
-RSpec.describe Repository do
+RSpec.describe El::Repository do
   let(:db) { Drn::Mentoring.app.db }
 
   describe '.order_by' do

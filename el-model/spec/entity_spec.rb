@@ -1,18 +1,18 @@
 require 'spec_helper'
-include Drn::Framework
+require 'el/entity'
 
-class EntityBasic < Entity
+class EntityBasic < El::Entity
 end
 
-class EntitySingle < Entity
+class EntitySingle < El::Entity
   has :name
 end
 
-class EntityTyped < Entity
+class EntityTyped < El::Entity
   has :number, Integer
 end
 
-RSpec.describe Entity do
+RSpec.describe El::Entity do
   describe '.valid?' do
     it 'should return false if given an empty value' do
       expect(EntityBasic.valid?({})).to be false

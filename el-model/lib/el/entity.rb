@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require 'forwardable'
+require 'el/hash_delegator'
+
 module El
   require_relative 'entity/attribute'
   require_relative 'entity/associations'
