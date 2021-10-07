@@ -1,27 +1,24 @@
 # frozen_string_literal: true
 
 require 'forwardable'
+require 'el/constants'
 require 'el/hash_delegator'
 
-module El
-  require_relative 'entity/attribute'
-  require_relative 'entity/associations'
-  require_relative 'entity/repositories'
-  require_relative 'entity/validation'
-  require_relative 'entity/types'
+require_relative 'entity/attribute'
+require_relative 'entity/validation'
+require_relative 'entity/types'
+require_relative 'entity/associations'
 
+module El
   # Represents a domain entity that will be modeled. Provides dynamic checks and
   # meta objects for relfection which is used to drive productivity and inspection tools.
   class Entity < HashDelegator
     transform_keys(&:to_sym)
 
-    extend Core
-    include Core
     extend Forwardable
-    extend Associations
-    extend Repositories
     extend Validation
     extend Types
+    extend Associations
 
     class << self
       def has(name, type = Object, **options, &block)

@@ -1,8 +1,6 @@
 source 'https://rubygems.org'
 
 gem 'el-core', path: '../el-core'
-gem 'el-db', path: '../el-db'
-gem 'el-entity', path: '../el-entity'
 
 group :development, :test do
   gem 'rspec'

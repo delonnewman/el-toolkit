@@ -28,20 +28,21 @@ module El
             a << attr.fetch(:message) { "#{name} is not valid" }
           end
 
-          unique = attr[:unique]
+          # TODO: Will need to add this back in el-repository
+          # unique = attr[:unique]
 
-          repo =
-            if unique.is_a?(Class) && unique < Entity
-              unique.repository
-            elsif unique.is_a?(Repository)
-              unique
-            else
-              repository
-            end
+          # repo =
+          #   if unique.is_a?(Class) && unique < Entity
+          #     unique.repository
+          #   elsif unique.is_a?(Repository)
+          #     unique
+          #   else
+          #     repository
+          #   end
 
-          if unique && repo.find_by(attr.name => value)
-            a << attr.fetch(:message) { "#{name} is not unique" }
-          end
+          # if unique && repo.find_by(attr.name => value)
+          #   a << attr.fetch(:message) { "#{name} is not unique" }
+          # end
 
           a.empty? ? errors : errors.merge!(key => a)
         end
