@@ -1,0 +1,29 @@
+GIT
+  remote: https://github.com/delonnewman/rack-routable.git
+  revision: e429dab524f932182b0c31b6c4e841780af8f4ca
+  specs:
+    rack-routable (0.1.0)
+      invokable
+      rack
+
+PATH
+  remote: ../el-core
+  specs:
+    el-core (0.1.0)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    invokable (1.0.0)
+    rack (2.2.3)
+
+PLATFORMS
+  x86_64-darwin-20
+
+DEPENDENCIES
+  el-core!
+  rack
+  rack-routable!
+
+BUNDLED WITH
+   2.2.16
