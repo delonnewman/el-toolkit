@@ -59,18 +59,3 @@ module El
 
   Null = NullClass.instance
 end
-
-class Object
-  def if_null(&_)
-    self
-  end
-
-  def not_null(&block)
-    block.call(self)
-    self
-  end
-
-  def null?
-    false
-  end
-end

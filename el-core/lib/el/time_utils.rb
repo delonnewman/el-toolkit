@@ -22,9 +22,10 @@ module El
 
     Duration::UNITS.each_key do |unit|
       module_eval do
-        module_function define_method unit do |magnitude|
+        define_method unit do |magnitude|
           Duration[magnitude, unit]
         end
+        module_function unit
       end
     end
   end

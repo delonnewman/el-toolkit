@@ -280,7 +280,7 @@ module El
 
     # If the method is a key of the internal hash return it's value.
     # If the internal hash responds to the method forward the method
-    # to the hash. If the method is 'closed' retrun a new HashDelegator
+    # to the hash. If the method is 'closed' return a new HashDelegator
     # otherwise return the raw result. If none of these conditions hold
     # call the superclass' method_missing.
     #

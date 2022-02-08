@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative "duration"
+
 module El
   # Represent a rate with magnitude and unit
   class Rate
@@ -26,6 +28,10 @@ module El
 
     def convert(unit)
       Rate[magnitude, unit]
+    end
+
+    def for(magnitude, unit, tolerance: 0.0)
+      self * Duration.new(magnitude, unit, tolerance: tolerance)
     end
 
     def *(other)
