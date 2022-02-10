@@ -20,6 +20,7 @@ module El
           return routable.instance_exec(routable.request, &action)
         end
 
+        return routable.instance_exec(&action) if action.is_a?(Proc)
         return action.call if action.respond_to?(:arity) && action.arity.zero?
 
         action.call(routable.request)
