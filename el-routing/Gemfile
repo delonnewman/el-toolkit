@@ -3,3 +3,4 @@ source "https://rubygems.org"
 gem 'el-core', path: "../el-core"
 gem 'rack'
 gem 'rspec'
+gem 'rubocop-rspec'
