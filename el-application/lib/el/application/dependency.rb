@@ -43,7 +43,7 @@ module El
 
       module InstanceMethods
         def app
-          raise "An `app` method must defined for Dependency classes"
+          raise "An `app` method must be defined for Dependency classes"
         end
       end
     end

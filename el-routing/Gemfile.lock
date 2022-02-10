@@ -1,0 +1,19 @@
+PATH
+  remote: ../el-core
+  specs:
+    el-core (0.1.0)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    rack (2.2.3)
+
+PLATFORMS
+  x86_64-darwin-20
+
+DEPENDENCIES
+  el-core!
+  rack
+
+BUNDLED WITH
+   2.2.16
