@@ -10,18 +10,19 @@ module El
       This module attempts to generalize the notion of a first class function or Procs as they are often called
       in Ruby. It enables any class and it's objects to be treated as first-class functions.
 
-      @example
-        class TwitterPoster
-          include El::Callable
+      ```ruby
+      class TwitterPoster
+        include El::Callable
 
-          def call(user)
-            # do the dirt
-            ...
-            TwitterStatus.new(user, data)
-          end
+        def call(user)
+          # do the dirt
+          ...
+          TwitterStatus.new(user, data)
         end
+      end
 
-        users.map(&TwitterPoster.new) # => [#<TwitterStatus>, ...]
+      users.map(&TwitterPoster.new) # => [#<TwitterStatus>, ...]
+      ```
     }
 
     requires :call, "When defined will enable this object to behave like a Proc"
