@@ -126,7 +126,7 @@ module El
         params
       end
 
-      NAME_PATTERN = /\A[\w\-]+\z/
+      NAME_PATTERN = /\A[\w\-]+\z/.freeze
       private_constant :NAME_PATTERN
     end
   end
