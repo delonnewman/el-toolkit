@@ -1,5 +1,7 @@
 require "el/routable/routes"
 
+# rubocop:disable Metric/BlockLength
+
 RSpec.describe El::Routable::Routes do
   subject(:routes) { described_class.new }
 
@@ -10,18 +12,22 @@ RSpec.describe El::Routable::Routes do
       end
 
       it "will match the corresponding path" do
-        match, = routes.match(Rack::MockRequest.env_for("/testing"))
+        route, = routes.match(Rack::MockRequest.env_for("/testing"))
 
-        expect(match).not_to be false
+        expect(route).not_to be_nil
+      end
+
+      it "will return an empty array if it doesn't match" do
+        res = routes.match(Rack::MockRequest.env_for("/wrong-path"))
+
+        expect(res).to be_empty
       end
 
       it "should match simple paths" do
         $test = 1
+        route, = routes.match(Rack::MockRequest.env_for("/testing"))
 
-        match, = routes.match(Rack::MockRequest.env_for("/testing"))
-        match.action.call
-
-        expect($test).to eq 3
+        expect { route.action.call }.to change { $test }.from(1).to(3)
       end
     end
 
@@ -32,22 +38,20 @@ RSpec.describe El::Routable::Routes do
               .add!(:get, "/user/:id/packages/:package_id", -> { $test = 6 })
       end
 
-      before :all do
+      before :each do
         $test = 1
       end
 
       it "will match a path with a single variable" do
-        match, = routes.match(Rack::MockRequest.env_for("/user/1"))
-        match.action.call
+        route, = routes.match(Rack::MockRequest.env_for("/user/1"))
 
-        expect($test).to eq 4
+        expect { route.action.call }.to change { $test }.from(1).to(4)
       end
 
       it "will match a path that has additional content after the variable" do
-        match, = routes.match(Rack::MockRequest.env_for("/user/1/settings"))
-        match.action.call
+        route, = routes.match(Rack::MockRequest.env_for("/user/1/settings"))
 
-        expect($test).to eq 5
+        expect { route.action.call }.to change { $test }.from(1).to(5)
       end
 
       it "will return the variables in the params hash" do
@@ -57,10 +61,9 @@ RSpec.describe El::Routable::Routes do
       end
 
       it "will match a path that has more than on variable" do
-        match, = routes.match(Rack::MockRequest.env_for("/user/1/packages/abad564"))
-        match.action.call
+        route, = routes.match(Rack::MockRequest.env_for("/user/1/packages/abad564"))
 
-        expect($test).to eq 6
+        expect { route.action.call }.to change { $test }.from(1).to(6)
       end
     end
   end

@@ -64,13 +64,15 @@ module El
         path   = path.start_with?("/") ? path[1, path.size] : path
         parts  = path.split(%r{/+})
 
-        return unless (routes = @table[method])
+        return EMPTY_ARRAY unless (routes = @table[method])
 
         routes.each do |route|
           if (params = match_path(parts, route.parsed_path))
             return [route, params]
           end
         end
+
+        EMPTY_ARRAY
       end
 
       private
