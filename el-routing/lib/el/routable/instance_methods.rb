@@ -23,12 +23,12 @@ module El
       ].freeze
 
       def initialize(env)
-        @env     = env
-        @request = Request.new(env)
+        @env = env
+        @route, @match_params = self.class.routes.match(env)
+      end
 
-        @route, params = self.class.routes.match(env)
-        @params   = @request.params.merge(params) if @route && params
-        @response = Rack::Response.new
+      def response
+        @response ||= Rack::Response.new
       end
 
       # rubocop:disable Metrics/MethodLength
@@ -59,7 +59,9 @@ module El
           end
         end
 
-        @params
+        @params.merge!(@match_params) if @match_params
+
+        @params.freeze
       end
 
       def content_type
@@ -146,7 +148,7 @@ module El
 
         if res.is_a?(Array) && res.size == 3 && res[0].is_a?(Integer)
           res
-        elsif res.is_a?(Response)
+        elsif res.is_a?(Rack::Response)
           res.finish
         elsif res.is_a?(Hash) && res.key?(:status)
           [res[:status], res.fetch(:headers) { DEFAULT_HEADERS.dup }, res.fetch(:body) { EMPTY_ARRAY }]

@@ -16,8 +16,11 @@ module El
 
       # rubocop:disable Metrics/AbcSize
       def call_action(routable)
-        routable.instance_exec(routable.request, &action) if action.is_a?(Proc) && !action.lambda?
-        action.call if callable.respond_to?(:arity) && callable.arity.zero?
+        if action.is_a?(Proc) && (!action.lambda? || action.arity.positive?)
+          return routable.instance_exec(routable.request, &action)
+        end
+
+        return action.call if action.respond_to?(:arity) && action.arity.zero?
 
         action.call(routable.request)
       end

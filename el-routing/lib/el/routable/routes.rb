@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Rack
+module El
   module Routable
     # A routing table--collects routes, and matches them against a given Rack environment.
     #

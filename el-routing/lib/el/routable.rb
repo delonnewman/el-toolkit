@@ -5,6 +5,14 @@ require "cgi"
 require "rack"
 require "stringio"
 
+require "el/constants"
+
+require_relative "routable/route"
+require_relative "routable/routes"
+require_relative "routable/instance_methods"
+require_relative "routable/class_methods"
+require_relative "routable/templates"
+
 module El
   # Provides a light-weight DSL for routing over Rack, and instances implement
   # the Rack application interface.
@@ -58,17 +66,6 @@ module El
   #     mount '/admin', AdminApp
   #   end
   module Routable
-    require_relative "routable/route"
-    require_relative "routable/routes"
-    require_relative "routable/instance_methods"
-    require_relative "routable/class_methods"
-    require_relative "routable/templates"
-
-    EMPTY_ARRAY = [].freeze
-    EMPTY_HASH  = {}.freeze
-
-    private_constant :EMPTY_HASH, :EMPTY_ARRAY
-
     def self.included(base)
       base.extend(ClassMethods)
       base.include(InstanceMethods)

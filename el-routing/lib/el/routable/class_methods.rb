@@ -66,7 +66,7 @@ module El
       #
       # @return [Routes]
       def routes
-        @routes ||= Routable::Routes.new
+        @routes ||= Routes.new
       end
 
       # A "macro" method for defining a route for the application.
