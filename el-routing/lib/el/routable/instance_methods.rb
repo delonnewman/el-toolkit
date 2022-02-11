@@ -5,9 +5,8 @@ require "el/http_utils"
 module El
   module Routable
     # Instance methods for Rack::Routable module
-    # rubocop:disable Metric/ModuleLength
     module InstanceMethods
-      attr_reader :env
+      attr_reader :env, :route, :request
 
       # The default headers for responses
       DEFAULT_HEADERS = {
@@ -24,63 +23,17 @@ module El
 
       def initialize(env)
         @env = env
-        @route, @match_params = self.class.routes.match(env)
-      end
-
-      def response
-        @response ||= Rack::Response.new
-      end
-
-      # rubocop:disable Metrics/MethodLength
-      def request
-        return @request if @request
-
-        @request = {
-          method: @env["REQUEST_METHOD"].downcase.to_sym,
-          path: @env["PATH_INFO"],
-          params: params,
-          content_type: content_type,
-          body: @env["rack.input"],
-          script_name: @env["SCRIPT_NAME"],
-          server_name: @env["SERVER_NAME"],
-          server_port: @env["SERVER_PORT"]
-        }.freeze
-      end
-
-      def params
-        return @params if @params
-
-        @params = HTTPUtils.parse_form_encoded_data(@env["QUERY_STRING"])
-
-        if @env["REQUEST_METHOD"] == "POST" && FORM_DATA_MEDIA_TYPES.include?(media_type)
-          @env["rack.input"].tap do |body|
-            @params.merge!(HTTPUtils.parse_form_encoded_data(body.read))
-            body.rewind
-          end
-        end
-
-        @params.merge!(@match_params) if @match_params
-
-        @params.freeze
-      end
-
-      def content_type
-        @env["CONTENT_TYPE"]
-      end
-
-      def media_params
-        Rack::MediaType.params(content_type)
-      end
-
-      def media_type
-        Rack::MediaType.type(content_type)
+        @route, match_params = self.class.routes.match(env)
+        @request = Request.new(env, match_params)
       end
 
       protected
 
       # These methods must be used or overridden by the subclass
 
-      attr_reader :match, :response
+      def response
+        @response ||= Rack::Response.new
+      end
 
       def options
         match[:options] || EMPTY_HASH

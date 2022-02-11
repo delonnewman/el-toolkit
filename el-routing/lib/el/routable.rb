@@ -9,6 +9,7 @@ require "el/constants"
 
 require_relative "routable/route"
 require_relative "routable/routes"
+require_relative "routable/request"
 require_relative "routable/instance_methods"
 require_relative "routable/class_methods"
 require_relative "routable/templates"
