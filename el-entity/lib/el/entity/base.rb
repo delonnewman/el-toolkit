@@ -65,39 +65,22 @@ module El
           Utils.snakecase(name.split("::").last)
         end
 
-        def validate!(entity)
-          attributes.each do |attr|
-            if entity[attr.name].nil? && attr.required? && !attr.default
-              raise TypeError, "#{self}##{attr.name} is required"
-            end
-          end
+        def validate!(entity_data)
+          @validator ||= Validator.new(self)
+          @validator.call(entity_data)
+        end
 
-          entity.each_with_object({}) do |(name, value), h|
-            h[name] = value # pass along extra attributes with no checks
-            next unless attribute?(name)
+        def normalizer
+          @normalizer ||= DataNomalizer.new(self)
+        end
 
-            attribute = attribute(name)
-            next if (attribute.optional? && value.nil?) || !attribute.default.nil?
-
-            unless attribute.valid_value?(value)
-              raise TypeError,
-                    "For #{self}##{attribute.name} #{value.inspect}:#{value.class} is not a valid #{attribute[:type]}"
-            end
-          end
+        def dehydrator
+          @dehydrator ||= DataDehydrator.new(self)
         end
       end
 
       def initialize(attributes = EMPTY_HASH)
-        record = self.class.validate!(attributes)
-
-        self.class.attributes.each do |attr|
-          value = record[attr.name]
-          if value.nil? && attr.default && attr.required?
-            record[attr.name] = attr.default.is_a?(Proc) ? instance_exec(&attr.default) : default
-          end
-
-          record[attr.name] = attr.value_class[value] if attr.entity? && !value.nil?
-        end
+        record = self.class.normalizer.call(self.class.validate!(attributes), self)
 
         super(record.freeze)
       end
@@ -107,25 +90,12 @@ module El
 
         default = self.class.attribute(name).default
 
+        # FIXME: Remove all muation of @hash
         @hash[name] ||= default.is_a?(Proc) ? instance_exec(&default) : default
       end
 
       def to_h
-        data = super
-
-        attrs = self.class.attributes
-        attrs.reject { |a| a.default.nil? }.each { |attr| data[attr.name] = value_for(attr.name) }
-
-        data = data.except(*self.class.exclude_for_storage)
-        attrs
-          .select(&:optional?)
-          .each { |attr| data.delete(attr.name) if value_for(attr.name).nil? }
-
-        if (comps = self.class.attributes.select(&:component?)).empty?
-          data
-        else
-          comps.reduce(data) { |h, comp| h.merge!(comp.reference_key => send(comp.name).id) }
-        end
+        self.class.dehydrator.call(super(), self)
       end
     end
   end
