@@ -2,13 +2,46 @@
 
 module El
   module Routable
-    class Request < Hash
-      def initialize(env, match_params)
-        super()
+    class Request
+      def initialize(env)
+        @env = env
+      end
 
-        read_env!(env, match_params)
+      def request_method
+        @env["REQUEST_METHOD"].downcase.to_sym
+      end
 
-        freeze
+      def path
+        @env["PATH_INFO"]
+      end
+
+      def content_type
+        @env["CONTENT_TYPE"]
+      end
+
+      def body
+        @env["rack.input"]
+      end
+
+      def script_name
+        @env["SCRIPT_NAME"]
+      end
+
+      def server_name
+        @env["SERVER_NAME"]
+      end
+
+      def server_port
+        @env["SERVER_PORT"]
+      end
+
+      def [](key)
+        key = key.name.upcase if key.is_a?(Symbol)
+        @env[key]
+      end
+
+      def to_h
+        @env.dup.freeze
       end
 
       def media_params
@@ -19,38 +52,21 @@ module El
         Rack::MediaType.type(content_type)
       end
 
-      %i[method path params content_type body script_name server_name server_port].each do |method|
-        define_method method do
-          fetch(method, nil)
-        end
+      def query_params
+        @query_params ||= HTTPUtils.parse_form_encoded_data(@env["QUERY_STRING"])
       end
 
-      private
+      def body_params
+        return @body_params if @body_params
 
-      def read_env!(env, match_params)
-        store(:method, env["REQUEST_METHOD"].downcase.to_sym)
-        store(:path, env["PATH_INFO"])
-        store(:params, parse_params(env, match_params))
-        store(:content_type, env["CONTENT_TYPE"])
-        store(:body, env["rack.input"])
-        store(:script_name, env["SCRIPT_NAME"])
-        store(:server_name, env["SERVER_NAME"])
-        store(:server_port, env["SERVER_PORT"])
-      end
+        return EMPTY_HASH unless env["REQUEST_METHOD"] == "POST" && FORM_DATA_MEDIA_TYPES.include?(media_type)
 
-      def parse_params(env, match_params)
-        params = HTTPUtils.parse_form_encoded_data(@env["QUERY_STRING"])
-
-        if env["REQUEST_METHOD"] == "POST" && FORM_DATA_MEDIA_TYPES.include?(media_type)
-          env["rack.input"].tap do |body|
-            params.merge!(HTTPUtils.parse_form_encoded_data(body.read))
-            body.rewind
-          end
+        body.tap do |body|
+          @body_params = HTTPUtils.parse_form_encoded_data(body.read)
+          body.rewind
         end
 
-        params.merge!(match_params) if @match_params
-
-        params.freeze
+        @body_params
       end
     end
   end

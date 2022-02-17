@@ -4,9 +4,9 @@ require "el/http_utils"
 
 module El
   module Routable
-    # Instance methods for Rack::Routable module
+    # Instance methods for El::Routable module
     module InstanceMethods
-      attr_reader :env, :route, :request
+      attr_reader :env, :route, :route_params, :request
 
       # The default headers for responses
       DEFAULT_HEADERS = {
@@ -22,9 +22,20 @@ module El
       ].freeze
 
       def initialize(env)
-        @env = env
-        @route, match_params = self.class.routes.match(env)
+        @route, @route_params = self.class.routes.match(env)
         @request = Request.new(env, match_params)
+      end
+
+      def body_params
+        request.body_params
+      end
+
+      def query_params
+        request.query_params
+      end
+
+      def params
+        @params ||= route_params.merge(body_params, query_params)
       end
 
       protected
