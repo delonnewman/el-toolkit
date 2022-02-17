@@ -1,14 +1,12 @@
 module El
-  class Entity < HashDelegator
+  module Entity
     # Higher-Order Types
-    ClassType = ->(klass) { ->(v) { v.is_a?(klass) } }
-    RegExpType = ->(regex) { ->(v) { v.is_a?(String) && !!(regex =~ v) } }
+    ClassType  = ->(klass) { ->(v) { v.is_a?(klass) } }
+    RegExpType = ->(regex) { ->(v) { v.is_a?(String) && regex =~ v } }
 
     DEFAULT_TYPE = ClassType[Object]
-    UUID_REGEXP = /\A[0-9A-Fa-f]{8,8}\-[0-9A-Fa-f]{4,4}\-[0-9A-Fa-f]{4,4}\-[0-9A-Fa-f]{4,4}\-[0-9A-Fa-f]{12,12}\z/
-                    .freeze
-    EMAIL_REGEXP = /\A[a-zA-Z0-9!#\$%&'*+\/=?\^_`{|}~\-]+(?:\.[a-zA-Z0-9!#\$%&'\*+\/=?\^_`{|}~\-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9\-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9\-]*[a-zA-Z0-9])?$\z/
-                     .freeze
+    UUID_REGEXP  = /\A[0-9A-Fa-f]{8,8}-[0-9A-Fa-f]{4,4}-[0-9A-Fa-f]{4,4}-[0-9A-Fa-f]{4,4}-[0-9A-Fa-f]{12,12}\z/.freeze
+    EMAIL_REGEXP = %r{\A[a-zA-Z0-9!#$%&'*+/=?\^_`{|}~\-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?\^_`{|}~\-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9\-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9\-]*[a-zA-Z0-9])?$\z}.freeze
 
     SPECIAL_TYPES = {
       boolean: ->(v) { v.is_a?(FalseClass) || v.is_a?(TrueClass) },
@@ -18,12 +16,18 @@ module El
       email: RegExpType[EMAIL_REGEXP],
       # TODO: add more checks here
       password: ->(v) { v.is_a?(String) && v.length > 10 || v.is_a?(BCrypt::Password) }
-    }
+    }.freeze
 
     # Represents an attribute of a domain entity. Drives dynamic checks and provides
     # meta objects for reflection.
     class Attribute < HashDelegator
       required :entity, :name, :required, :type
+
+      def define!
+        AttributeBuilder.new(self).call
+
+        self
+      end
 
       def entity_class
         self[:entity]
@@ -130,7 +134,7 @@ module El
         self[:mutable] == true
       end
 
-      # NOTE: reference mapping should be reviewed
+      # FIXME: reference mapping should be reviewed
       def resolver
         value_class&.reference_mapping
       end
