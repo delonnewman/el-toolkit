@@ -1,5 +1,7 @@
 source 'https://rubygems.org'
 
+gemspec
+
 gem 'el-core', path: '../el-core'
 
 group :development, :test do
