@@ -75,20 +75,6 @@ module El
         self[:default]
       end
 
-      def join_table_name
-        return nil unless many?
-        return self[:join_table] if self[:join_table]
-
-        Utils.join_table_name(entity_class.canonical_name, name).to_sym
-      end
-
-      def join_table
-        name = join_table_name
-        return nil unless name
-
-        Drn::Mentoring.app.db[name]
-      end
-
       def type
         t = self[:type]
 
