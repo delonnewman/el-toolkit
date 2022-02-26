@@ -19,11 +19,11 @@ module El
         @deps[name]
       end
 
-      def Package()
+      def Package
         @package_class ||= Application::Package.create(self)
       end
 
-      def Router()
+      def Router
         @router_class ||= Application::Router.create(self)
       end
 
@@ -47,7 +47,6 @@ module El
       @deps[dep_name]
     end
 
-    def call(env)
-    end
+    def call(env); end
   end
 end

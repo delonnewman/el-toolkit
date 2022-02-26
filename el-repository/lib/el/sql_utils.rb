@@ -47,7 +47,7 @@ module El
 
     def run(query, *args, tag: nil, &block)
       tag = tag.nil? ? 'SQL' : "SQL #{tag}"
-      app = Drn::Mentoring.app
+      app = Mentoring.app
 
       app.logger.info "#{tag}: #{query.gsub(/\s+/, ' ')}, args: #{args.inspect}"
 

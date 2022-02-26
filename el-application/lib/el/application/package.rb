@@ -12,9 +12,8 @@ module El
 
         app_class.add_dependency!(name, pkg)
 
-        pkg = self
         app_class.define_method name do
-          @packages[name] ||= pkg.new(self)
+          self[name]
         end
       end
 
