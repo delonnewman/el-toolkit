@@ -20,4 +20,12 @@ class String
   def dasherize
     StringUtils.dasherize(self)
   end
+
+  def squish!
+    StringUtils.squish!(self)
+  end
+
+  def squish
+    StringUtils.squish(self)
+  end
 end

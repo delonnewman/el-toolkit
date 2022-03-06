@@ -50,9 +50,9 @@ module El
       end
 
       def validate_unit!(unit, units = UNITS)
-        unless valid_unit?(unit, units)
-          raise "Invalid unit #{unit.inspect}, expected one of the following: #{units.keys.map(&:inspect).join(', ')}"
-        end
+        return if valid_unit?(unit, units)
+
+        raise "Invalid unit #{unit.inspect}, expected one of the following: #{units.keys.map(&:inspect).join(", ")}"
       end
 
       def from_seconds(seconds, unit)
@@ -127,8 +127,6 @@ module El
     def *(other)
       case other
       when Duration
-        return Duration[magnitude * other.magnitude, unit] if unit == other.unit
-
         Duration[magnitude * other.convert(unit).magnitude, unit]
       else
         Duration.from_seconds(value * other, unit)
@@ -211,7 +209,7 @@ module El
       u = magnitude == 1 ? singular_unit : unit
       t = tolerance.zero? ? nil : '~'
 
-      "#{t}#{magnitude.to_f.round(1)} #{u.name.tr('_', ' ')}"
+      "#{t}#{magnitude.to_f.round(1)} #{u.name.tr("_", " ")}"
     end
   end
 end

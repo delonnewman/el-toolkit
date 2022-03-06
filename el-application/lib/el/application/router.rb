@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require "rack"
-require "rack/routable"
+require 'rack'
+require 'rack/routable'
 
-require_relative "dependency"
+require_relative 'dependency'
 
 module El
   class Application

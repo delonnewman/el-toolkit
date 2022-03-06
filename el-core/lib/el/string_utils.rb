@@ -2,17 +2,17 @@
 
 module El
   # A collection of utilities for working with strings
+  # mostly blantantly stolen from active-support
   module StringUtils
     module_function
 
-    # Blantantly stolen from active-support
     def underscore(string)
       return string unless /[A-Z-]|::/ =~ string
 
-      word = string.to_s.gsub("::", "/")
+      word = string.to_s.gsub('::', '/')
       word.gsub!(/([A-Z\d]+)([A-Z][a-z])/, '\1_\2')
       word.gsub!(/([a-z\d])([A-Z])/, '\1_\2')
-      word.tr!("-", "_")
+      word.tr!('-', '_')
       word.downcase!
       word
     end
@@ -21,11 +21,11 @@ module El
       string = string.name if string.is_a?(Symbol)
       return string unless /[\W_]/ =~ string
 
-      string.to_s.gsub(/[\W_]/, " ")
+      string.to_s.gsub(/[\W_]/, ' ')
     end
 
     def titlecase(string)
-      humanize(string).split(" ").map!(&:capitalize).join(" ")
+      humanize(string).split(' ').map!(&:capitalize).join(' ')
     end
 
     # rubocop:disable Metrics/MethodLength
@@ -40,12 +40,22 @@ module El
                  end
                end
       string.gsub!(%r{(?:_|(/))([a-z\d]*)}i) { Regexp.last_match(2).capitalize.to_s }
-      string.gsub!("/", "::")
+      string.gsub!('/', '::')
       string
     end
 
-    def dasherize(string)
+    def dasherize(underscored_word)
+      underscored_word.tr('_', '-')
+    end
+
+    def squish!(string)
+      string.gsub!(/[[:space:]]+/, ' ')
+      string.strip!
       string
+    end
+
+    def squish(string)
+      squish!(string.dup)
     end
   end
 end

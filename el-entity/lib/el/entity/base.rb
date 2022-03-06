@@ -44,25 +44,17 @@ module El
           @attributes.key?(name)
         end
 
-        def ensure!(value)
-          case value
-          when self
-            value
-          when Hash
-            new(value)
-          else
-            raise TypeError, "#{value.inspect}:#{value.class} cannot be coerced into #{self}"
-          end
+        def [](attributes)
+          new(attributes)
         end
-        alias call ensure!
-        alias [] ensure!
+        alias call []
 
         def to_proc
           ->(attributes) { call(attributes) }
         end
 
         def canonical_name
-          Utils.snakecase(name.split("::").last)
+          Utils.snakecase(name.split('::').last)
         end
 
         def validate!(entity_data)
@@ -85,17 +77,26 @@ module El
         super(record.freeze)
       end
 
-      def value_for(name)
-        return self[name] if self[name]
+      def [](name)
+        return super(name) if super(name)
 
         default = self.class.attribute(name).default
 
         # FIXME: Remove all muation of @hash
         @hash[name] ||= default.is_a?(Proc) ? instance_exec(&default) : default
       end
+      alias value_for []
+
+      def to_proc
+        ->(name) { value_for(name) }
+      end
 
       def to_h
         self.class.dehydrator.call(super(), self)
+      end
+
+      def ===(other)
+        other.is_a?(self.class) && other.id == id
       end
     end
   end

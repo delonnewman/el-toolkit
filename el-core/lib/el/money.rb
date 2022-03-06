@@ -28,7 +28,7 @@ module El
     def *(other)
       Money[other * magnitude, currency]
     end
-    
+
     def +(other)
       Money[other + magnitude, currency]
     end
