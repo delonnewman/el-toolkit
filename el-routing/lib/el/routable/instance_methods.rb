@@ -15,10 +15,8 @@ module El
 
       protected
 
-      # These methods must be used or overridden by the subclass
-
       def options
-        match[:options] || EMPTY_HASH
+        @route&.options || EMPTY_HASH
       end
 
       def escape_html(*args)
@@ -30,32 +28,8 @@ module El
         ENV.fetch('RACK_ENV', :development).to_sym
       end
 
-      # rubocop:disable Metrics/AbcSize
-      # rubocop:disable Metrics/MethodLength
       def not_found
-        io = StringIO.new
-        io.puts '<h1>Not Found</h1>'
-        io.puts "#{request[:method]} - #{request[:path]}"
-
-        unless rack_env == :production
-          io.puts '<div class="routes"><h2>Valid Routes</h2>'
-          io.puts '<table>'
-          io.puts '<thead><tr><th>Method</th><th>Path</th><th>Router</th></thead>'
-          io.puts '<tbody>'
-          routes.each do |route|
-            io.puts "<tr><td>#{route.method}</td><td>#{h route.path}</td></tr>"
-          end
-          io.puts '</tbody></table></div>'
-
-          io.puts '<div class="environment"><h2>Environment</h2>'
-          io.puts '<table><tbody>'
-          request.each do |key, value|
-            io.puts "<tr><th>#{h key}</th><td><pre>#{h value.pretty_inspect}</pre></td>"
-          end
-          io.puts '</tbody></table></div>'
-        end
-
-        [404, DEFAULT_HEADERS.dup, [NOT_FOUND_TMPL.sub('%BODY%', io.string)]]
+        [404, DEFAULT_HEADERS.dup, StringIO.new('Not Found')]
       end
 
       def error(_)
@@ -97,6 +71,8 @@ module El
       # TODO: add error and not_found to the DSL
       # rubocop:disable Metrics/CyclomaticComplexity
       # rubocop:disable Metrics/PerceivedComplexity
+      # rubocop:disable Metrics/MethodLength
+      # rubocop:disable Metrics/AbcSize
       def call(env)
         @route, @route_params = routes.match(env)
         @request = Request.new(env)
