@@ -6,7 +6,7 @@
 # rubocop:disable Metrics/PerceivedComplexity
 # rubocop:disable Metrics/BlockLength
 
-require "uri"
+require 'uri'
 
 module El
   # Utilities for working with HTTP data
@@ -49,9 +49,9 @@ module El
       buffer = []
       params = root
       tokens.each_with_index do |ch, i|
-        if ch == "[" && tokens[i + 1] == "]" # start reading collection
+        if ch == '[' && tokens[i + 1] == ']' # start reading collection
           many_values = true
-        elsif ch == "[" && tokens[i + 1] != "]" # start reading hash
+        elsif ch == '[' && tokens[i + 1] != ']' # start reading hash
           read_hash = true
           unless buffer.empty?
             key_ = symbolize_keys ? buffer.join.to_sym : buffer.join
@@ -59,17 +59,17 @@ module El
             params[key_] ||= {} unless params[key_].is_a?(Hash)
             params = params[key_]
           end
-        elsif ch == "]" && read_hash # complete reading hash
+        elsif ch == ']' && read_hash # complete reading hash
           read_hash = false
           key_ = symbolize_keys ? buffer.join.to_sym : buffer.join
           buffer = []
           if i == tokens.length - 1
             params[key_] = value
-          elsif tokens[i + 1] != "[" || tokens[i + 2] != "]"
+          elsif tokens[i + 1] != '[' || tokens[i + 2] != ']'
             params[key_] ||= {}
             params = params[key_]
           end
-        elsif ch == "]" && many_values # complete reading collection
+        elsif ch == ']' && many_values # complete reading collection
           unless buffer.empty?
             key_ = symbolize_keys ? buffer.join.to_sym : buffer.join
             buffer = []
@@ -79,7 +79,7 @@ module El
 
           params[key_] ||= [] unless params[key_].is_a?(Array)
           params[key_] << value
-        elsif ch == "]"
+        elsif ch == ']'
           raise 'Unexpected "]" expecting key or "["'
         else
           buffer << ch

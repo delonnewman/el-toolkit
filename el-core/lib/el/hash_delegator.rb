@@ -46,7 +46,7 @@ module El
       #
       # @param attributes [Array]
       # @return [HashDelegator]
-      def required(*attributes)
+      def requires(*attributes)
         @required_attributes =
           if superclass.respond_to?(:required_attributes) && !superclass.required_attributes.nil?
             superclass.required_attributes + attributes

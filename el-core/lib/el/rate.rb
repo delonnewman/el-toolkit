@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative "duration"
+require_relative 'duration'
 
 module El
   # Represent a rate with magnitude and unit

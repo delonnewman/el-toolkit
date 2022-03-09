@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require "singleton"
-require_relative "constants"
+require 'singleton'
+require_relative 'constants'
 
 module El
   # Like nil except it will answer any message with itself, and a few other differences.
@@ -49,7 +49,7 @@ module El
     end
 
     def inspect
-      "El::Null"
+      'El::Null'
     end
 
     def to_a

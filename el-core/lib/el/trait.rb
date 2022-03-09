@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative "self_describing"
+require_relative 'self_describing'
 
 module El
   # Use a module as a trait
@@ -19,8 +19,7 @@ module El
   #   end
   module Trait
     def requires(method, doc = nil)
-      @required_methods ||= []
-      @required_methods << method
+      required_methods << method
 
       add_method_metadata(method, doc: doc, required: true) if doc
 
@@ -28,7 +27,7 @@ module El
     end
 
     def required_methods
-      @required_methods
+      @required_methods ||= []
     end
 
     def self.extended(base)
