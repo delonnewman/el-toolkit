@@ -21,7 +21,7 @@ module El
       #
       # @return [Routes] this object
       def each_route(&block)
-        routes.each(&block)
+        @routes.each(&block)
         self
       end
       alias each each_route
@@ -38,6 +38,10 @@ module El
         self << Route.new(method, path, options, action, parse_path(path))
       end
 
+      def route_path_methods
+        @route_path_methods ||= []
+      end
+
       # Add a route to the table.
       #
       # @param Route [Route]
@@ -51,6 +55,12 @@ module El
         @table[method] << route
         @routes << route
 
+        define_singleton_method route.path_method_name do |*args|
+          route.route_path(*args)
+        end
+
+        route_path_methods << route.path_method_name.to_sym
+
         self
       end
 
@@ -59,9 +69,9 @@ module El
       # @param env [Hash] a Rack environment
       #
       # @return [[Route, Hash]]
-      def match(env, method = env["REQUEST_METHOD"])
-        path   = env["PATH_INFO"]
-        path   = path.start_with?("/") ? path[1, path.size] : path
+      def match(env, method = env['REQUEST_METHOD'])
+        path   = env['PATH_INFO']
+        path   = path.start_with?('/') ? path[1, path.size] : path
         parts  = path.split(%r{/+})
 
         return EMPTY_ARRAY unless (routes = @table[method])
@@ -79,14 +89,14 @@ module El
 
       # rubocop:disable Metrics/MethodLength
       def parse_path(str)
-        str   = str.start_with?("/") ? str[1, str.size] : str
+        str   = str.start_with?('/') ? str[1, str.size] : str
         names = []
 
         route = str.split(%r{/+}).each_with_index.map do |part, i|
-          if part.start_with?(":")
+          if part.start_with?(':')
             names[i] = part[1, part.size].to_sym
             NAME_PATTERN
-          elsif part.end_with?("*")
+          elsif part.end_with?('*')
             /^#{part[0, part.size - 1]}/i
           else
             part

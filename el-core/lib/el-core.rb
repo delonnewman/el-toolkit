@@ -1,3 +1,3 @@
 # frozen_string_literal: true
 
-require_relatve 'lib/el/core/version'
+require_relative 'el/core/version'

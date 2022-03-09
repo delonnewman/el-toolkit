@@ -27,13 +27,13 @@ module El
       end
 
       def path_method_prefix
-        return "root" if path == "/"
+        return 'root' if path == '/'
 
         parts = []
-        path.split("/").each do |part|
-          parts << part.gsub(/\W+/, "_") unless part.start_with?(":") || part.empty?
+        path.split('/').each do |part|
+          parts << part.gsub(/\W+/, '_') unless part.start_with?(':') || part.empty?
         end
-        parts.join("_")
+        parts.join('_')
       end
 
       def path_method_name

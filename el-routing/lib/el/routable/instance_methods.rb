@@ -13,28 +13,12 @@ module El
         'Content-Type' => 'text/html'
       }.freeze
 
-      # The set of form-data media-types. Requests that do not indicate
-      # one of the media types present in this list will not be eligible
-      # for form-data / param parsing.
-      FORM_DATA_MEDIA_TYPES = [
-        'application/x-www-form-urlencoded',
-        'multipart/form-data'
-      ].freeze
-
       protected
 
       # These methods must be used or overridden by the subclass
 
-      def response
-        @response ||= Rack::Response.new
-      end
-
       def options
         match[:options] || EMPTY_HASH
-      end
-
-      def routes
-        self.class.routes
       end
 
       def escape_html(*args)
@@ -58,14 +42,14 @@ module El
           io.puts '<table>'
           io.puts '<thead><tr><th>Method</th><th>Path</th><th>Router</th></thead>'
           io.puts '<tbody>'
-          self.class.routes.each do |route|
-            io.puts "<tr><td>#{h route.method}</td><td>#{h route.path}</td><td>#{h route.router.to_s}</td></tr>"
+          routes.each do |route|
+            io.puts "<tr><td>#{route.method}</td><td>#{h route.path}</td></tr>"
           end
           io.puts '</tbody></table></div>'
 
           io.puts '<div class="environment"><h2>Environment</h2>'
           io.puts '<table><tbody>'
-          env.each do |key, value|
+          request.each do |key, value|
             io.puts "<tr><th>#{h key}</th><td><pre>#{h value.pretty_inspect}</pre></td>"
           end
           io.puts '</tbody></table></div>'
@@ -90,6 +74,14 @@ module El
 
       public
 
+      def response
+        @response ||= Rack::Response.new
+      end
+
+      def routes
+        self.class.routes
+      end
+
       def body_params
         request&.body_params
       end
@@ -105,9 +97,9 @@ module El
       # TODO: add error and not_found to the DSL
       # rubocop:disable Metrics/CyclomaticComplexity
       # rubocop:disable Metrics/PerceivedComplexity
-      def call
-        @route, @route_params = self.class.routes.match(env)
-        @request = Request.new(env, match_params)
+      def call(env)
+        @route, @route_params = routes.match(env)
+        @request = Request.new(env)
 
         return not_found unless @route
 
@@ -120,7 +112,7 @@ module El
         elsif res.is_a?(Rack::Response)
           res.finish
         elsif res.is_a?(Hash) && res.key?(:status)
-          [res[:status], res.fetch(:headers) { DEFAULT_HEADERS.dup }, res.fetch(:body) { EMPTY_ARRAY }]
+          [res[:status], res.fetch(:headers, DEFAULT_HEADERS.dup), res.fetch(:body, EMPTY_ARRAY)]
         elsif res.respond_to?(:each)
           [200, DEFAULT_HEADERS.dup, res]
         else
