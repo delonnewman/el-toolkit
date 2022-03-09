@@ -1,18 +1,18 @@
 # frozen_string_literal: true
 
-require "set"
-require "cgi"
-require "rack"
-require "stringio"
+require 'set'
+require 'cgi'
+require 'rack'
+require 'stringio'
 
-require "el/constants"
+require 'el/constants'
 
-require_relative "routable/route"
-require_relative "routable/routes"
-require_relative "routable/request"
-require_relative "routable/instance_methods"
-require_relative "routable/class_methods"
-require_relative "routable/templates"
+require_relative 'routable/route'
+require_relative 'routable/routes'
+require_relative 'routable/request'
+require_relative 'routable/instance_methods'
+require_relative 'routable/class_methods'
+require_relative 'routable/templates'
 
 module El
   # Provides a light-weight DSL for routing over Rack, and instances implement

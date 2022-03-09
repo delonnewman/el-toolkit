@@ -8,31 +8,31 @@ module El
       end
 
       def request_method
-        @env["REQUEST_METHOD"].downcase.to_sym
+        @env['REQUEST_METHOD'].downcase.to_sym
       end
 
       def path
-        @env["PATH_INFO"]
+        @env['PATH_INFO']
       end
 
       def content_type
-        @env["CONTENT_TYPE"]
+        @env['CONTENT_TYPE']
       end
 
       def body
-        @env["rack.input"]
+        @env['rack.input']
       end
 
       def script_name
-        @env["SCRIPT_NAME"]
+        @env['SCRIPT_NAME']
       end
 
       def server_name
-        @env["SERVER_NAME"]
+        @env['SERVER_NAME']
       end
 
       def server_port
-        @env["SERVER_PORT"]
+        @env['SERVER_PORT']
       end
 
       def [](key)
@@ -53,13 +53,13 @@ module El
       end
 
       def query_params
-        @query_params ||= HTTPUtils.parse_form_encoded_data(@env["QUERY_STRING"])
+        @query_params ||= HTTPUtils.parse_form_encoded_data(@env['QUERY_STRING'])
       end
 
       def body_params
         return @body_params if @body_params
 
-        return EMPTY_HASH unless env["REQUEST_METHOD"] == "POST" && FORM_DATA_MEDIA_TYPES.include?(media_type)
+        return EMPTY_HASH unless env['REQUEST_METHOD'] == 'POST' && FORM_DATA_MEDIA_TYPES.include?(media_type)
 
         body.tap do |body|
           @body_params = HTTPUtils.parse_form_encoded_data(body.read)

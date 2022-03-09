@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "el/http_utils"
+require 'el/http_utils'
 
 module El
   module Routable
@@ -10,33 +10,16 @@ module El
 
       # The default headers for responses
       DEFAULT_HEADERS = {
-        "Content-Type" => "text/html"
+        'Content-Type' => 'text/html'
       }.freeze
 
       # The set of form-data media-types. Requests that do not indicate
       # one of the media types present in this list will not be eligible
       # for form-data / param parsing.
       FORM_DATA_MEDIA_TYPES = [
-        "application/x-www-form-urlencoded",
-        "multipart/form-data"
+        'application/x-www-form-urlencoded',
+        'multipart/form-data'
       ].freeze
-
-      def initialize(env)
-        @route, @route_params = self.class.routes.match(env)
-        @request = Request.new(env, match_params)
-      end
-
-      def body_params
-        request.body_params
-      end
-
-      def query_params
-        request.query_params
-      end
-
-      def params
-        @params ||= route_params.merge(body_params, query_params)
-      end
 
       protected
 
@@ -60,38 +43,39 @@ module El
       alias h escape_html
 
       def rack_env
-        ENV.fetch("RACK_ENV", :development).to_sym
+        ENV.fetch('RACK_ENV', :development).to_sym
       end
 
       # rubocop:disable Metrics/AbcSize
+      # rubocop:disable Metrics/MethodLength
       def not_found
         io = StringIO.new
-        io.puts "<h1>Not Found</h1>"
+        io.puts '<h1>Not Found</h1>'
         io.puts "#{request[:method]} - #{request[:path]}"
 
         unless rack_env == :production
           io.puts '<div class="routes"><h2>Valid Routes</h2>'
-          io.puts "<table>"
-          io.puts "<thead><tr><th>Method</th><th>Path</th><th>Router</th></thead>"
-          io.puts "<tbody>"
+          io.puts '<table>'
+          io.puts '<thead><tr><th>Method</th><th>Path</th><th>Router</th></thead>'
+          io.puts '<tbody>'
           self.class.routes.each do |route|
             io.puts "<tr><td>#{h route.method}</td><td>#{h route.path}</td><td>#{h route.router.to_s}</td></tr>"
           end
-          io.puts "</tbody></table></div>"
+          io.puts '</tbody></table></div>'
 
           io.puts '<div class="environment"><h2>Environment</h2>'
-          io.puts "<table><tbody>"
+          io.puts '<table><tbody>'
           env.each do |key, value|
             io.puts "<tr><th>#{h key}</th><td><pre>#{h value.pretty_inspect}</pre></td>"
           end
-          io.puts "</tbody></table></div>"
+          io.puts '</tbody></table></div>'
         end
 
-        [404, DEFAULT_HEADERS.dup, [NOT_FOUND_TMPL.sub("%BODY%", io.string)]]
+        [404, DEFAULT_HEADERS.dup, [NOT_FOUND_TMPL.sub('%BODY%', io.string)]]
       end
 
       def error(_)
-        [500, DEFAULT_HEADERS.dup, StringIO.new("Server Error")]
+        [500, DEFAULT_HEADERS.dup, StringIO.new('Server Error')]
       end
 
       def redirect_to(url)
@@ -100,18 +84,39 @@ module El
         end.finish
       end
 
+      def halt(*response)
+        throw :halt, *response
+      end
+
       public
+
+      def body_params
+        request&.body_params
+      end
+
+      def query_params
+        request&.query_params
+      end
+
+      def params
+        @params ||= route_params&.merge(body_params, query_params)
+      end
 
       # TODO: add error and not_found to the DSL
       # rubocop:disable Metrics/CyclomaticComplexity
       # rubocop:disable Metrics/PerceivedComplexity
       def call
+        @route, @route_params = self.class.routes.match(env)
+        @request = Request.new(env, match_params)
+
         return not_found unless @route
 
-        res = @route.call_action(self)
+        res = catch(:halt) { @route.call_action(self) }
 
         if res.is_a?(Array) && res.size == 3 && res[0].is_a?(Integer)
           res
+        elsif res.is_a?(Integer)
+          [res, DEFAULT_HEADERS.dup, EMPTY_ARRAY]
         elsif res.is_a?(Rack::Response)
           res.finish
         elsif res.is_a?(Hash) && res.key?(:status)
@@ -124,7 +129,7 @@ module El
       rescue StandardError => e
         raise e unless rack_env == :production
 
-        env["rack.error"].write(e.message)
+        env['rack.error'].write(e.message)
         error(e)
       end
     end

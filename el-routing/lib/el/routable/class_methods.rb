@@ -4,16 +4,6 @@ module El
   module Routable
     # Class methods for the Rack::Routable module
     module ClassMethods
-      # A "macro" method to specify paths that should be used to serve static files.
-      # They will be served from the "public" directory within the applications root_path.
-      #
-      # @param paths [Array<String>]
-      def static(mapping)
-        url  = mapping.first[0]
-        root = mapping.first[1]
-        use Rack::TryStatic, root: root, urls: [url], try: %w[.html index.html /index.html]
-      end
-
       # A "macro" method to specify Rack middleware that should be used by this application.
       #
       # @param klass [Class] Rack middleware
