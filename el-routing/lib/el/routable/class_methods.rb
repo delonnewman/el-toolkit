@@ -12,22 +12,17 @@ module El
         middleware << [klass, args]
       end
 
+      def namespace(path = nil)
+        return @namespace unless path
+
+        @namespace = path
+      end
+
       # Return an array of Rack middleware (used by this application) and their arguments.
       #
       # @return [Array<[Class, Array]>]
       def middleware
         @middleware ||= []
-      end
-
-      # A "macro" method for specifying the root_path of the application.
-      # If called as a class method it will return the value that will be used
-      # when instantiating.
-      #
-      # @param dir [String]
-      # @return [String, nil]
-      def root_path(dir = nil)
-        @root_path = dir unless dir.nil?
-        @root_path || Dir.pwd
       end
 
       # Rack interface
@@ -62,16 +57,29 @@ module El
       # A "macro" method for defining a route for the application.
       #
       # @param method [:get, :post, :delete :put, :head, :link :unlink]
-      def route(method, path, proc = nil, **options, &block)
-        raise "Invalid method: #{method.inspect}" unless METHODS.include?(method)
+      def route(request_method, path, controller = nil, method = nil, **options, &block)
+        raise "Invalid method: #{request_method.inspect}" unless METHODS.include?(request_method)
 
-        routes.add!(method, path, proc || block, options)
+        action = block_given? ? block : resolve_action(controller, method)
+        raise 'An action is required for a route' unless action
+
+        path = namespace ? File.join(namespace, path) : path
+        routes << Route.new(request_method, path, action, options)
       end
 
       METHODS.each do |method|
-        define_method method do |path, proc = nil, **options, &block|
-          route(method, path, proc, **options, &block)
+        define_method method do |*args, **options, &block|
+          route(method, *args, **options, &block)
         end
+      end
+
+      private
+
+      def resolve_action(controller, method)
+        controller = controller.is_a?(Class) ? controller.new : controller
+        return controller.method(method) if method
+
+        controller
       end
     end
   end

@@ -24,8 +24,6 @@ module El
   #     # compose Rack middleware
   #     use Rack::Session
   #
-  #     static '/' => 'public'
-  #
   #     # block routes
   #     get '/hello' do
   #       'Hello'

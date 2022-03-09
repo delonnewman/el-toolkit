@@ -6,12 +6,12 @@ module El
     class Route
       attr_reader :method, :path, :options, :action, :parsed_path
 
-      def initialize(method, path, options, action, parsed_path)
+      def initialize(method, path, action, options)
         @method = method
         @path = path
-        @options = options
         @action = action
-        @parsed_path = parsed_path
+        @options = options
+        @parsed_path = parse_path(path)
       end
 
       # rubocop:disable Metrics/AbcSize
@@ -20,7 +20,7 @@ module El
           return routable.instance_exec(routable.request, &action)
         end
 
-        return routable.instance_exec(&action) if action.is_a?(Proc)
+        return routable.instance_exec(&action) if action.respond_to?(:to_proc)
         return action.call if action.respond_to?(:arity) && action.arity.zero?
 
         action.call(routable.request)
@@ -64,9 +64,29 @@ module El
         "#{root}/#{route_path(*args)}"
       end
 
-      def with_prefix(prefix)
-        self.class.new(router, method, prefix + path, options, action, parsed_path)
+      private
+
+      # rubocop:disable Metrics/MethodLength
+      def parse_path(str)
+        str   = str.start_with?('/') ? str[1, str.size] : str
+        names = []
+
+        route = str.split(%r{/+}).each_with_index.map do |part, i|
+          if part.start_with?(':')
+            names[i] = part[1, part.size].to_sym
+            NAME_PATTERN
+          elsif part.end_with?('*')
+            /^#{part[0, part.size - 1]}/i
+          else
+            part
+          end
+        end
+
+        { names: names, path: route }
       end
+
+      NAME_PATTERN = /\A[\w\-]+\z/i.freeze
+      private_constant :NAME_PATTERN
     end
   end
 end
