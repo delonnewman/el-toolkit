@@ -37,23 +37,37 @@ module El
       end
 
       def redirect_to(url)
-        Rack::Response.new.tap do |r|
-          r.redirect(url)
-        end.finish
+        r = Rack::Response.new
+        r.redirect(url)
+
+        halt r.finish
       end
 
       def halt(*response)
-        throw :halt, *response
+        response = response[0] if response.size == 1
+        throw :halt, response
       end
 
       public
 
-      def response
-        @response ||= Rack::Response.new
+      %i[routes namespace middleware].each do |method|
+        define_method method do
+          self.class.public_send(method)
+        end
       end
 
-      def routes
-        self.class.routes
+      def rack
+        routable = self
+        Rack::Builder.new do
+          middleware.each do |middle|
+            use middle
+          end
+          run routable
+        end
+      end
+
+      def response
+        @response ||= Rack::Response.new
       end
 
       def body_params
@@ -83,6 +97,8 @@ module El
 
         if res.is_a?(Array) && res.size == 3 && res[0].is_a?(Integer)
           res
+        elsif res.is_a?(Array) && res.size == 2 && res[0].is_a?(Integer)
+          [res[0], DEFAULT_HEADERS.dup, res[2]]
         elsif res.is_a?(Integer)
           [res, DEFAULT_HEADERS.dup, EMPTY_ARRAY]
         elsif res.is_a?(Rack::Response)

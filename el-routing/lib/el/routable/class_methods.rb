@@ -12,12 +12,6 @@ module El
         middleware << [klass, args]
       end
 
-      def namespace(path = nil)
-        return @namespace unless path
-
-        @namespace = path
-      end
-
       # Return an array of Rack middleware (used by this application) and their arguments.
       #
       # @return [Array<[Class, Array]>]
@@ -25,23 +19,16 @@ module El
         @middleware ||= []
       end
 
-      # Rack interface
+      # A "macro" method to specify a namespace or prefix for all the specified routers.
+      # If no path is specified the namespace will be returned.
       #
-      # @param env [Hash]
-      # @returns Array<Integer, Hash, #each>
-      def call(env)
-        new(env).call
-      end
+      # @param path [String, nil] the namespace path
+      #
+      # @returns [String, nil] the namespace or nil
+      def namespace(path = nil)
+        return @namespace unless path
 
-      # Rack application
-      def rack
-        routable = self
-        Rack::Builder.new do
-          middleware.each do |middle|
-            use middle
-          end
-          run routable
-        end
+        @namespace = path
       end
 
       # Valid methods for routes
@@ -76,10 +63,7 @@ module El
       private
 
       def resolve_action(controller, method)
-        controller = controller.is_a?(Class) ? controller.new : controller
-        return controller.method(method) if method
-
-        controller
+        controller.is_a?(Class) ? [controller, method] : controller
       end
     end
   end

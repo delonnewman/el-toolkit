@@ -63,6 +63,12 @@ module El
         Rack::MediaType.type(content_type)
       end
 
+      def json_body(symbolize_names: true)
+        @json_body ||= JSON.parse(body.read, symbolize_names: symbolize_names).tap do
+          body.rewind
+        end
+      end
+
       def query_params
         @query_params ||= HTTPUtils.parse_form_encoded_data(@env['QUERY_STRING'])
       end

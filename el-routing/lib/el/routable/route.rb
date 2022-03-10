@@ -7,24 +7,72 @@ module El
       attr_reader :method, :path, :options, :action, :parsed_path
 
       def initialize(method, path, action, options)
-        @method = method
-        @path = path
-        @action = action
-        @options = options
+        @method      = method
+        @path        = path
+        @action      = action
+        @options     = options
         @parsed_path = parse_path(path)
       end
 
-      # rubocop:disable Metrics/AbcSize
-      def call_action(routable)
-        if action.is_a?(Proc) && (!action.lambda? || action.arity.positive?)
-          return routable.instance_exec(routable.request, &action)
+      private
+
+      # rubocop:disable Metrics/MethodLength
+      def parse_path(str)
+        str   = str.start_with?('/') ? str[1, str.size] : str
+        names = []
+
+        route = str.split(%r{/+}).each_with_index.map do |part, i|
+          if part.start_with?(':')
+            names[i] = part[1, part.size].to_sym
+            NAME_PATTERN
+          elsif part.end_with?('*')
+            /^#{part[0, part.size - 1]}/i
+          else
+            part
+          end
         end
+
+        { names: names, path: route }
+      end
+      # rubocop:enable Metrics/MethodLength
+
+      NAME_PATTERN = /\A[\w\-]+\z/i.freeze
+      private_constant :NAME_PATTERN
+
+      # TODO: There's a pattern here, this could be generalized, but we don't want it to cost too much in performance.
+      def controller_action?(action)
+        action.is_a?(Array) && action[0].is_a?(Class)
+      end
+
+      def call_controller_action(action, routable)
+        method = action[0].new(routable).method(action[1] || :call)
+        return method.call(routable.request) if method.arity.positive?
+
+        method.call
+      end
+
+      def single_arity_proc?(action)
+        action.is_a?(Proc) && (!action.lambda? || action.arity.positive?)
+      end
+
+      def call_single_arity_proc(action, routable)
+        routable.instance_exec(routable.request, &action)
+      end
+
+      public
+
+      # rubocop:disable Metrics/AbcSize
+      # @api private
+      def call_action(routable)
+        return call_controller_action(action, routable) if controller_action?(action)
+        return call_single_arity_proc(action, routable) if single_arity_proc?(action)
 
         return routable.instance_exec(&action) if action.respond_to?(:to_proc)
         return action.call if action.respond_to?(:arity) && action.arity.zero?
 
         action.call(routable.request)
       end
+      # rubocop:enable Metrics/AbcSize
 
       def path_method_prefix
         return 'root' if path == '/'
@@ -63,30 +111,6 @@ module El
       def route_url(root, *args)
         "#{root}/#{route_path(*args)}"
       end
-
-      private
-
-      # rubocop:disable Metrics/MethodLength
-      def parse_path(str)
-        str   = str.start_with?('/') ? str[1, str.size] : str
-        names = []
-
-        route = str.split(%r{/+}).each_with_index.map do |part, i|
-          if part.start_with?(':')
-            names[i] = part[1, part.size].to_sym
-            NAME_PATTERN
-          elsif part.end_with?('*')
-            /^#{part[0, part.size - 1]}/i
-          else
-            part
-          end
-        end
-
-        { names: names, path: route }
-      end
-
-      NAME_PATTERN = /\A[\w\-]+\z/i.freeze
-      private_constant :NAME_PATTERN
     end
   end
 end

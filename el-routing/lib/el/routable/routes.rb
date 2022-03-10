@@ -14,6 +14,16 @@ module El
         @routes = []
       end
 
+      def freeze
+        @table.freeze
+        @routes.freeze
+        self
+      end
+
+      def size
+        @routes.size
+      end
+
       # Iterate over each route in the routes table passing it's information along
       # to the given block.
       #
