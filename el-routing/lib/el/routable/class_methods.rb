@@ -25,10 +25,14 @@ module El
       # @param path [String, nil] the namespace path
       #
       # @returns [String, nil] the namespace or nil
-      def namespace(path = nil)
+      def namespace(path = nil, **options, &block)
         return @namespace unless path
 
-        @namespace = path
+        @namespace = { path: path, options: options }
+        return unless block_given?
+
+        block.call
+        @namespace = nil
       end
 
       # Valid methods for routes
@@ -50,8 +54,12 @@ module El
         action = block_given? ? block : resolve_action(controller, method)
         raise 'An action is required for a route' unless action
 
-        path = namespace ? File.join(namespace, path) : path
-        routes << Route.new(request_method, path, action, options)
+        path    = resolve_path(namespace, path)
+        options = resolve_options(namespace, options)
+
+        Route.new(request_method, path, action, options).tap do |r|
+          routes << r
+        end
       end
 
       METHODS.each do |method|
@@ -64,6 +72,14 @@ module El
 
       def resolve_action(controller, method)
         controller.is_a?(Class) ? [controller, method] : controller
+      end
+
+      def resolve_path(namespace, path)
+        namespace ? File.join(namespace[:path], path) : path
+      end
+
+      def resolve_options(namespace, options)
+        namespace ? namespace[:options].merge(options) : options
       end
     end
   end
