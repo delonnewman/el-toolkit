@@ -2,8 +2,8 @@
 
 module El
   module Routable
-    # Class methods for the Rack::Routable module
-    module ClassMethods
+    # DSL for the El::Routable module
+    module DSL
       # A "macro" method to specify Rack middleware that should be used by this application.
       #
       # @param klass [Class] Rack middleware

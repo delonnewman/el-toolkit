@@ -11,7 +11,7 @@ require_relative 'routable/route'
 require_relative 'routable/routes'
 require_relative 'routable/request'
 require_relative 'routable/instance_methods'
-require_relative 'routable/class_methods'
+require_relative 'routable/dsl'
 
 module El
   # Provides a light-weight DSL for routing over Rack, and instances implement
@@ -19,7 +19,7 @@ module El
   #
   # @example
   #   class MyApp
-  #     include Rack::Routable
+  #     include El::Routable
   #
   #     # compose Rack middleware
   #     use Rack::Session
@@ -65,7 +65,7 @@ module El
   #   end
   module Routable
     def self.included(base)
-      base.extend(ClassMethods)
+      base.extend(DSL)
       base.include(InstanceMethods)
     end
   end

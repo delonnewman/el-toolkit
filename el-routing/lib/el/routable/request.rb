@@ -4,6 +4,7 @@ module El
   module Routable
     class Request
       include Enumerable
+      include Rack::Request::Helpers
 
       def initialize(env)
         @env = env
@@ -38,6 +39,10 @@ module El
         @env['rack.input']
       end
 
+      def error
+        @env['rack.error']
+      end
+
       def script_name
         @env['SCRIPT_NAME']
       end
@@ -54,6 +59,7 @@ module El
         key = key.name.upcase if key.is_a?(Symbol)
         @env[key]
       end
+      alias get_header []
 
       def media_params
         Rack::MediaType.params(content_type)

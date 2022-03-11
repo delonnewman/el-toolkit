@@ -4,7 +4,7 @@ require 'el/http_utils'
 
 module El
   module Routable
-    # Instance methods for El::Routable module
+    # Instance methods for the El::Routable module
     module InstanceMethods
       attr_reader :env, :route, :route_params, :request
 
@@ -49,6 +49,18 @@ module El
       end
 
       public
+
+      def url_for(path, params = EMPTY_HASH)
+        raise 'a request is required to generate a complete url' if request.nil?
+
+        path_for(URI.join(request.base_url, path), params)
+      end
+
+      def path_for(path, params = EMPTY_HASH)
+        return path if params.empty?
+
+        "#{path}?#{URI.encode_www_form(params)}"
+      end
 
       %i[routes namespace middleware].each do |method|
         define_method method do

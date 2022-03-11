@@ -36,11 +36,11 @@ module El
       end
       alias each each_route
 
-      # Return the names of the route path methods that are genterated as routes are added.
+      # Return the names of the route helper methods that are genterated as routes are added.
       #
       # @return [Array<Symbol>]
-      def route_path_methods
-        @route_path_methods ||= []
+      def route_helper_methods
+        @route_helper_methods ||= []
       end
 
       # Add a route to the table.
@@ -56,14 +56,31 @@ module El
         @table[method] << route
         @routes << route
 
+        define_path_method!(route)
+        define_url_method!(route)
+
+        self
+      end
+
+      private
+
+      def define_path_method!(route)
         define_singleton_method route.path_method_name do |*args|
           route.route_path(*args)
         end
 
-        route_path_methods << route.path_method_name.to_sym
-
-        self
+        route_helper_methods << route.path_method_name.to_sym
       end
+
+      def define_url_method!(route)
+        define_singleton_method route.url_method_name do |*args|
+          route.route_url(*args)
+        end
+
+        route_helper_methods << route.url_method_name.to_sym
+      end
+
+      public
 
       # Match a route in the table to the given Rack environment.
       #

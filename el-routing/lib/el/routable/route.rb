@@ -92,7 +92,33 @@ module El
         "#{path_method_prefix}_url"
       end
 
+      def route_url(root, *args)
+        args, params = params_from(args)
+        path_with_params(URI.join(root, base_path(*args)), params)
+      end
+
       def route_path(*args)
+        args, params = params_from(args)
+        path_with_params(base_path(*args), params)
+      end
+
+      private
+
+      def params_from(args)
+        if args.last.is_a?(Hash)
+          [args.slice(0, args.size - 1), args.last]
+        else
+          [args, EMPTY_HASH]
+        end
+      end
+
+      def path_with_params(base, params)
+        return base if params.empty?
+
+        "#{base}?#{URI.encode_www_form(params)}"
+      end
+
+      def base_path(*args)
         vars = @path.scan(/(:\w+)/)
 
         if vars.length != args.length
@@ -106,10 +132,6 @@ module El
           path = @path.sub(str[0], args[i].to_s)
         end
         path
-      end
-
-      def route_url(root, *args)
-        "#{root}/#{route_path(*args)}"
       end
     end
   end
