@@ -6,7 +6,7 @@ module El
   module Routable
     # Instance methods for the El::Routable module
     module InstanceMethods
-      attr :env, :route, :route_params, :request, :response
+      attr :request
 
       # The default headers for responses
       DEFAULT_HEADERS = {
@@ -96,13 +96,12 @@ module El
       # rubocop:disable Metrics/MethodLength
       # rubocop:disable Metrics/AbcSize
       def call(env)
-        @request  = Request.new(env)
-        @response = Rack::Response.new
-        @route, @route_params = routes.match(@request, media_type_aliases)
+        @request = Request.new(env)
+        route, route_params = routes.match(@request, media_type_aliases)
 
-        return not_found unless @route
+        return not_found unless route
 
-        res = catch(:halt) { @route.call_action(self, @route_params) }
+        res = catch(:halt) { route.call_action(self, route_params) }
 
         if res.is_a?(Array) && res.size == 3 && res[0].is_a?(Integer)
           res
