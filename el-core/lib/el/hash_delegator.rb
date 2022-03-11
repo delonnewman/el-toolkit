@@ -142,29 +142,54 @@ module El
     #
     # @param hash [Hash]
     def initialize(hash = EMPTY_HASH)
-      raise 'HashDelegator should not be initialized' if instance_of?(HashDelegator)
-
-      @hash =
-        if self.class.key_transformer
-          hash.transform_keys(&self.class.key_transformer)
-        elsif hash.frozen?
-          hash
-        else
-          hash.dup
-        end
-
-      if self.class.default_value.is_a?(Proc)
-        @hash.default_proc = self.class.default_value
+      if is_a?(HashDelegator)
+        @__hash__ = hash.frozen? ? hash : hash.dup
       else
-        @hash.default = self.class.default_value
+        @__hash__ = apply_key_transformer(hash)
+        set_default!
+        validate!
       end
+    end
 
-      if self.class.required_attributes
-        self.class.required_attributes.each do |attribute|
-          attribute = self.class.key_transformer.call(attribute) if self.class.key_transformer
-          raise "#{attribute.inspect} is required, but is missing" unless key?(attribute)
-        end
+    protected
+
+    attr :__hash__
+
+    private
+
+    def apply_key_transformer(hash)
+      if key_transformer
+        hash.transform_keys(&key_transformer)
+      elsif hash.frozen?
+        hash
+      else
+        hash.dup
       end
+    end
+
+    def set_default!
+      if self.class.default_value.is_a?(Proc)
+        @__hash__.default_proc = self.class.default_value
+      else
+        @__hash__.default = self.class.default_value
+      end
+    end
+
+    def validate!
+      required_attributes&.each do |attribute|
+        attribute = key_transformer.call(attribute) if key_transformer
+        raise "#{attribute.inspect} is required, but is missing" unless key?(attribute)
+      end
+    end
+
+    public
+
+    def key_transformer
+      self.class.key_transformer
+    end
+
+    def required_attributes
+      self.class.required_attributes
     end
 
     # If the given keys include any required attributes
@@ -175,10 +200,10 @@ module El
     # @param keys [Array]
     # @return [Hash, HashDelegator]
     def except(*keys)
-      common = keys & self.class.required_attributes
+      common = keys & required_attributes
 
       if common.empty?
-        self.class.new(@hash.except(*keys))
+        self.class.new(@__hash__.except(*keys))
       else
         to_hash.except(*keys)
       end
@@ -192,11 +217,11 @@ module El
     # @param keys [Array]
     # @return [Hash, HashDelegator]
     def slice(*keys)
-      required = self.class.required_attributes
+      required = required_attributes
       common   = keys & required
 
       if keys.size == common.size && common.size == required.size
-        self.class.new(@hash.slice(*keys))
+        self.class.new(@__hash__.slice(*keys))
       else
         to_hash.slice(*keys)
       end
@@ -206,12 +231,12 @@ module El
     #
     # @return [Hash]
     def to_hash
-      @hash.dup
+      @__hash__.dup
     end
     alias to_h to_hash
 
     def to_s
-      "#<#{self.class} #{@hash.inspect}>"
+      "#<#{self.class} #{@__hash__.inspect}>"
     end
     alias inspect to_s
 
@@ -221,10 +246,12 @@ module El
     #
     # @param key
     def [](key)
-      if self.class.key_transformer
-        @hash[self.class.key_transformer.call(key)]
+      xformer = key_transformer
+
+      if xformer
+        @__hash__[xformer.call(key)]
       else
-        @hash[key]
+        @__hash__[key]
       end
     end
 
@@ -232,7 +259,7 @@ module El
     #
     # @return [Integer]
     def hash
-      @hash.hash
+      @__hash__.hash
     end
 
     # Return true if the other object has the same numerical hash
@@ -240,14 +267,14 @@ module El
     #
     # @return [Boolean]
     def eql?(other)
-      @hash.hash == other.hash
+      hash == other.hash
     end
 
     # Return true if the other object has all of this objects required attributes.
     #
     # @param other
     def ===(other)
-      required = self.class.required_attributes
+      required = required_attributes
 
       other.respond_to?(:keys) && (common = other.keys & required) &&
         common.size == other.keys.size && common.size == required.size
@@ -291,10 +318,10 @@ module El
     # @param args [Array]
     # @param block [Proc]
     def method_missing(method, *args, &block)
-      return @hash[method] if @hash.key?(method)
+      return @__hash__[method] if @__hash__.key?(method)
 
       if hash_respond_to?(method)
-        result = @hash.public_send(method, *args, &block)
+        result = @__hash__.public_send(method, *args, &block)
         return result unless CLOSED_METHODS.include?(method)
 
         return self.class.new(result)
@@ -307,17 +334,6 @@ module El
 
     def hash_respond_to?(method)
       !MUTATING_METHODS.include?(method) && @hash.respond_to?(method)
-    end
-
-    protected
-
-    # TODO: remove
-    # Set the key of the internal hash to the given value.
-    #
-    # @param key
-    # @param value
-    def []=(key, value)
-      @hash[key] = value
     end
   end
 end
