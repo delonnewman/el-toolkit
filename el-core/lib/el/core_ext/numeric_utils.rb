@@ -5,4 +5,8 @@ class Numeric
     El::Money[self, '$']
   end
   alias dollar dollars
+
+  def cents
+    El::Money[self, :cents]
+  end
 end

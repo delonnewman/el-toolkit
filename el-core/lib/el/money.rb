@@ -12,6 +12,12 @@ module El
       end
     end
 
+    CONVERSIONS = {
+      '$'      => { cents: Rational(1, 100) },
+      :dollars => { cents: Rational(1, 100) },
+      :cents   => { dollars: 100 }
+    }.freeze
+
     attr_reader :magnitude, :currency
 
     def initialize(magnitude, currency)
@@ -20,6 +26,15 @@ module El
       @magnitude = magnitude
       @currency = currency
     end
+
+    def convert_to(other_currency)
+      conversion = CONVERSIONS.dig(currency, other_currency)
+      raise "Don't know how to convert #{currency} to #{other_currency}" unless conversion
+
+      self.class.new(magnitude * conversion, other_currency)
+    end
+    alias as convert_to
+    alias in convert_to
 
     def per(unit)
       Rate[self, Duration.resolve_unit(unit.to_sym)]
@@ -42,7 +57,11 @@ module El
     end
 
     def to_s
-      "#{currency}#{format "%.2f", magnitude}"
+      if currency.is_a?(Symbol)
+        "#{format "%.2f", magnitude} #{currency}"
+      else
+        "#{currency}#{format "%.2f", magnitude}"
+      end
     end
   end
 end

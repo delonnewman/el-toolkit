@@ -10,7 +10,7 @@ require 'uri'
 
 module El
   # Utilities for working with HTTP data
-  module HTTPUtils
+  module DataUtils
     module_function
 
     # Parse form encoded data into a nested hash / array values.
@@ -39,6 +39,7 @@ module El
 
     # @api private
     def parse_nesting_key(key, value, root = {}, symbolize_keys: true)
+      key = key.is_a?(Symbol) ? key.name : key
       tokens = key.chars
 
       # states
