@@ -28,7 +28,7 @@ class TestApp
       body:    ['Hello!'] }
   end
 
-  get '/only-json', content_type: :json do
+  get '/only-json', accept: :json do
     'This as JSON'
   end
 

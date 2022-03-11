@@ -84,20 +84,26 @@ module El
 
       # Match a route in the table to the given Rack environment.
       #
-      # @param env [Hash] a Rack environment
+      # @param request [El::Routable::Request]
+      # @param media_type_aliases [Hash]
+      #
+      # @see El::Routable::DSL.media_type_aliases
       #
       # @return [[Route, Hash]] the route and it's params or an empty array
-      def match(env, method = env['REQUEST_METHOD'])
-        path   = env['PATH_INFO']
-        path   = path.start_with?('/') ? path[1, path.size] : path
-        parts  = path.split(%r{/+})
+      # @api private
+      def match(request, media_type_aliases)
+        method, path = request.values_at('REQUEST_METHOD', 'PATH_INFO')
+        path  = path.start_with?('/') ? path[1, path.size] : path
+        parts = path.split(%r{/+})
 
         return EMPTY_ARRAY unless (routes = @table[method])
 
         routes.each do |route|
-          if (params = match_path(parts, route.parsed_path))
-            return [route, params]
-          end
+          next unless (params = match_path(parts, route.parsed_path))
+
+          return EMPTY_ARRAY if route.options[:content_type] != media_type_aliases[request.media_type]
+
+          return [route, params]
         end
 
         EMPTY_ARRAY
@@ -137,6 +143,7 @@ module El
 
         params
       end
+      # rubocop:enable Metrics/MethodLength
     end
   end
 end

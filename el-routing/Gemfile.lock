@@ -7,6 +7,12 @@ GEM
   remote: https://rubygems.org/
   specs:
     minitest (5.15.0)
+    minitest-autotest (1.1.1)
+      minitest-server (~> 1.0)
+      path_expander (~> 1.0)
+    minitest-server (1.0.6)
+      minitest (~> 5.0)
+    path_expander (1.1.0)
     rack (2.2.3)
 
 PLATFORMS
@@ -16,6 +22,7 @@ PLATFORMS
 DEPENDENCIES
   el-core!
   minitest
+  minitest-autotest
   rack
 
 BUNDLED WITH

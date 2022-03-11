@@ -39,7 +39,6 @@ module El
       NAME_PATTERN = /\A[\w\-]+\z/i.freeze
       private_constant :NAME_PATTERN
 
-      # TODO: There's a pattern here, this could be generalized, but we don't want it to cost too much in performance.
       def controller_action?(action)
         action.is_a?(Array) && action[0].is_a?(Class)
       end
@@ -51,24 +50,14 @@ module El
         method.call
       end
 
-      def single_arity_proc?(action)
-        action.is_a?(Proc) && (!action.lambda? || action.arity.positive?)
-      end
-
-      def call_single_arity_proc(action, routable)
-        routable.instance_exec(routable.request, &action)
-      end
-
       public
 
       # rubocop:disable Metrics/AbcSize
       # @api private
-      def call_action(routable)
-        return call_controller_action(action, routable) if controller_action?(action)
-        return call_single_arity_proc(action, routable) if single_arity_proc?(action)
-
-        return routable.instance_exec(&action) if action.respond_to?(:to_proc)
+      def call_action(routable, route_params)
         return action.call if action.respond_to?(:arity) && action.arity.zero?
+        return call_controller_action(action, routable) if controller_action?(action)
+        return routable.instance_exec(*route_params.values, &action) if action.respond_to?(:to_proc)
 
         action.call(routable.request)
       end

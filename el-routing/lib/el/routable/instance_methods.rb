@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-require 'el/http_utils'
+require 'el/data_utils'
 
 module El
   module Routable
     # Instance methods for the El::Routable module
     module InstanceMethods
-      attr_reader :env, :route, :route_params, :request
+      attr :env, :route, :route_params, :request
 
       # The default headers for responses
       DEFAULT_HEADERS = {
@@ -62,7 +62,7 @@ module El
         "#{path}?#{URI.encode_www_form(params)}"
       end
 
-      %i[routes namespace middleware].each do |method|
+      %i[routes namespace middleware media_type_aliases content_type_aliases].each do |method|
         define_method method do
           self.class.public_send(method)
         end
@@ -100,12 +100,12 @@ module El
       # rubocop:disable Metrics/MethodLength
       # rubocop:disable Metrics/AbcSize
       def call(env)
-        @route, @route_params = routes.match(env)
         @request = Request.new(env)
+        @route, @route_params = routes.match(@request, media_type_aliases)
 
         return not_found unless @route
 
-        res = catch(:halt) { @route.call_action(self) }
+        res = catch(:halt) { @route.call_action(self, @route_params) }
 
         if res.is_a?(Array) && res.size == 3 && res[0].is_a?(Integer)
           res

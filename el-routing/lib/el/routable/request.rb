@@ -14,10 +14,16 @@ module El
         @env.dup
       end
 
-      def each(&block)
+      def headers
+        @env.keys
+      end
+      alias keys headers
+
+      def each_header(&block)
         to_h.each(&block)
         self
       end
+      alias each each_header
 
       def request_method
         @env['REQUEST_METHOD'].downcase.to_sym
@@ -57,9 +63,21 @@ module El
 
       def [](key)
         key = key.name.upcase if key.is_a?(Symbol)
-        @env[key]
+        get_header(key)
       end
-      alias get_header []
+
+      def get_header(header)
+        @env[header]
+      end
+
+      def values_at(*keys)
+        keys = keys.map! { |k| k.is_a?(Symbol) ? k.name.upcase : k }
+        @env.values_at(*keys)
+      end
+
+      def get_headers(*headers)
+        @env.values_at(*headers)
+      end
 
       def media_params
         Rack::MediaType.params(content_type)
@@ -69,14 +87,20 @@ module El
         Rack::MediaType.type(content_type)
       end
 
+      JSON_MEDIA_TYPE = 'application/json'
+
       def json_body(symbolize_names: true)
-        @json_body ||= JSON.parse(body.read, symbolize_names: symbolize_names).tap do
+        return @json_body if @json_body
+        return EMPTY_HASH unless request_method == 'POST' && media_type == JSON_MEDIA_TYPE
+
+        @json_body = JSON.parse(body.read, symbolize_names: symbolize_names).tap do
           body.rewind
         end
       end
+      alias json json_body
 
       def query_params
-        @query_params ||= HTTPUtils.parse_form_encoded_data(@env['QUERY_STRING'])
+        @query_params ||= DataUtils.parse_form_encoded_data(@env['QUERY_STRING'])
       end
 
       # The set of form-data media-types. Requests that do not indicate
@@ -92,7 +116,7 @@ module El
         return EMPTY_HASH unless @env['REQUEST_METHOD'] == 'POST' && FORM_DATA_MEDIA_TYPES.include?(media_type)
 
         body.tap do |body|
-          @body_params = HTTPUtils.parse_form_encoded_data(body.read)
+          @body_params = DataUtils.parse_form_encoded_data(body.read)
           body.rewind
         end
 

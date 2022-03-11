@@ -19,6 +19,18 @@ module El
         @middleware ||= []
       end
 
+      def media_type_aliases
+        @media_type_aliases ||= Hash.new { |_, k| k }
+      end
+      alias content_type_aliases media_type_aliases
+
+      def media_type(type_alias, *type_values)
+        type_values.each do |value|
+          media_type_aliases[media_type_aliases[value]] = type_alias
+        end
+      end
+      alias content_type media_type
+
       # A "macro" method to specify a namespace or prefix for all the specified routers.
       # If no path is specified the namespace will be returned.
       #
