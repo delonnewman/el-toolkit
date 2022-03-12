@@ -12,10 +12,14 @@ module El
       end
     end
 
+    SYMBOLS = {
+      dollars: '$',
+      cents:   "\u00A2"
+    }.freeze
+
     CONVERSIONS = {
-      '$'      => { cents: Rational(1, 100) },
-      :dollars => { cents: Rational(1, 100) },
-      :cents   => { dollars: 100 }
+      dollars: { dollars: 1, cents: 100 },
+      cents:   { cents: 1, dollars: Rational(1, 100) }
     }.freeze
 
     attr_reader :magnitude, :currency
@@ -23,7 +27,7 @@ module El
     def initialize(magnitude, currency)
       super()
 
-      @magnitude = magnitude
+      @magnitude = magnitude.to_r
       @currency = currency
     end
 
@@ -57,11 +61,14 @@ module El
     end
 
     def to_s
-      if currency.is_a?(Symbol)
-        "#{format "%.2f", magnitude} #{currency}"
+      sym = SYMBOLS[currency]
+
+      if sym
+        "#{sym}#{format "%.2f", magnitude}"
       else
-        "#{currency}#{format "%.2f", magnitude}"
+        "#{format "%.2f", magnitude} #{currency}"
       end
     end
+    alias inspec to_s
   end
 end

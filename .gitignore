@@ -2,3 +2,5 @@ tags
 .yardoc/
 vendor/
 doc/
+.DS_Store
+pkg/
