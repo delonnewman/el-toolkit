@@ -84,10 +84,7 @@ module El
 
       # Match a route in the table to the given Rack environment.
       #
-      # @param request [El::Routable::Request]
-      # @param media_type_aliases [Hash]
-      #
-      # @see El::Routable::DSL.media_type_aliases
+      # @param env [Hash]
       #
       # @return [[Route, Hash]] the route and it's params or an empty array
       # @api private

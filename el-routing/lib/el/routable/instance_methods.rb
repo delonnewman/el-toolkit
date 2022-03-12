@@ -15,10 +15,6 @@ module El
 
       protected
 
-      def options
-        @route&.options || EMPTY_HASH
-      end
-
       def escape_html(*args)
         CGI.escapeHTML(*args)
       end
@@ -36,6 +32,8 @@ module El
         [500, DEFAULT_HEADERS.dup, StringIO.new('Server Error')]
       end
 
+      public
+
       def redirect_to(url)
         r = Rack::Response.new
         r.redirect(url)
@@ -47,8 +45,6 @@ module El
         response = response[0] if response.size == 1
         throw :halt, response
       end
-
-      public
 
       def url_for(path, params = EMPTY_HASH)
         raise 'a request is required to generate a complete url' if request.nil?
@@ -94,6 +90,10 @@ module El
         request.params
       end
 
+      def options
+        request&.options || EMPTY_HASH
+      end
+
       # TODO: add error and not_found to the DSL
       # rubocop:disable Metrics/CyclomaticComplexity
       # rubocop:disable Metrics/PerceivedComplexity
@@ -101,7 +101,7 @@ module El
       # rubocop:disable Metrics/AbcSize
       def call(env)
         route, route_params = routes.match(env)
-        @request = Request.new(env, route_params)
+        @request = Request.new(env, route, route_params)
 
         return not_found unless route
 

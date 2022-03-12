@@ -6,15 +6,20 @@ module El
       include Enumerable
       include Rack::Request::Helpers
 
-      attr_reader :route_params
+      attr_reader :route_params, :route
 
-      def initialize(env, route_params)
+      def initialize(env, route, route_params)
         @env = env
+        @route = route
         @route_params = route_params
       end
 
       def to_h
         @env.dup
+      end
+
+      def options
+        route.options
       end
 
       def headers
