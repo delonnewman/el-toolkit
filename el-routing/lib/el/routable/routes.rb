@@ -91,7 +91,7 @@ module El
       #
       # @return [[Route, Hash]] the route and it's params or an empty array
       # @api private
-      def match(request, media_type_aliases)
+      def match(request)
         method, path = request.values_at('REQUEST_METHOD', 'PATH_INFO')
         path  = path.start_with?('/') ? path[1, path.size] : path
         parts = path.split(%r{/+})
@@ -100,8 +100,6 @@ module El
 
         routes.each do |route|
           next unless (params = match_path(parts, route.parsed_path))
-
-          return EMPTY_ARRAY if route.options[:content_type] != media_type_aliases[request.media_type]
 
           return [route, params]
         end

@@ -100,7 +100,7 @@ module El
       # rubocop:disable Metrics/MethodLength
       # rubocop:disable Metrics/AbcSize
       def call(env)
-        route, route_params = routes.match(env, media_type_aliases)
+        route, route_params = routes.match(env)
         @request = Request.new(env, route_params)
 
         return not_found unless route
