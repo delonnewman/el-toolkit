@@ -86,8 +86,12 @@ module El
         request&.query_params
       end
 
+      def route_params
+        request&.route_params
+      end
+
       def params
-        @params ||= route_params&.merge(body_params, query_params)
+        request.params
       end
 
       # TODO: add error and not_found to the DSL
@@ -96,8 +100,8 @@ module El
       # rubocop:disable Metrics/MethodLength
       # rubocop:disable Metrics/AbcSize
       def call(env)
-        @request = Request.new(env)
-        route, route_params = routes.match(@request, media_type_aliases)
+        route, route_params = routes.match(env, media_type_aliases)
+        @request = Request.new(env, route_params)
 
         return not_found unless route
 

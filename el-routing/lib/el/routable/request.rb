@@ -6,8 +6,11 @@ module El
       include Enumerable
       include Rack::Request::Helpers
 
-      def initialize(env)
+      attr_reader :route_params
+
+      def initialize(env, route_params)
         @env = env
+        @route_params = route_params
       end
 
       def to_h
@@ -98,6 +101,10 @@ module El
         end
       end
       alias json json_body
+
+      def params
+        @params ||= route_params.merge(body_params, query_params)
+      end
 
       def query_params
         @query_params ||= DataUtils.parse_form_encoded_data(@env['QUERY_STRING'])
