@@ -121,7 +121,7 @@ module El
       rescue StandardError => e
         raise e unless rack_env == :production
 
-        env['rack.error'].write(e.message)
+        request.errors.write(e.message)
         error(e)
       end
     end

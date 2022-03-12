@@ -45,8 +45,8 @@ module El
         @env['rack.input']
       end
 
-      def error
-        @env['rack.error']
+      def errors
+        @env['rack.errors']
       end
 
       def script_name
