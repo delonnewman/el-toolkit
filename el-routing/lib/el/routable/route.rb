@@ -52,16 +52,13 @@ module El
 
       public
 
-      # rubocop:disable Metrics/AbcSize
       # @api private
       def call_action(routable, route_params)
-        return action.call if action.respond_to?(:arity) && action.arity.zero?
         return call_controller_action(action, routable) if controller_action?(action)
         return routable.instance_exec(*route_params.values, &action) if action.respond_to?(:to_proc)
 
         action.call(routable.request)
       end
-      # rubocop:enable Metrics/AbcSize
 
       def path_method_prefix
         return 'root' if path == '/'

@@ -14,9 +14,18 @@ module El
         @routes = []
       end
 
+      def [](key)
+        key = key.name.upcase if key.is_a?(Symbol)
+
+        return @table[key] if key.is_a?(String)
+        return @routes[key] if key.is_a?(Integer)
+      end
+
       def freeze
         @table.freeze
+        @table.each_value(&:freeze)
         @routes.freeze
+        @routes.each(&:freeze)
         self
       end
 

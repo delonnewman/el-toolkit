@@ -87,7 +87,7 @@ module El
       end
 
       def params
-        request.params
+        request&.params || EMPTY_HASH
       end
 
       def options

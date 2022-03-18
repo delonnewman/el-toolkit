@@ -57,6 +57,10 @@ module El
         @routes ||= Routes.new
       end
 
+      def freeze
+        routes.freeze
+      end
+
       # A "macro" method for defining a route for the application.
       #
       # @param method [:get, :post, :delete :put, :head, :link :unlink]
