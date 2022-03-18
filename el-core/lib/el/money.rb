@@ -48,6 +48,10 @@ module El
       Money[other * magnitude, currency]
     end
 
+    def /(other)
+      Money[magnitude / other, currency]
+    end
+
     def +(other)
       Money[other + magnitude, currency]
     end
