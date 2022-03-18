@@ -3,7 +3,9 @@ source 'https://rubygems.org'
 gemspec
 
 gem 'el-core', path: '../el-core'
+gem 'dry-types'
 
 group :development, :test do
-  gem 'rspec'
+  gem 'minitest'
+  gem 'minitest-autotest'
 end

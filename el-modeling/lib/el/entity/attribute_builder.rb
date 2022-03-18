@@ -5,12 +5,16 @@ module El
       def initialize(attribute)
         @attribute = attribute
         @entity_class = attribute.entity_class
-        @mapping = attribute.resolver
+        @mapping = attribute.value_reference_mapping
       end
 
       private
 
       attr_reader :attribute, :entity_class, :mapping
+
+      def name
+        attribute.name
+      end
 
       def define_predicate_method!
         entity_class.define_method :"#{name}?" do
@@ -53,12 +57,12 @@ module El
         validate_entity_resolution!
 
         entity_class.define_method name do
-          value = @hash[name]
+          value = self[name]
           type = self.class.attribute(name).value_class
           if value.is_a?(type)
             value
           else
-            @hash[name.inspect] = type.ensure!(value)
+            type.ensure!(value)
           end
         end
       end
