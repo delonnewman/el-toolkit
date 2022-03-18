@@ -305,6 +305,12 @@ module El
       super || key?(method) || hash_respond_to?(method)
     end
 
+    def try(method, *args, **kwargs, &block)
+      public_send(method, *args, **kwargs, &block)
+    rescue NoMethodError
+      nil
+    end
+
     # If the method is a key of the internal hash return it's value.
     # If the internal hash responds to the method forward the method
     # to the hash. If the method is 'closed' return a new HashDelegator
