@@ -33,6 +33,8 @@ module El
 
     def parse_nested_hash_keys(hash, **options)
       hash.each_with_object({}) do |(key, value), h|
+        next if key.nil?
+
         parse_nesting_key(key, value, h, **options)
       end
     end

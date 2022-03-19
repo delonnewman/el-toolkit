@@ -64,6 +64,18 @@ module El
       magnitude.zero?
     end
 
+    def to_i
+      magnitude.round
+    end
+
+    def to_f(precision = 2)
+      magnitude.round(precision).to_f
+    end
+
+    def to_r
+      magnitude.to_r
+    end
+
     def to_s
       sym = SYMBOLS[currency]
 

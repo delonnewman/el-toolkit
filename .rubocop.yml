@@ -15,6 +15,9 @@ Layout/LineLength:
 Metrics/ClassLength:
   Enabled: false
 
+Metrics/ModuleLength:
+  Enabled: False
+
 Layout/HashAlignment:
   Enabled: true
   EnforcedHashRocketStyle: table
