@@ -43,21 +43,18 @@ module El
         action.is_a?(Array) && action[0].is_a?(Class)
       end
 
-      def call_controller_action(action, routable)
-        method = action[0].new(routable).method(action[1] || :call)
-        return method.call(routable.request) if method.arity.positive?
-
-        method.call
+      def call_controller_action(action, routeable, request)
+        action[0].new(routeable, request).public_send(action[1] || :call)
       end
 
       public
 
       # @api private
-      def call_action(routable, route_params)
-        return call_controller_action(action, routable) if controller_action?(action)
-        return routable.instance_exec(*route_params.values, &action) if action.respond_to?(:to_proc)
+      def call_action(routable, request)
+        return call_controller_action(action, routable, request) if controller_action?(action)
+        return action.call unless action.arity.positive?
 
-        action.call(routable.request)
+        action.call(request)
       end
 
       def path_method_prefix

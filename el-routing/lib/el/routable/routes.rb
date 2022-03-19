@@ -14,18 +14,12 @@ module El
         @routes = []
       end
 
-      def [](key)
-        key = key.name.upcase if key.is_a?(Symbol)
-
-        return @table[key] if key.is_a?(String)
-        return @routes[key] if key.is_a?(Integer)
-      end
-
       def freeze
         @table.freeze
         @table.each_value(&:freeze)
         @routes.freeze
         @routes.each(&:freeze)
+        @route_helper_methods.freeze
         self
       end
 
@@ -49,7 +43,7 @@ module El
       #
       # @return [Array<Symbol>]
       def route_helper_methods
-        @route_helper_methods ||= []
+        @route_helper_methods ||= {}
       end
 
       # Add a route to the table.
@@ -74,19 +68,15 @@ module El
       private
 
       def define_path_method!(route)
-        define_singleton_method route.path_method_name do |*args|
-          route.route_path(*args)
-        end
-
-        route_helper_methods << route.path_method_name.to_sym
+        name = route.path_method_name.to_sym
+        route_helper_methods[name] = ->(*args) { route.route_path(*args) }
+        name
       end
 
       def define_url_method!(route)
-        define_singleton_method route.url_method_name do |*args|
-          route.route_url(*args)
-        end
-
-        route_helper_methods << route.url_method_name.to_sym
+        name = route.url_method_name.to_sym
+        route_helper_methods[name] = ->(*args) { route.route_url(*args) }
+        name
       end
 
       public

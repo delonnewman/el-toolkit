@@ -9,7 +9,7 @@ module El
       attr_reader :route_params, :route
 
       def initialize(env, route, route_params)
-        @env = env
+        @env = env.dup # take a snapshot of the rack request
         @route = route
         @route_params = route_params
       end
@@ -31,7 +31,7 @@ module El
       end
 
       def to_h
-        @env.dup
+        @env
       end
 
       def options
@@ -121,6 +121,10 @@ module El
 
       def media_type
         Rack::MediaType.type(content_type)
+      end
+
+      def url_for(path)
+        URI.join(base_url, path)
       end
 
       JSON_MEDIA_TYPES = Set[
