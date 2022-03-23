@@ -57,8 +57,14 @@ module El
         @routes ||= Routes.new
       end
 
+      # Make internal data structures immutable
+      #
+      # @return [Routable]
       def freeze
         routes.freeze
+        middleware.freeze
+        media_type_aliases.freeze
+        self
       end
 
       # A "macro" method for defining a route for the application.
