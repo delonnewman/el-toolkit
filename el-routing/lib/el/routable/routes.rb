@@ -87,20 +87,20 @@ module El
       #
       # @return [[Route, Hash]] the route and it's params or an empty array
       # @api private
-      def match(request)
-        method, path = request.values_at('REQUEST_METHOD', 'PATH_INFO')
+      def match(env)
+        method, path = env.values_at('REQUEST_METHOD', 'PATH_INFO')
         path  = path.start_with?('/') ? path[1, path.size] : path
         parts = path.split(%r{/+})
 
-        return EMPTY_ARRAY unless (routes = @table[method])
+        return unless (routes = @table[method])
 
         routes.each do |route|
           next unless (params = match_path(parts, route.parsed_path))
 
-          return [route, params]
+          return Request.new(env, route, route_params: params)
         end
 
-        EMPTY_ARRAY
+        nil
       end
 
       private

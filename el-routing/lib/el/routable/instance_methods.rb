@@ -54,10 +54,9 @@ module El
       # rubocop:disable Metrics/MethodLength
       # rubocop:disable Metrics/AbcSize
       def call(env)
-        route, route_params = routes.match(env)
-        request = Request.new(env, route, route_params)
+        request = routes.match(env)
 
-        return not_found unless route
+        return not_found unless request
 
         eval_request(request)
       rescue StandardError => e

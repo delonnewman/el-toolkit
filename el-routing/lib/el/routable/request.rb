@@ -8,10 +8,64 @@ module El
 
       attr_reader :route_params, :route
 
-      def initialize(env, route, route_params)
+      def initialize(env, route, route_params: nil, params: nil)
         @env = env.dup # take a snapshot of the rack request
         @route = route
         @route_params = route_params
+        @params = params
+      end
+
+      def with_params(new_params)
+        self.class.new(@env, route, params: new_params)
+      end
+
+      def include_params(other_params)
+        with_params(params.merge(other_params))
+      end
+
+      JSON_MEDIA_TYPES = Set[
+        'application/json',
+        'application/vnd.api+json',
+        'application/ld+json',
+        'text/json'
+      ].freeze
+
+      def json_body(symbolize_names: true, force: false)
+        return @json_body if @json_body
+        return EMPTY_HASH unless force || request_method == 'POST' && JSON_MEDIA_TYPES.include?(media_type)
+
+        @json_body = JSON.parse(body.read, symbolize_names: symbolize_names).tap do
+          body.rewind
+        end
+      end
+      alias json json_body
+
+      def params
+        @params ||= route_params.merge(body_params, query_params, json_body)
+      end
+
+      def query_params
+        @query_params ||= DataUtils.parse_form_encoded_data(@env['QUERY_STRING'])
+      end
+
+      # The set of form-data media-types. Requests that do not indicate
+      # one of the media types present in this list will not be eligible
+      # for form-data / param parsing.
+      FORM_DATA_MEDIA_TYPES = Set[
+        'application/x-www-form-urlencoded',
+        'multipart/form-data'
+      ].freeze
+
+      def body_params
+        return @body_params if @body_params
+        return EMPTY_HASH unless request_method == 'POST' && FORM_DATA_MEDIA_TYPES.include?(media_type)
+
+        body.tap do |body|
+          @body_params = DataUtils.parse_form_encoded_data(body.read)
+          body.rewind
+        end
+
+        @body_params
       end
 
       def []=(_, _)
@@ -125,51 +179,6 @@ module El
 
       def url_for(path)
         URI.join(base_url, path)
-      end
-
-      JSON_MEDIA_TYPES = Set[
-        'application/json',
-        'application/vnd.api+json',
-        'application/ld+json',
-        'text/json'
-      ].freeze
-
-      def json_body(symbolize_names: true, force: false)
-        return @json_body if @json_body
-        return EMPTY_HASH unless force || request_method == 'POST' && JSON_MEDIA_TYPES.include?(media_type)
-
-        @json_body = JSON.parse(body.read, symbolize_names: symbolize_names).tap do
-          body.rewind
-        end
-      end
-      alias json json_body
-
-      def params
-        @params ||= route_params.merge(body_params, query_params, json_body)
-      end
-
-      def query_params
-        @query_params ||= DataUtils.parse_form_encoded_data(@env['QUERY_STRING'])
-      end
-
-      # The set of form-data media-types. Requests that do not indicate
-      # one of the media types present in this list will not be eligible
-      # for form-data / param parsing.
-      FORM_DATA_MEDIA_TYPES = Set[
-        'application/x-www-form-urlencoded',
-        'multipart/form-data'
-      ].freeze
-
-      def body_params
-        return @body_params if @body_params
-        return EMPTY_HASH unless request_method == 'POST' && FORM_DATA_MEDIA_TYPES.include?(media_type)
-
-        body.tap do |body|
-          @body_params = DataUtils.parse_form_encoded_data(body.read)
-          body.rewind
-        end
-
-        @body_params
       end
     end
   end
