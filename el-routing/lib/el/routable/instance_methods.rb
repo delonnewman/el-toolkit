@@ -60,10 +60,10 @@ module El
 
         eval_request(request)
       rescue StandardError => e
-        raise e unless rack_env == :production
-
         request.errors.write(e.message)
         error(e)
+
+        raise e unless rack_env == :production
       end
 
       def eval_request(request)

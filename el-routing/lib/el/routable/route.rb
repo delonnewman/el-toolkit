@@ -40,11 +40,11 @@ module El
       private_constant :NAME_PATTERN
 
       def controller_action?(action)
-        action.is_a?(Array) && action[0].is_a?(Class)
+        action.is_a?(Array) && action[0].is_a?(Class) && action[1].is_a?(Symbol)
       end
 
       def call_controller_action(action, routeable, request)
-        action[0].new(routeable, request).public_send(action[1] || :call)
+        action[0].call(routeable, request).call(action[1])
       end
 
       public

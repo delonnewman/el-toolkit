@@ -1,15 +1,15 @@
 module El
   # Shared behavior for self-describing objects
   module SelfDescribing
-    def class_doc(doc)
-      class_meta(doc: doc)
+    def classdoc(doc)
+      classmeta(doc: doc)
     end
-    alias module_doc class_doc
+    alias moduledoc classdoc
 
-    def class_meta(data)
+    def classmeta(data)
       @metadata = data
     end
-    alias module_meta class_meta
+    alias modulemeta classmeta
 
     def metadata
       meta = @metadata || {}
