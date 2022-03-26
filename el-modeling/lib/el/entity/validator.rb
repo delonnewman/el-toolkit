@@ -15,33 +15,44 @@ module El
 
     def_delegators :entity_class, :attributes
 
-    def validate_required_attributes!(entity_data)
-      attributes.each do |attr|
-        if !entity_data.key?(attr.name) && attr.required? && !attr.default
-          raise TypeError, "#{entity_class}##{attr.name} is required"
-        end
+    def mapping
+      entity_class.respond_to?(:reference_mapping) ? value_class.reference_mapping : EMPTY_HASH
+    end
+
+    def validate_required_attributes!(errors, entity_data)
+      attributes.each_with_object(errors) do |attr, e|
+        e[attr.name] = "#{attr.name} is required" if !entity_data.key?(attr.name) && attr.required? && !attr.default
       end
     end
 
-    def validate_attribute_type!(attr, value)
-      return if attr.valid_value?(value)
+    def valid_reference?(value)
+      return false unless entity?
+      return true if value.is_a?(Hash) # TODO: use the value class to validate
 
-      raise TypeError, "For #{self}##{attr.name} #{value.inspect}:#{value.class} is not a valid #{attr[:type]}"
+      mapping.keys.any? { |k| k.call(value) }
+    end
+
+    def validate_attribute_type!(errors, attr, value)
+      return if attr.valid_value?(value)
+      return if valid_reference?(value)
+
+      errors[attr.name] = "#{value.inspect} is not a valid #{attr.name}"
     end
 
     public
 
     def call(entity_data)
-      validate_required_attributes!(entity_data)
+      errors = {}
 
-      entity_data.each_with_object({}) do |(name, value), h|
-        h[name] = value # pass along extra attributes with no checks
+      validate_required_attributes!(errors, entity_data)
+
+      entity_data.each_with_object(errors) do |(name, value), e|
         next unless entity_class.attribute?(name)
 
         attribute = entity_class.attribute(name)
         next if (attribute.optional? && value.nil?) || !attribute.default.nil?
 
-        validate_attribute_type!(attribute, value)
+        validate_attribute_type!(e, attribute, value)
       end
     end
   end

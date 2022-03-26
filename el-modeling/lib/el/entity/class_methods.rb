@@ -45,12 +45,26 @@ module El
     end
 
     def canonical_name
-      Utils.snakecase(name.split('::').last)
+      StringUtils.underscore(name.split('::').last)
+    end
+
+    def validator
+      @validator ||= Entity::Validator.new(self)
+    end
+
+    def errors(entity_data)
+      validator.call(entity_data)
+    end
+
+    def valid?(entity_data)
+      errors(entity_data).empty?
     end
 
     def validate!(entity_data)
-      @validator ||= Entity::Validator.new(self)
-      @validator.call(entity_data)
+      errors = errors(entity_data)
+      return entity_data if errors.empty?
+
+      raise errors.first[1]
     end
 
     def normalizer

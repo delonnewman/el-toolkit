@@ -36,6 +36,10 @@ module El
       type == :boolean
     end
 
+    def serialize?
+      try(:serialize) == true
+    end
+
     def entity?
       klass = value_class
       klass && klass < Entity
@@ -54,9 +58,13 @@ module El
     def type_predicate
       case type
       when Symbol then Types.aliases[type]
-      when Class  then Types::ClassType[type]
       when Regexp then Types::RegExpType[type]
       when Set    then Types::SetType[type]
+      when Class, String
+        klass = value_class
+        return ->(v) { klass.validator.call(v).empty? } if entity?
+
+        Types::ClassType[klass]
       else
         type
       end
