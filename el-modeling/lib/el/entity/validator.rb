@@ -1,45 +1,47 @@
 # frozen_string_literal: true
 
 module El
-  module Entity
-    # Validate an data for an entity class
-    class Validator
-      def initialize(entity_class)
-        @entity_class = entity_class
-      end
+  # Validate an data for an entity class
+  class Entity::Validator
+    extend Forwardable
 
-      private
+    def initialize(entity_class)
+      @entity_class = entity_class
+    end
 
-      attr_reader :entity_class
+    private
 
-      def validate_required_attributes!
-        attributes.each do |attr|
-          if entity[attr.name].nil? && attr.required? && !attr.default
-            raise TypeError, "#{self}##{attr.name} is required"
-          end
+    attr_reader :entity_class
+
+    def_delegators :entity_class, :attributes
+
+    def validate_required_attributes!(entity_data)
+      attributes.each do |attr|
+        if !entity_data.key?(attr.name) && attr.required? && !attr.default
+          raise TypeError, "#{entity_class}##{attr.name} is required"
         end
       end
+    end
 
-      def validate_attribute_type!(attr, value)
-        return if attr.valid_value?(value)
+    def validate_attribute_type!(attr, value)
+      return if attr.valid_value?(value)
 
-        raise TypeError, "For #{self}##{attr.name} #{value.inspect}:#{value.class} is not a valid #{attr[:type]}"
-      end
+      raise TypeError, "For #{self}##{attr.name} #{value.inspect}:#{value.class} is not a valid #{attr[:type]}"
+    end
 
-      public
+    public
 
-      def call(entity_data)
-        validate_required_attributes!
+    def call(entity_data)
+      validate_required_attributes!(entity_data)
 
-        entity_data.each_with_object({}) do |(name, value), h|
-          h[name] = value # pass along extra attributes with no checks
-          next unless attribute?(name)
+      entity_data.each_with_object({}) do |(name, value), h|
+        h[name] = value # pass along extra attributes with no checks
+        next unless entity_class.attribute?(name)
 
-          attribute = attribute(name)
-          next if (attribute.optional? && value.nil?) || !attribute.default.nil?
+        attribute = entity_class.attribute(name)
+        next if (attribute.optional? && value.nil?) || !attribute.default.nil?
 
-          validate_attribute_type!(attribute, value)
-        end
+        validate_attribute_type!(attribute, value)
       end
     end
   end

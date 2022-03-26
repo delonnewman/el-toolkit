@@ -6,7 +6,7 @@ PATH
 PATH
   remote: .
   specs:
-    el-entity (0.1.0)
+    el-modeling (0.1.0)
       dry-types
       el-core
 
@@ -14,7 +14,6 @@ GEM
   remote: https://rubygems.org/
   specs:
     concurrent-ruby (1.1.9)
-    diff-lcs (1.4.4)
     dry-configurable (0.14.0)
       concurrent-ruby (~> 1.0)
       dry-core (~> 0.6)
@@ -33,27 +32,24 @@ GEM
       dry-core (~> 0.5, >= 0.5)
       dry-inflector (~> 0.1, >= 0.1.2)
       dry-logic (~> 1.0, >= 1.0.2)
-    rspec (3.10.0)
-      rspec-core (~> 3.10.0)
-      rspec-expectations (~> 3.10.0)
-      rspec-mocks (~> 3.10.0)
-    rspec-core (3.10.1)
-      rspec-support (~> 3.10.0)
-    rspec-expectations (3.10.1)
-      diff-lcs (>= 1.2.0, < 2.0)
-      rspec-support (~> 3.10.0)
-    rspec-mocks (3.10.2)
-      diff-lcs (>= 1.2.0, < 2.0)
-      rspec-support (~> 3.10.0)
-    rspec-support (3.10.2)
+    minitest (5.15.0)
+    minitest-autotest (1.1.1)
+      minitest-server (~> 1.0)
+      path_expander (~> 1.0)
+    minitest-server (1.0.6)
+      minitest (~> 5.0)
+    path_expander (1.1.0)
 
 PLATFORMS
+  arm64-darwin-21
   x86_64-darwin-20
 
 DEPENDENCIES
+  dry-types
   el-core!
-  el-entity!
-  rspec
+  el-modeling!
+  minitest
+  minitest-autotest
 
 BUNDLED WITH
-   2.2.16
+   2.3.8
