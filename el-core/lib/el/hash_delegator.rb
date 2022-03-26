@@ -255,6 +255,10 @@ module El
       end
     end
 
+    def key?(name)
+      @__hash__.key?(name)
+    end
+
     # Return the numerical hash of the decorated hash.
     #
     # @return [Integer]
@@ -306,9 +310,9 @@ module El
     end
 
     def try(method, *args, **kwargs, &block)
+      return unless respond_to?(method)
+
       public_send(method, *args, **kwargs, &block)
-    rescue NoMethodError
-      nil
     end
 
     # If the method is a key of the internal hash return it's value.
@@ -339,7 +343,7 @@ module El
     private
 
     def hash_respond_to?(method)
-      !MUTATING_METHODS.include?(method) && @hash.respond_to?(method)
+      !MUTATING_METHODS.include?(method) && @__hash__.respond_to?(method)
     end
   end
 end
