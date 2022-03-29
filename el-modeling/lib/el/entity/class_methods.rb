@@ -61,10 +61,10 @@ module El
     end
 
     def validate!(entity_data)
-      errors = errors(entity_data)
-      return entity_data if errors.empty?
+      errs = errors(entity_data)
+      return entity_data if errs.empty?
 
-      raise errors.first[1]
+      raise errs.first[1]
     end
 
     def normalizer

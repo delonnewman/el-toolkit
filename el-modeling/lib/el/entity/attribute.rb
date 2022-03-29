@@ -5,6 +5,7 @@ module El
   # meta objects for reflection.
   class Entity::Attribute < HashDelegator
     requires :name, :type
+    optional :default
 
     def define_on!(entity_class)
       Entity::AttributeBuilder.new(self).call(entity_class)
@@ -45,14 +46,14 @@ module El
       klass && klass < Entity
     end
 
-    def default
-      self[:default]
-    end
-
     def value_class
       type = try(:type)
       return type                    if type.is_a?(Class)
       return Utils.constantize(type) if type.is_a?(String)
+    end
+
+    def reference_key
+      "#{Inflection.singularize(name.name)}_id"
     end
 
     def type_predicate

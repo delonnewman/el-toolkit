@@ -2,6 +2,7 @@
 
 require 'set'
 require_relative 'core_ext/hash'
+require_relative 'constants'
 
 module El
   # Thread-safe immutable objects that provide delegation and basic validation to hashes.
@@ -38,8 +39,9 @@ module El
       # @return [Array, nil]
       def required_attributes
         return @required_attributes if @required_attributes
+        return superclass.required_attributes if superclass.respond_to?(:required_attributes)
 
-        superclass.required_attributes if superclass.respond_to?(:required_attributes)
+        EMPTY_ARRAY
       end
 
       # Specifiy required attributes
@@ -55,6 +57,38 @@ module El
           end
 
         self
+      end
+
+      # Return optional attributes or nil
+      #
+      # @return [Array, nil]
+      def optional_attributes
+        return @optional_attributes if @optional_attributes
+        return superclass.optional_attributes if superclass.respond_to?(:optional_attributes)
+
+        EMPTY_ARRAY
+      end
+
+      # Specifiy optional attributes
+      #
+      # @param attributes [Array]
+      # @return [HashDelegator]
+      def optional(*attributes)
+        @optional_attributes =
+          if superclass.respond_to?(:optional_attributes) && !superclass.optional_attributes.nil?
+            superclass.optional_attributes + attributes
+          else
+            attributes
+          end
+
+        self
+      end
+
+      def validate!(data)
+        required_attributes&.each do |attribute|
+          attribute = key_transformer.call(attribute) if key_transformer
+          raise "#{attribute.inspect} is required, but is missing" unless data.key?(attribute)
+        end
       end
 
       # Specify the default value if the value is a Proc or a block is passed
@@ -130,9 +164,6 @@ module El
       :merge
     ].freeze
 
-    EMPTY_HASH = {}.freeze
-    private_constant :EMPTY_HASH
-
     # Initialize the HashDelegator with the given hash.
     # If the hash is not frozen it will be duplicated. If a key transformer
     # is specified the hashes keys will be processed with it (duplicating the original hash).
@@ -142,12 +173,12 @@ module El
     #
     # @param hash [Hash]
     def initialize(hash = EMPTY_HASH)
-      if is_a?(HashDelegator)
+      if instance_of?(HashDelegator)
         @__hash__ = hash.frozen? ? hash : hash.dup
       else
         @__hash__ = apply_key_transformer(hash)
         set_default!
-        validate!
+        self.class.validate!(@__hash__)
       end
     end
 
@@ -175,13 +206,6 @@ module El
       end
     end
 
-    def validate!
-      required_attributes&.each do |attribute|
-        attribute = key_transformer.call(attribute) if key_transformer
-        raise "#{attribute.inspect} is required, but is missing" unless key?(attribute)
-      end
-    end
-
     public
 
     def key_transformer
@@ -192,7 +216,15 @@ module El
       self.class.required_attributes
     end
 
-    # If the given keys include any required attributes
+    def optional_attributes
+      self.class.optional_attributes
+    end
+
+    def known_attributes
+      required_attributes + optional_attributes
+    end
+
+    # If the given keys include any known attributes
     # the hash will be duplicated and except will be called
     # on the duplicated hash. Otherwise a new instance of
     # the HashDelegator will be return without the specified keys.
@@ -200,7 +232,7 @@ module El
     # @param keys [Array]
     # @return [Hash, HashDelegator]
     def except(*keys)
-      common = keys & required_attributes
+      common = keys & known_attributes
 
       if common.empty?
         self.class.new(@__hash__.except(*keys))

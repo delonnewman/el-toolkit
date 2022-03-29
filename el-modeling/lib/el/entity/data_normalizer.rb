@@ -13,26 +13,25 @@ module El
 
     def normalized_attribute_value(attr, value, instance)
       if value.nil? && attr.default && attr.required?
-        return attr.default.is_a?(Proc) ? instance.instance_exec(&attr.default) : default
+        return attr.default.is_a?(Proc) ? instance.instance_exec(&attr.default) : attr.default
       end
 
-      if attr.entity? && !value.nil?
-        attr.value_class[value]
-      else
-        value
-      end
+      return value if !attr.entity? || value
+
+      attr.value_class[value]
     end
 
     public
 
     # @note this will mutate the entity_data
     def call(entity_data, instance)
+      data = entity_data.dup
       entity_class.attributes.each do |attr|
         value = entity_data[attr.name]
-        entity_data[attr.name] = normalized_attribute_value(attr, value, instance)
+        entity_data.merge!(attr.name => normalized_attribute_value(attr, value, instance))
       end
 
-      entity_data
+      data
     end
   end
 end

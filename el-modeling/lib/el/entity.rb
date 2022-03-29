@@ -33,29 +33,41 @@ module El
       super(record.freeze)
     end
 
-    def [](name)
-      return super(name) if super(name)
+    def value_for(name)
+      return __hash__[name] if __hash__.key?(name)
 
-      default = attribute(name).default
-      default.is_a?(Proc) ? instance_exec(&default) : default
+      @defaults ||= {}
+      @defaults[name] ||= begin
+        default = attribute(name).default
+        default.is_a?(Proc) ? instance_exec(&default) : default
+      end
     end
-    alias value_for []
+    alias [] value_for
 
     def to_proc
       ->(name) { value_for(name) }
     end
 
     def to_h
-      dehydrator.call(__hash__.dup, self)
+      hash = @defaults ? @defaults.merge(__hash__) : __hash__
+      dehydrator.call(hash, self)
     end
 
     def ===(other)
       other.is_a?(self.class) && other.id == id
     end
 
-    def to_s
+    def inspect
       "#<#{self.class} #{to_h.inspect}>"
     end
-    alias inspect to_s
+    alias to_s inspect
+
+    def to_ruby
+      "#{self.class}[#{to_h.inspect}]"
+    end
+
+    def to_json(*args)
+      to_h.to_json(*args)
+    end
   end
 end
