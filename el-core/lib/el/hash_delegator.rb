@@ -41,7 +41,7 @@ module El
         return @required_attributes if @required_attributes
         return superclass.required_attributes if superclass.respond_to?(:required_attributes)
 
-        EMPTY_ARRAY
+        EMPTY_SET
       end
 
       # Specifiy required attributes
@@ -51,9 +51,9 @@ module El
       def requires(*attributes)
         @required_attributes =
           if superclass.respond_to?(:required_attributes) && !superclass.required_attributes.nil?
-            superclass.required_attributes + attributes
+            superclass.required_attributes + attributes.to_set
           else
-            attributes
+            attributes.to_set
           end
 
         self
@@ -66,7 +66,7 @@ module El
         return @optional_attributes if @optional_attributes
         return superclass.optional_attributes if superclass.respond_to?(:optional_attributes)
 
-        EMPTY_ARRAY
+        EMPTY_SET
       end
 
       # Specifiy optional attributes
@@ -76,9 +76,9 @@ module El
       def optional(*attributes)
         @optional_attributes =
           if superclass.respond_to?(:optional_attributes) && !superclass.optional_attributes.nil?
-            superclass.optional_attributes + attributes
+            superclass.optional_attributes + attributes.to_set
           else
-            attributes
+            attributes.to_set
           end
 
         self
@@ -221,7 +221,7 @@ module El
     end
 
     def known_attributes
-      required_attributes + optional_attributes
+      @known_attributes ||= required_attributes + optional_attributes
     end
 
     # If the given keys include any known attributes
@@ -338,7 +338,7 @@ module El
     # @param method [Symbol]
     # @param include_all [Boolean]
     def respond_to_missing?(method, include_all)
-      super || key?(method) || hash_respond_to?(method)
+      super || known_attributes.include?(method) || hash_respond_to?(method)
     end
 
     def try(method, *args, **kwargs, &block)
@@ -360,7 +360,7 @@ module El
     # @param args [Array]
     # @param block [Proc]
     def method_missing(method, *args, &block)
-      return @__hash__[method] if @__hash__.key?(method)
+      return @__hash__[method] if known_attributes.include?(method)
 
       if hash_respond_to?(method)
         result = @__hash__.public_send(method, *args, &block)

@@ -4,8 +4,8 @@ module El
   # Represents an attribute of a domain entity. Drives dynamic checks and provides
   # meta objects for reflection.
   class Entity::Attribute < HashDelegator
-    requires :name, :type
-    optional :default
+    requires :name, :namespace, :type
+    optional :default, :cardinality, :definition
 
     def define_on!(entity_class)
       Entity::AttributeBuilder.new(self).call(entity_class)
@@ -24,8 +24,12 @@ module El
       try(:component) == true
     end
 
-    def many?
-      try(:many) == true
+    def reference?
+      try(:reference) == true
+    end
+
+    def exclude_for_storage?
+      try(:exclude_for_storage) == true
     end
 
     # TODO: Define sematics around this
@@ -48,8 +52,8 @@ module El
 
     def value_class
       type = try(:type)
-      return type                    if type.is_a?(Class)
-      return Utils.constantize(type) if type.is_a?(String)
+      return type                          if type.is_a?(Class)
+      return StringUtils.constantize(type) if type.is_a?(String)
     end
 
     def reference_key

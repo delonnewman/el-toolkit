@@ -71,7 +71,7 @@ module El
 
     def define_custom_method!(entity_class)
       name = attribute.name
-      proc = attribute.proc
+      proc = attribute.definition
       entity_class.exclude_for_storage << name
       entity_class.define_method name do
         instance_exec(value_for(name), &proc)
@@ -94,7 +94,7 @@ module El
     def call(entity_class)
       define_predicate_method!(entity_class) if attribute.boolean?
       define_mutation_method!(entity_class)  if attribute.mutable?
-      define_custom_method!(entity_class)    if attribute.proc
+      define_custom_method!(entity_class)    if attribute.definition
 
       if define_component_method?
         define_component_method!(entity_class)

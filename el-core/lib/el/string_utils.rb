@@ -6,6 +6,12 @@ module El
   module StringUtils
     module_function
 
+    def constantize(string)
+      string.split('::').reduce(Kernel) do |mod, const|
+        mod.const_get(const)
+      end
+    end
+
     def underscore(string)
       return string unless /[A-Z-]|::/ =~ string
 

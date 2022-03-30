@@ -4,7 +4,9 @@ module El
   # Class methods for El::Entity
   module Entity::ClassMethods
     def define_attribute(name, type = :any, **options, &block)
-      meta = { name: name, type: type, required: !block, proc: block }
+      meta = { name: name, namespace: self.name, type: type }
+      meta.merge(definition: block) if block_given?
+
       attribute = Entity::Attribute.new(meta.merge(options)).define_on!(self)
 
       @required_attributes ||= []
