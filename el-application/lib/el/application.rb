@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 require 'el/routable'
+require 'el/routes'
 
 require_relative 'application/dependency'
 require_relative 'application/servicable'
 require_relative 'application/service'
-require_relative 'application/routes'
 require_relative 'application/router'
 require_relative 'application/entity'
 

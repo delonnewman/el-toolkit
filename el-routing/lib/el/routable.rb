@@ -7,9 +7,9 @@ require 'stringio'
 
 require 'el/constants'
 
-require_relative 'routable/route'
-require_relative 'routable/routes'
-require_relative 'routable/request'
+require_relative 'route'
+require_relative 'routes'
+require_relative 'request'
 require_relative 'routable/instance_methods'
 require_relative 'routable/dsl'
 

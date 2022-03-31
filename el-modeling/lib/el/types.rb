@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'dry-types'
-
 module El
   # Data types for use with entities and thier attributes
   module Types

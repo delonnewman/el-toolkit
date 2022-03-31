@@ -27,6 +27,5 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ['lib']
 
-  spec.add_runtime_dependency 'el-core'
-  spec.add_runtime_dependency 'dry-types'
+  spec.add_runtime_dependency 'el-core', '~> 0.1.0'
 end

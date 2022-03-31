@@ -3,6 +3,8 @@ source 'https://rubygems.org'
 gemspec
 
 gem 'el-core', path: '../el-core'
+gem 'el-routing', path: '../el-routing'
+gem 'el-modeling', path: '../el-modeling'
 
 group :development, :test do
   gem 'minitest'

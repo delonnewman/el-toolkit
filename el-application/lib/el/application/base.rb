@@ -44,7 +44,7 @@ module El
         @settings     = Settings.new(self)
         @loader       = Loader.new(self)
         @dependencies = ClassMethods::DEPENDENCY_KINDS.reduce({}) { |h, kind| h.merge(kind => {}) }
-        @routes       = Application::Routes.new(self)
+        @routes       = El::Routes.new
       end
 
       def reload!
@@ -95,9 +95,6 @@ module El
         public_path.opendir.children
       end
 
-      DEFAULT_RESPONSE = [404, {}, ['Not Found']].freeze
-      private_constant :DEFAULT_RESPONSE
-
       # Rack interface
       def call(env)
         env['rack.logger'] = logger
@@ -105,12 +102,14 @@ module El
         reload! if development? && initialized?
 
         # dispatch routes
-        routers.each do |_name, router|
-          res = router.call(env)
-          return res unless res[0] == 404
-        end
+        request = routes.match(env)
 
-        DEFAULT_RESPONSE
+        if development?
+          request_history << request
+          request.respond!(self)
+        else
+          request.repond(self)
+        end
       end
 
       def request_history

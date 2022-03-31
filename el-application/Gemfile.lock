@@ -4,10 +4,25 @@ PATH
     el-core (0.1.0)
 
 PATH
+  remote: ../el-modeling
+  specs:
+    el-modeling (0.1.0)
+      el-core (~> 0.1.0)
+
+PATH
+  remote: ../el-routing
+  specs:
+    el-routing (0.1.0)
+      el-core
+      rack
+
+PATH
   remote: .
   specs:
     el-application (0.1.0)
-      el-core
+      el-core (~> 0.1.0)
+      el-modeling (~> 0.1.0)
+      el-routing (~> 0.1.0)
 
 GEM
   remote: https://rubygems.org/
@@ -19,14 +34,16 @@ GEM
     minitest-server (1.0.6)
       minitest (~> 5.0)
     path_expander (1.1.0)
+    rack (2.2.3)
 
 PLATFORMS
   arm64-darwin-21
-  x86_64-darwin-20
 
 DEPENDENCIES
   el-application!
   el-core!
+  el-modeling!
+  el-routing!
   minitest
   minitest-autotest
 

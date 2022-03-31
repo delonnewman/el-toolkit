@@ -50,7 +50,7 @@ module El
         router = router_class.new(app)
         router_class.freeze
 
-        app.routes << router
+        app.routes.merge!(router_class.routes)
 
         router
       end

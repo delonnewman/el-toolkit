@@ -6,7 +6,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ['Delon Newman']
   spec.email         = ['contact@delonnewman.name']
 
-  spec.summary       = 'Declarative domain modeling'
+  spec.summary       = 'Application state container'
   spec.description   = spec.summary
   spec.homepage      = 'https://github.com/delonnewman/el-toolkit'
   spec.license       = 'MIT'
@@ -27,7 +27,7 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ['lib']
 
-  spec.add_runtime_dependency 'el-core'
-  spec.add_runtime_dependency 'el-routing'
-  spec.add_runtime_dependency 'el-modeling'
+  spec.add_runtime_dependency 'el-core', '~> 0.1.0'
+  spec.add_runtime_dependency 'el-routing', '~> 0.1.0'
+  spec.add_runtime_dependency 'el-modeling', '~> 0.1.0'
 end
