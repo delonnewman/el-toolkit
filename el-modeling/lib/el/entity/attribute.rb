@@ -5,7 +5,7 @@ module El
   # meta objects for reflection.
   class Entity::Attribute < HashDelegator
     requires :name, :namespace, :type
-    optional :default, :cardinality, :definition
+    optional :default, :cardinality, :definition, :reference, :exclude_for_storage, :serialize
 
     def define_on!(entity_class)
       Entity::AttributeBuilder.new(self).call(entity_class)
@@ -67,9 +67,10 @@ module El
       when Set    then Types::SetType[type]
       when Class, String
         klass = value_class
-        return ->(v) { klass.validator.call(v).empty? } if entity?
+        return Types::ClassType[klass] unless entity?
 
-        Types::ClassType[klass]
+        attribute = self
+        ->(v) { klass.validator.call(v, attribute).empty? }
       else
         type
       end

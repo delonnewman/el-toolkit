@@ -74,9 +74,9 @@ module El
 
       attrs = entity_class.attributes
 
-      attrs
-        .select(&:serialize?)
-        .each { |attr| h.merge!(attr.name => YAML.dump(h[attr.name])) if h[attr.name] }
+      attrs.select(&:serialize?).each do |attr|
+        h.merge!(attr.name => YAML.dump(h[attr.name])) if h[attr.name]
+      end
 
       comps = attrs.select(&:component?)
 

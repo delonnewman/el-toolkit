@@ -3,12 +3,14 @@ module El
     module Utils
       extend self
 
-      def entity_name(string)
+      def entity_name(string, namespace: false)
+        string = string.split('::').last unless namespace
         Inflection.singular(StringUtils.camelcase(string))
       end
 
-      def table_name(string)
-        Inflection.plural(StringUtils.underscore(string.split('::').last))
+      def table_name(string, namespace: false)
+        string = string.split('::').last unless namespace
+        Inflection.plural(StringUtils.underscore(string))
       end
       alias repository_name table_name
 

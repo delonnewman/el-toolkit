@@ -9,9 +9,6 @@ module El
 
       attribute = Entity::Attribute.new(meta.merge(options)).define_on!(self)
 
-      @required_attributes ||= []
-      @required_attributes << name if attribute.required?
-
       @attributes ||= {}
       @attributes[name] = attribute
 

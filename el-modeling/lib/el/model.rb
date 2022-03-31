@@ -17,7 +17,7 @@ module El
     end
 
     def register_entity(entity_class)
-      @entities[entity_name(entity_class.name.split('::').last).to_sym] = entity_class
+      @entities[entity_name(entity_class.name).to_sym] = entity_class
       self
     end
     alias << register_entity

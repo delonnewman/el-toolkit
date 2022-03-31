@@ -56,7 +56,7 @@ module El
             attributes.to_set
           end
 
-        self
+        attributes
       end
 
       # Return optional attributes or nil
@@ -81,7 +81,7 @@ module El
             attributes.to_set
           end
 
-        self
+        attributes
       end
 
       def validate!(data)
@@ -360,7 +360,7 @@ module El
     # @param args [Array]
     # @param block [Proc]
     def method_missing(method, *args, &block)
-      return @__hash__[method] if known_attributes.include?(method)
+      return @__hash__[method] if known_attributes.include?(method) || @__hash__.key?(method)
 
       if hash_respond_to?(method)
         result = @__hash__.public_send(method, *args, &block)

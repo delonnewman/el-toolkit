@@ -41,9 +41,8 @@ module El
     def dataset
       return @dataset if @dataset
 
-      @dataset = model.database[model.table_name(entity_class.name)]
+      @dataset = table
       @dataset = @dataset.order(order_by_attribute_name) if order_by_attribute_name
-
       return @dataset if component_attributes.empty?
 
       @dataset = field_info.reduce(@dataset) { |ds, data| ds.join(data[:table], id: data[:ref]) }.select(*fields)
@@ -60,10 +59,7 @@ module El
     def fields
       return @fields if @fields
 
-      @fields = entity_class.attributes
-                            .reject(&:exclude_for_storage?)
-                            .map { |a| Sequel[table_name][a.name] }
-
+      @fields = entity_class.storable_attributes.map { |a| Sequel[table_name][a.name] }
       return @fields if component_attributes.empty?
 
       @fields += field_info.flat_map { |data| data[:fields] }
@@ -72,15 +68,19 @@ module El
     public
 
     def table_name
-      model.table_name(entity_class.name)
+      model.table_name(entity_class.name).to_sym
     end
 
     def table
       database[table_name]
     end
 
+    def table_exists?
+      database.table_exists?(table_name)
+    end
+
     def empty?
-      dataset.empty?
+      table.empty?
     end
 
     def all(&block)
@@ -271,7 +271,7 @@ module El
       return data if component_attributes.empty?
 
       component_attributes.reduce(data) do |h, comp|
-        h.merge!(Modeling::Utils.reference_key(comp) => app.ensure_repository!(comp.value_class).find!(entity.value_for(comp.name)).id)
+        h.merge!(Modeling::Utils.reference_key(comp.name).to_sym => model.repository(comp.value_class).find!(entity.value_for(comp.name)).id)
       end
     end
   end
