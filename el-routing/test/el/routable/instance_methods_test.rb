@@ -18,10 +18,10 @@ module El
 
       def test_match_named_path
         test = nil
-        @routable.get '/:id', ->(id) { test = id }
+        @routable.get '/:id', ->(r) { test = r.params[:id] }
         router = @routable.new
 
-        examples = [{ path: '/123', value: '123' }]
+        examples = [{ path: '/123', value: '123' }, { path: '/abc123', value: 'abc123' }]
 
         examples.each do |example|
           router.call(Rack::MockRequest.env_for(example[:path]))

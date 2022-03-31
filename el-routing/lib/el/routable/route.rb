@@ -6,7 +6,7 @@ module El
     class Route
       attr_reader :method, :path, :options, :action, :parsed_path
 
-      def initialize(method, path, action, options)
+      def initialize(method, path, action, options = EMPTY_HASH)
         @method      = method
         @path        = path
         @action      = action

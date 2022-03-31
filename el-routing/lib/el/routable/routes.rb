@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'el/core_ext/hash'
+
 module El
   module Routable
     # A routing table--collects routes, and matches them against a given Rack environment.
@@ -9,9 +11,22 @@ module El
     class Routes
       include Enumerable
 
-      def initialize
+      def self.[](map)
+        new do |r|
+          map.each_pair do |(method, path, options), action|
+            r << Route.new(method, path, action, options || EMPTY_HASH)
+          end
+        end
+      end
+
+      # A Hash of helper procs for building paths and urls
+      attr_reader :helpers
+
+      def initialize(&block)
         @table = {}
         @routes = []
+        @helpers = {}
+        block.call(self) if block_given?
       end
 
       def freeze
@@ -19,7 +34,7 @@ module El
         @table.each_value(&:freeze)
         @routes.freeze
         @routes.each(&:freeze)
-        @route_helper_methods.freeze
+        @helpers.freeze
         self
       end
 
@@ -39,11 +54,17 @@ module El
       end
       alias each each_route
 
-      # Return the names of the route helper methods that are genterated as routes are added.
-      #
-      # @return [Array<Symbol>]
-      def route_helper_methods
-        @route_helper_methods ||= {}
+      # Merge routing tables into one
+      def merge!(other)
+        @routes += other.instance_variable_get(:@routes)
+        @table.deep_merge!(other.instance_variable_get(:@table))
+        @helpers.merge!(other.helpers)
+
+        self
+      end
+
+      def merge(other)
+        dup.merge!(other)
       end
 
       # Add a route to the table.
@@ -54,28 +75,30 @@ module El
       def <<(route)
         # TODO: Add Symbol#name for older versions of Ruby
         method = route.method.name.upcase
-        @table[method] ||= []
+        scope = route.parsed_path[:path].reduce(@table) do |tree, part|
+          tree[part] ||= {}
+        end
 
-        @table[method] << route
+        scope[method] = route
         @routes << route
 
-        define_path_method!(route)
-        define_url_method!(route)
+        define_path_helper!(route)
+        define_url_helper!(route)
 
         self
       end
 
       private
 
-      def define_path_method!(route)
+      def define_path_helper!(route)
         name = route.path_method_name.to_sym
-        route_helper_methods[name] = ->(*args) { route.route_path(*args) }
+        helpers[name] = ->(*args) { route.route_path(*args) }
         name
       end
 
-      def define_url_method!(route)
+      def define_url_helper!(route)
         name = route.url_method_name.to_sym
-        route_helper_methods[name] = ->(*args) { route.route_url(*args) }
+        helpers[name] = ->(*args) { route.route_url(*args) }
         name
       end
 
@@ -87,20 +110,57 @@ module El
       #
       # @return [[Route, Hash]] the route and it's params or an empty array
       # @api private
+
+      # rubocop: disable Metrics/CyclomaticComplexity
+      # rubocop: disable Metrics/AbcSize
+      # rubocop: disable Metrics/PerceivedComplexity
       def match(env)
         method, path = env.values_at('REQUEST_METHOD', 'PATH_INFO')
         path  = path.start_with?('/') ? path[1, path.size] : path
-        parts = path.split(%r{/+})
+        parts = path.split(%r{/+}) << method
 
-        return unless (routes = @table[method])
+        scope  = @table
+        prev   = nil
+        values = []
 
-        routes.each do |route|
-          next unless (params = match_path(parts, route.parsed_path))
+        i = 0
+        until scope.nil?
+          if scope.is_a?(Route)
+            params = {}
+            scope.parsed_path[:names].each_with_index do |name, j|
+              next unless name
 
-          return Request.new(env, route, route_params: params)
+              params[name] = values[j]
+            end
+
+            return Request.new(env, scope, route_params: params)
+          end
+
+          part = parts[i]
+          prev  = scope
+          scope = scope[part]
+
+          i += 1
+          next unless scope.nil?
+
+          prev.each_key do |pattern|
+            next if pattern.is_a?(String)
+
+            if pattern === part
+              scope = prev[pattern]
+              values[i - 1] = part
+            end
+          end
+
+          return if scope.nil?
+
         end
 
         nil
+      end
+
+      def fetch(method, path)
+        match(Rack::MockRequest.env_for(path, method: method))
       end
 
       private
@@ -118,26 +178,6 @@ module El
 
         res
       end
-
-      # rubocop:disable Metrics/MethodLength
-      def match_path(path, route)
-        return false if path.size != route[:path].size
-
-        pattern = route[:path]
-        names   = route[:names]
-        params  = {}
-
-        path.each_with_index do |part, i|
-          return false unless pattern[i] === part
-
-          if (name = names[i])
-            params[name] = part
-          end
-        end
-
-        params
-      end
-      # rubocop:enable Metrics/MethodLength
     end
   end
 end

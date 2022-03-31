@@ -8,7 +8,7 @@ module El
 
       attr_reader :route_params, :route
 
-      def initialize(env, route, route_params: nil, params: nil)
+      def initialize(env, route = nil, route_params: nil, params: nil)
         @env = env.dup # take a snapshot of the rack request
         @route = route
         @route_params = route_params
