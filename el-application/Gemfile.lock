@@ -1,29 +1,34 @@
-GIT
-  remote: https://github.com/delonnewman/rack-routable.git
-  revision: e429dab524f932182b0c31b6c4e841780af8f4ca
-  specs:
-    rack-routable (0.1.0)
-      invokable
-      rack
-
 PATH
   remote: ../el-core
   specs:
     el-core (0.1.0)
 
+PATH
+  remote: .
+  specs:
+    el-application (0.1.0)
+      el-core
+
 GEM
   remote: https://rubygems.org/
   specs:
-    invokable (1.0.0)
-    rack (2.2.3)
+    minitest (5.15.0)
+    minitest-autotest (1.1.1)
+      minitest-server (~> 1.0)
+      path_expander (~> 1.0)
+    minitest-server (1.0.6)
+      minitest (~> 5.0)
+    path_expander (1.1.0)
 
 PLATFORMS
+  arm64-darwin-21
   x86_64-darwin-20
 
 DEPENDENCIES
+  el-application!
   el-core!
-  rack
-  rack-routable!
+  minitest
+  minitest-autotest
 
 BUNDLED WITH
-   2.2.16
+   2.3.8

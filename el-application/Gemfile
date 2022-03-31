@@ -1,5 +1,10 @@
-source "https://rubygems.org"
+source 'https://rubygems.org'
 
-gem "el-core", path: "../el-core", require: false
-gem "rack-routable", git: "https://github.com/delonnewman/rack-routable.git"
-gem "rack"
+gemspec
+
+gem 'el-core', path: '../el-core'
+
+group :development, :test do
+  gem 'minitest'
+  gem 'minitest-autotest'
+end
