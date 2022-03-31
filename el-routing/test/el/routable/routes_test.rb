@@ -50,6 +50,7 @@ module El
           paths.each do |(method, path)|
             request = routes.match(Rack::MockRequest.env_for(path, method: method))
 
+            assert !request.not_found?
             assert_equal expected_path, request.route.path
             assert_equal method, request.route.method
           end

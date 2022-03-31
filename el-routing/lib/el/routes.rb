@@ -22,7 +22,7 @@ module El
     def initialize(&block)
       @table = {}
       @routes = []
-      @helpers = {}
+      @aliases = {}
       block.call(self) if block_given?
     end
 
@@ -31,7 +31,7 @@ module El
       @table.each_value(&:freeze)
       @routes.freeze
       @routes.each(&:freeze)
-      @helpers.freeze
+      @aliases.freeze
       self
     end
 
@@ -43,13 +43,21 @@ module El
       @routes.dup
     end
 
-    def [](index, path = nil)
-      if path
-        fetch(index, path)
-      elsif index.is_a?(String)
-        raise NotImplementedError, 'will support listing all routes matching the given path'
+    # Find routes by method, path, alias or numerical index
+    #
+    # @param first [String, Integer, Symbol] a path, method, alias or number
+    # @param second [String, nil] a path if a method is specified
+    #
+    # @return [Route, Array<Route>]
+    def [](first, second = nil)
+      if first.is_a?(Integer)
+        @routes[first]
+      elsif second
+        fetch(first, second)
+      elsif first.is_a?(Symbol)
+        route(first)
       else
-        @routes[index]
+        match_path(first.to_s)
       end
     end
 
@@ -69,7 +77,7 @@ module El
     def merge!(other)
       @routes += other.instance_variable_get(:@routes)
       @table.deep_merge!(other.instance_variable_get(:@table))
-      @helpers.merge!(other.instance_variable_get(:@helpers))
+      @aliases.merge!(other.instance_variable_get(:@aliases))
 
       self
     end
@@ -92,54 +100,48 @@ module El
 
       scope[method] = route
       @routes << route
-
-      define_path_helper!(route)
-      define_url_helper!(route)
+      @aliases[route.route_alias] = route
 
       self
     end
 
-    def define_helper(name, &block)
-      @helpers[name] = block
-      name
+    def alias?(name)
+      @alias.key?(name)
     end
 
-    def helper?(name)
-      @helpers.key?(name)
-    end
-
-    def helper!(name)
-      @helpers.fetch(name) do
-        raise "unknown helper `#{name}`, valid helpers: #{helpers.keys.join(", ")}"
+    def alias!(name)
+      @aliases.fetch(name) do
+        raise "unknown alias `#{name}`, valid aliases: #{aliases.keys.join(", ")}"
       end
     end
 
-    def helper(name, alt = nil)
-      @helpers.fetch(name, alt)
+    def route(name, alt = nil)
+      @aliases.fetch(name, alt)
     end
 
-    def helpers
-      @helpers.keys
+    def aliases
+      @aliases.keys
     end
-
-    private
-
-    def define_path_helper!(route)
-      define_helper route.path_method_name.to_sym do |*args|
-        route.route_path(*args)
-      end
-    end
-
-    def define_url_helper!(route)
-      define_helper route.url_method_name.to_sym do |*args|
-        route.route_url(*args)
-      end
-    end
-
-    public
 
     def fetch(method, path)
-      match(Rack::MockRequest.env_for(path, method: method))
+      _match(parsed_request(Rack::MockRequest.env_for(path, method: method)))
+    end
+
+    def match_path(path)
+      scope = _match(parsed_path(path), splat_methods: true)
+      return EMPTY_ARRAY unless scope
+
+      flatten_nested_routes(scope)
+    end
+
+    def flatten_nested_routes(scope)
+      scope.values.flat_map do |value|
+        if value.is_a?(Route)
+          value
+        else
+          flatten_nested_routes(value)
+        end
+      end
     end
 
     # Match a route in the table to the given Rack environment.
@@ -153,16 +155,36 @@ module El
     # rubocop: disable Metrics/AbcSize
     # rubocop: disable Metrics/PerceivedComplexity
     def match(env)
-      method, path = env.values_at('REQUEST_METHOD', 'PATH_INFO')
-      path  = path.start_with?('/') ? path[1, path.size] : path
-      parts = path.split(%r{/+}) << method
+      _match(parsed_request(env), env)
+    end
 
+    private
+
+    def parsed_request(env)
+      method, path = env.values_at('REQUEST_METHOD', 'PATH_INFO')
+      parsed_path(path) << method
+    end
+
+    def parsed_path(path)
+      path = path.start_with?('/') ? path[1, path.size] : path
+      path.split(%r{/+})
+    end
+
+    def _match(parts, env = nil, splat_methods: false)
       scope  = @table
       prev   = nil
       values = []
 
       i = 0
-      until scope.nil?
+      loop do
+        break if scope.nil?
+
+        part  = parts[i]
+        prev  = scope
+        scope = scope[part]
+
+        i += 1
+
         if scope.is_a?(Route)
           params = {}
           scope.parsed_path[:names].each_with_index do |name, j|
@@ -171,14 +193,11 @@ module El
             params[name] = values[j]
           end
 
+          return scope unless env
+
           return Request.new(env, scope, route_params: params)
         end
 
-        part = parts[i]
-        prev  = scope
-        scope = scope[part]
-
-        i += 1
         next unless scope.nil?
 
         prev.each_key do |pattern|
@@ -190,6 +209,9 @@ module El
           end
         end
       end
+
+      return prev if splat_methods
+      return unless env
 
       RequestNotFound.new(env)
     end

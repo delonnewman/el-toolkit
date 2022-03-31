@@ -53,6 +53,10 @@ module El
       action.call(request)
     end
 
+    def route_alias
+      path_method_prefix.to_sym
+    end
+
     def path_method_prefix
       return 'root' if path == '/'
 
