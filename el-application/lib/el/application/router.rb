@@ -69,11 +69,6 @@ module El
         @app = app
       end
 
-      def eval_request(request)
-        app.request_history << request if app.development?
-        super
-      end
-
       def logger
         app.logger
       end

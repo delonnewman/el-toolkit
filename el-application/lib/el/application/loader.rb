@@ -57,8 +57,8 @@ module El
         init_ignore_paths
         init_collapse_paths
 
-        @instance.enable_reloading if app.development?
-        init_livereload! if app.development?
+        @instance.enable_reloading if app.settings[:autoreload]
+        init_livereload! if app.settings[:livereload]
 
         @instance.setup
         @instance.eager_load

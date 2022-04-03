@@ -10,11 +10,15 @@ module El
 
       def initialize(app)
         @app = app
-        @settings = {}
+        @settings = {} # TODO: wrap in an atom
       end
 
       def [](key)
         @settings[normalize_key(key)]
+      end
+
+      def []=(key, value)
+        @settings[key] = value # TODO: use @settings.swap { |s| s.merge(key => value) }
       end
 
       def load!

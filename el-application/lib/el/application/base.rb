@@ -6,11 +6,29 @@ module El
     class Base
       extend ClassMethods
 
-      def self.init!(env = ENV.fetch('RACK_ENV', 'development').to_sym)
+      configure :development do
+        enable :logging_request_history
+        enable :autoreload
+        enable :livereload
+        enable :raise_server_errors
+
+        disable :template_caching
+      end
+
+      configure :production do
+        disable :logging_request_history
+        disable :autoreload
+        disable :livereload
+        disable :raise_server_errors
+
+        enable :template_caching
+      end
+
+      def self.init!(env = environment)
         new(env).init!
       end
 
-      def self.with_only_settings(env = ENV.fetch('RACK_ENV', 'development').to_sym)
+      def self.with_only_settings(env = environment)
         new(env).tap do |app|
           app.settings.load!
         end
@@ -48,6 +66,7 @@ module El
       end
 
       def reload!
+        logger.info 'Reloading...'
         settings.unload!
         loader.reload!
         @initialized = false
@@ -99,16 +118,16 @@ module El
       def call(env)
         env['rack.logger'] = logger
 
-        reload! if development? && initialized?
+        reload! if settings[:autoreload] && initialized?
 
         # dispatch routes
         request = routes.match(env)
+        request_history << request if settings[:logging_request_history]
 
-        if development?
-          request_history << request
+        if settings[:raise_server_errors]
           request.respond!(self)
         else
-          request.repond(self)
+          request.respond(self)
         end
       end
 
@@ -117,7 +136,7 @@ module El
       end
 
       def init!
-        raise 'An application can only be initialized once' if initialized? && !development?
+        raise 'An application can only be initialized once' if initialized? && !settings[:autoreload]
 
         notify
         settings.load!

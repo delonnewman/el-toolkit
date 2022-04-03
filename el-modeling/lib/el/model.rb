@@ -40,6 +40,7 @@ module El
       @entities.values.flat_map(&:attributes)
     end
 
+    # TODO: Add diffs
     def schema_version
       schema.reduce(hash) do |hash, a|
         El::Utils.hash_combine(hash, a.hash)

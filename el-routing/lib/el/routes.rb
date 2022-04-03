@@ -1,7 +1,10 @@
 # frozen_string_literal: true
 
 require 'el/core_ext/hash'
+require 'el/constants'
+
 require_relative 'request_not_found'
+require_relative 'route'
 
 module El
   # A routing table--collects routes, and matches them against a given Rack environment.
@@ -11,6 +14,19 @@ module El
   class Routes
     include Enumerable
 
+    # Build routes declaratively from a hash.
+    #
+    # @example
+    #   Routes[
+    #     [:get,    '/']          => [MainController,  :index],
+    #     [:get,    '/users']     => [UsersController, :index],
+    #     [:post,   '/users']     => [UsersController, :create],
+    #     [:get,    '/users/:id'] => [UsersController, :show],
+    #     [:post,   '/users/:id'] => [UsersController, :update],
+    #     [:delete, '/users/:id'] => [UsersController, :remove]
+    #   ]
+    #
+    # @return [Routes]
     def self.[](map)
       new do |r|
         map.each_pair do |(method, path, options), action|
@@ -134,16 +150,6 @@ module El
       flatten_nested_routes(scope)
     end
 
-    def flatten_nested_routes(scope)
-      scope.values.flat_map do |value|
-        if value.is_a?(Route)
-          value
-        else
-          flatten_nested_routes(value)
-        end
-      end
-    end
-
     # Match a route in the table to the given Rack environment.
     #
     # @param env [Hash]
@@ -159,6 +165,16 @@ module El
     end
 
     private
+
+    def flatten_nested_routes(scope)
+      scope.values.flat_map do |value|
+        if value.is_a?(Route)
+          value
+        else
+          flatten_nested_routes(value)
+        end
+      end
+    end
 
     def parsed_request(env)
       method, path = env.values_at('REQUEST_METHOD', 'PATH_INFO')

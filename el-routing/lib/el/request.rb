@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'request_error'
+
 module El
   class Request
     include Enumerable
@@ -30,7 +32,7 @@ module El
     def respond(context = nil)
       evaluate(context)
     rescue StandardError => e
-      RequestError.new(@env, e)
+      RequestError.new(@env, e).respond(context)
     end
 
     def evaluate(context = nil)
@@ -218,6 +220,10 @@ module El
 
     def url_for(path)
       URI.join(base_url, path)
+    end
+
+    def url
+      url_for(path)
     end
   end
 end

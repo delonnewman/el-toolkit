@@ -4,8 +4,23 @@ module El
   module Application
     # Macro and meta methods for application configuration
     module ClassMethods
+      def environment
+        ENV.fetch('APP_ENV', ENV.fetch('RACK_ENV', 'development')).to_sym
+      end
+
+      def configure(env, &block)
+        instance_exec(&block) if environment == env
+      end
+
       def settings
-        @settings ||= {}
+        return @settings if @settings
+
+        @settings =
+          if superclass.respond_to?(:settings)
+            superclass.settings.dup
+          else
+            {}
+          end
       end
 
       def set(key, value)

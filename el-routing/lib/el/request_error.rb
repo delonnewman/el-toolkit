@@ -5,7 +5,7 @@ module El
       @error = error
     end
 
-    DEFAULT_RESPONSE = [505, { 'Content-Type' => 'text/html' }, ['Server Error'].freeze].freeze
+    DEFAULT_RESPONSE = [505, { 'Content-Type' => 'text/html' }, ['Server Error']].freeze
 
     def respond(*)
       DEFAULT_RESPONSE
