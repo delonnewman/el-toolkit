@@ -7,33 +7,27 @@ module El
 
     def has_many(name, **options)
       type = El::Modeling::Utils.entity_name(name)
-      meta = { required: false }.merge!(options.merge(cardinality: :one_to_many, exclude_for_storage: true))
+      meta = { required: false }.merge!(options.merge(cardinality: :one_to_many, exclude_for_storage: true, deref: true))
       define_attribute(name, type, **meta)
       name
     end
 
     def has_and_belongs_to_many(name, **options)
       type = El::Modeling::Utils.entity_name(name)
-      meta = { required: false }.merge!(options.merge(cardinality: :many_to_many, exclude_for_storage: true))
+      meta = { required: false }.merge!(options.merge(cardinality: :many_to_many, exclude_for_storage: true, deref: true))
       define_attribute(name, type, **meta)
       name
     end
 
     def belongs_to(name, **options)
       type = El::Modeling::Utils.entity_name("#{self}_#{name}", namespace: true)
-      define_attribute(name, type, **options.merge(cardinality: :many_to_one, exclude_for_storage: true))
-
-      attr = attribute(name)
-      define_method name do
-        attr.value_class[value_for(name)]
-      end
-
+      define_attribute(name, type, **options.merge(cardinality: :many_to_one, exclude_for_storage: true, deref: true))
       name
     end
 
     def has_one(name, **options)
       type = El::Modeling::Utils.entity_name(name)
-      define_attribute(name, type, **options.merge(cardinality: :one_to_one, exclude_for_storage: true))
+      define_attribute(name, type, **options.merge(cardinality: :one_to_one, exclude_for_storage: true, deref: true))
       name
     end
 

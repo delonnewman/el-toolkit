@@ -18,6 +18,7 @@ module El
     require_relative 'entity/data_dehydrator'
     require_relative 'entity/class_methods'
     require_relative 'entity/attribute'
+    require_relative 'entity/dereferencer'
 
     extend Forwardable
     extend ClassMethods
@@ -34,13 +35,7 @@ module El
     end
 
     def value_for(name)
-      return __hash__[name] if __hash__.key?(name)
-
-      @defaults ||= {}
-      @defaults[name] ||= begin
-        default = attribute(name).default
-        default.is_a?(Proc) ? instance_exec(&default) : default
-      end
+      __hash__[name]
     end
     alias [] value_for
 
@@ -68,6 +63,14 @@ module El
 
     def to_json(*args)
       to_h.to_json(*args)
+    end
+
+    def to_query(namespace = nil)
+      to_h.to_query(namespace)
+    end
+
+    def to_param
+      id.to_s
     end
   end
 end

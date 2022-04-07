@@ -20,22 +20,7 @@ module El
     end
 
     def define_predicate_method!(entity_class)
-      name = attribute.name
-      entity_class.define_method :"#{name}?" do
-        self[name] == true
-      end
-    end
-
-    # TODO: Define semantics around this
-    def define_mutation_method!(entity_class)
-      name = attribute.name
-      type = attribute.type
-      pred = attribute.type_predicate
-      entity_class.define_method :"#{name}=" do |value|
-        raise TypeError, "#{value.inspect}:#{value.class} is not a valid #{type}" unless pred.call(value)
-
-        self[name] = value
-      end
+      entity_class.class_eval "def #{name}?; !!value_for(#{name.inspect}) end", __FILE__, __LINE__
     end
 
     def validate_attribute_name!
@@ -55,49 +40,41 @@ module El
       end
     end
 
-    def define_component_method!(entity_class)
-      validate_entity_mapping!
-
-      name = attribute.name
-      entity_class.define_method name do
-        value = value_for(name)
-        klass = attribute(name).value_class
-
-        return value if value.is_a?(klass)
-
-        klass[value]
-      end
-    end
-
     def define_custom_method!(entity_class)
-      name = attribute.name
-      proc = attribute.definition
       entity_class.exclude_for_storage << name
-      entity_class.define_method name do
-        instance_exec(value_for(name), &proc)
-      end
+      entity_class.class_eval <<~CODE, __FILE__, __LINE__ + 1
+        def #{name}
+          proc = attribute(#{name.inspect}).definition
+          instance_exec(value_for(name), &proc)
+        end
+      CODE
     end
 
     def define_reading_method!(entity_class)
-      attr_name = name
-      entity_class.define_method name do
-        value_for(attr_name)
-      end
+      entity_class.class_eval "def #{name}; value_for(#{name.inspect}) end", __FILE__, __LINE__
     end
 
-    def define_component_method?
-      attribute.component? && mapping.is_a?(Hash)
+    def define_method_with_default!(entity_class)
+      entity_class.class_eval <<~CODE, __FILE__, __LINE__ + 1
+        def #{name}
+          value = value_for(#{name.inspect})
+          return value if value
+
+          default = attribute(#{name.inspect}).default
+          default.is_a?(Proc) ? instance_exec(&default) : default
+        end
+      CODE
     end
 
     public
 
     def call(entity_class)
       define_predicate_method!(entity_class) if attribute.boolean?
-      define_mutation_method!(entity_class)  if attribute.mutable?
-      define_custom_method!(entity_class)    if attribute.definition
 
-      if define_component_method?
-        define_component_method!(entity_class)
+      if attribute.definition
+        define_custom_method!(entity_class)
+      elsif attribute.default
+        define_method_with_default!(entity_class)
       else
         define_reading_method!(entity_class)
       end

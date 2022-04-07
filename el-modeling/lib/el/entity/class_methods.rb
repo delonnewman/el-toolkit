@@ -4,6 +4,9 @@ module El
   # Class methods for El::Entity
   module Entity::ClassMethods
     def define_attribute(name, type = :any, **options, &block)
+      raise 'name should be a symbol' unless name.is_a?(Symbol)
+      raise 'name should not include special characters' if name.name =~ /\W/
+
       meta = { name: name, namespace: self.name, type: type }
       meta.merge(definition: block) if block_given?
 
@@ -35,7 +38,7 @@ module El
     end
 
     def [](attributes)
-      new(attributes)
+      new(dereferencer.call(attributes))
     end
     alias call []
 
@@ -45,6 +48,10 @@ module El
 
     def canonical_name
       StringUtils.underscore(name.split('::').last)
+    end
+
+    def dereferencer
+      @dereferencer ||= Entity::Dereferencer.new(self)
     end
 
     def validator

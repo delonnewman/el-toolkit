@@ -21,7 +21,7 @@ module El
     end
 
     def component?
-      try(:component) == true
+      try(:cardinality) == :many_to_one
     end
 
     def reference?
