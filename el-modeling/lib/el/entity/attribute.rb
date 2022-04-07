@@ -5,7 +5,7 @@ module El
   # meta objects for reflection.
   class Entity::Attribute < HashDelegator
     requires :name, :namespace, :type
-    optional :default, :cardinality, :definition, :reference, :exclude_for_storage, :serialize
+    optional :default, :cardinality, :definition, :reference, :exclude_for_storage, :serialize, :deref
 
     def define_on!(entity_class)
       Entity::AttributeBuilder.new(self).call(entity_class)
@@ -22,6 +22,10 @@ module El
 
     def component?
       try(:cardinality) == :many_to_one
+    end
+
+    def deref?
+      try(:deref) == true
     end
 
     def reference?

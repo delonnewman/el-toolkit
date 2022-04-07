@@ -23,15 +23,15 @@ module El
     extend Forwardable
     extend ClassMethods
 
-    def_delegators 'self.class', :dehydrator, :normalizer, :attribute, :validate!
+    def_delegators 'self.class', :dehydrator, :normalizer, :attribute, :validate!, :dereferencer
     def_delegators :to_h, :to_a
 
     def initialize(attributes = EMPTY_HASH)
       raise 'El::Entity should not be initialized directly' if instance_of?(El::Entity)
 
-      record = normalizer.call(validate!(attributes), self)
+      record = normalizer.call(validate!(dereferencer.call(attributes)), self).freeze
 
-      super(record.freeze)
+      super(record)
     end
 
     def value_for(name)
@@ -40,12 +40,11 @@ module El
     alias [] value_for
 
     def to_proc
-      ->(name) { value_for(name) }
+      ->(name) { public_send(name) }
     end
 
     def to_h
-      hash = @defaults ? @defaults.merge(__hash__) : __hash__
-      dehydrator.call(hash, self)
+      dehydrator.call(__hash__, self)
     end
 
     def ===(other)

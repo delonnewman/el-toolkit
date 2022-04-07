@@ -1,5 +1,5 @@
 module El
-  class Entity::Deferencer
+  class Entity::Dereferencer
     attr_reader :entity_class
 
     def initialize(entity_class)
@@ -11,7 +11,7 @@ module El
         attr = entity_class.attribute(name)
 
         data[name] =
-          if attr.deref && attr.entity?
+          if attr.deref? && attr.entity?
             attr.value_class[value]
           else
             value

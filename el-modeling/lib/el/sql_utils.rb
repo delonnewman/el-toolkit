@@ -97,6 +97,7 @@ module El
       h
     end
 
+    # TODO: Make this into a YAMLSerializer callable class
     def reconstitute_record(entity_class, hash)
       entity_class.attributes.select(&:serialize?).each_with_object(hash.dup) do |attr, h|
         h.merge!(attr.name => YAML.load(h[attr.name])) if h[attr.name]

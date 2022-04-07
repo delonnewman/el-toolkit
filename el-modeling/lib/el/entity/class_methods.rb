@@ -38,7 +38,7 @@ module El
     end
 
     def [](attributes)
-      new(dereferencer.call(attributes))
+      new(attributes)
     end
     alias call []
 
