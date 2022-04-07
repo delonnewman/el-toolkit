@@ -103,9 +103,9 @@ module El
     end
 
     def pluck(*columns)
-      return @simple_dataset.select_map(columns[0]) if columns.size == 1
+      return table.select_map(columns[0]) if columns.size == 1
 
-      @simple_dataset.select_map(columns)
+      table.select_map(columns)
     end
 
     def find_by(predicates)
@@ -140,7 +140,7 @@ module El
         end
       end
 
-      @simple_dataset.where(id: id).update(data)
+      table.where(id: id).update(data)
     end
 
     def valid?(entity, &block)
@@ -206,7 +206,7 @@ module El
     end
 
     def delete_where!(predicates)
-      @simple_dataset.where(predicates).delete
+      table.where(predicates).delete
     end
 
     def delete_all!

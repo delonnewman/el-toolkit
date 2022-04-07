@@ -27,6 +27,10 @@ module El
       @entities.fetch(entity_name(name).to_sym)
     end
 
+    def entity_classes
+      @entities.values
+    end
+
     def repository_class(name)
       entity_class(name).repository_class
     end
