@@ -69,6 +69,7 @@ module El
         logger.info 'Reloading...'
         settings.unload!
         loader.reload!
+        @routes = El::Routes.new
         @initialized = false
 
         init!
