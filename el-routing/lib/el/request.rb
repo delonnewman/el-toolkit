@@ -219,7 +219,7 @@ module El
     end
 
     def url_for(path)
-      URI.join(base_url, path)
+      URI.join(base_url, path).to_s
     end
 
     def url

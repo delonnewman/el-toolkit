@@ -70,7 +70,7 @@ module El
       # A "macro" method for defining a route for the application.
       #
       # @param method [:get, :post, :delete :put, :head, :link :unlink]
-      def route(request_method, path, controller = nil, method = nil, **options, &block)
+      def route(request_method, path, controller = nil, method = :call, **options, &block)
         raise "Invalid method: #{request_method.inspect}" unless METHODS.include?(request_method)
 
         action = block_given? ? block : resolve_action(controller, method)

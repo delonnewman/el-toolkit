@@ -102,6 +102,10 @@ module El
       dup.merge!(other)
     end
 
+    def list
+      map { |r| [r.method, r.path, r.route_alias] }
+    end
+
     # Add a route to the table.
     #
     # @param Route [Route]

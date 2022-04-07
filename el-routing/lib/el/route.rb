@@ -57,14 +57,22 @@ module El
       path_method_prefix.to_sym
     end
 
+    IGNORED_PREFIXES = %w[index show create remove update].to_set.freeze
+    IGNORED_SEGMENTS = %w[new].to_set.freeze
+
     def path_method_prefix
       return 'root' if path == '/'
+      return options[:as].name if options.key?(:as)
 
       path_parts = path.split('/')
       return 'root' if path_parts.length.zero? || path_parts[1].start_with?(':')
 
       parts = []
+      parts << action[1].name if !IGNORED_PREFIXES.include?(action[1].name) && controller_action?(action)
+
       path.split('/').each do |part|
+        next if IGNORED_SEGMENTS.include?(part)
+
         parts << part.gsub(/\W+/, '_') unless part.start_with?(':') || part.empty?
       end
       parts.join('_')
@@ -76,48 +84,6 @@ module El
 
     def url_method_name
       "#{path_method_prefix}_url"
-    end
-
-    def route_url(root, *args)
-      args, params = params_from(args)
-      path_with_params(URI.join(root, base_path(*args)), params)
-    end
-
-    def route_path(*args)
-      args, params = params_from(args)
-      path_with_params(base_path(*args), params)
-    end
-
-    private
-
-    def params_from(args)
-      if args.last.is_a?(Hash)
-        [args.slice(0, args.size - 1), args.last]
-      else
-        [args, EMPTY_HASH]
-      end
-    end
-
-    def path_with_params(base, params)
-      return base if params.empty?
-
-      "#{base}?#{URI.encode_www_form(params)}"
-    end
-
-    def base_path(*args)
-      vars = @path.scan(/(:\w+)/)
-
-      if vars.length != args.length
-        raise ArgumentError, "wrong number of arguments expected #{vars.length} got #{args.length}"
-      end
-
-      return @path if vars.length.zero?
-
-      path = nil
-      vars.each_with_index do |str, i|
-        path = @path.sub(str[0], args[i].to_s)
-      end
-      path
     end
   end
 end
