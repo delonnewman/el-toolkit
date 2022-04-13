@@ -118,7 +118,7 @@ module El
         dispatch_request(routes.match(env))
       end
 
-      def dipatch_request(request)
+      def dispatch_request(request)
         request_history << request if settings[:logging_request_history]
 
         unless base_url?
