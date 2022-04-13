@@ -43,7 +43,6 @@ module El
 
     def call(entity_data, attribute = nil)
       errors = {}
-
       return errors if attribute && valid_reference?(attribute, entity_data)
 
       validate_required_attributes!(errors, entity_data)

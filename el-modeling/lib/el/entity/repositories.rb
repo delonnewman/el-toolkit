@@ -1,4 +1,5 @@
 module El
+  # TODO: make into a plugin
   module Entity::Repositories
     def repository_class_name(class_name = nil)
       @repository_class_name = class_name if class_name

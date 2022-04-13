@@ -1,5 +1,6 @@
 module El
   # Methods used for Entity associations
+  # TODO: make into a plugin
   module Entity::Associations
     def reference_key
       :"#{canonical_name.downcase}_id"

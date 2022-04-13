@@ -1,4 +1,5 @@
 module El
+  # TODO: make into a plugin
   module Entity::Passwords
     El::Types.define_alias(:password, ->(v) { v.is_a?(String) && v.length > 10 || v.is_a?(BCrypt::Password) })
 

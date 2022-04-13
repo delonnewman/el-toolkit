@@ -1,4 +1,5 @@
 module El
+  # TODO: make into a plugin
   module Entity::Timestamps
     def timestamp(name)
       define_attribute(name, :time, default: -> { Time.now })

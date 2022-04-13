@@ -9,6 +9,7 @@ require_relative 'types'
 module El
   # Represents a domain entity that will be modeled. Provides dynamic checks and
   # meta objects for relfection which is used to drive productivity and inspection tools.
+  # TODO: Untie this from HashDelegator, perhaps should be a MapDelegator?
   class Entity < HashDelegator
     transform_keys(&:to_sym)
 
@@ -24,7 +25,8 @@ module El
     extend ClassMethods
 
     def_delegators 'self.class', :dehydrator, :normalizer, :attribute, :validate!, :dereferencer
-    def_delegators :to_h, :to_a
+    def_delegators :to_h, :to_a, :to_json, :to_query
+    def_delegators :id, :to_param
 
     def initialize(attributes = EMPTY_HASH)
       raise 'El::Entity should not be initialized directly' if instance_of?(El::Entity)
@@ -34,10 +36,8 @@ module El
       super(record)
     end
 
-    def value_for(name)
-      __hash__[name]
-    end
-    alias [] value_for
+    # TODO: remove
+    alias value_for []
 
     def to_proc
       ->(name) { public_send(name) }
@@ -58,18 +58,6 @@ module El
 
     def to_ruby
       "#{self.class}[#{to_h.inspect}]"
-    end
-
-    def to_json(*args)
-      to_h.to_json(*args)
-    end
-
-    def to_query(namespace = nil)
-      to_h.to_query(namespace)
-    end
-
-    def to_param
-      id.to_s
     end
   end
 end
