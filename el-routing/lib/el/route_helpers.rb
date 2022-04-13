@@ -4,37 +4,6 @@ require 'el/core_ext/to_param'
 
 module El
   class RouteHelpers < Module
-    def initialize(routes, base_url)
-      @routes = routes
-      @base_url = base_url
-      super()
-    end
-
-    def inspect
-      'RouteHelpers'
-    end
-
-    attr_reader :routes, :base_url
-
-    def generate_methods!
-      module_eval routes.map { |r|
-        %(
-          def #{r.path_method_name}(*args)
-            args, params = El::RouteHelpers.params_from(args)
-            El::RouteHelpers.path_with_params(El::RouteHelpers.base_path(#{r.path.inspect}, *args), params)
-          end
-
-          def #{r.url_method_name}(*args)
-            args, params = El::RouteHelpers.params_from(args)
-            base = El::RouteHelpers.base_path(#{r.path.inspect}, *args)
-            El::RouteHelpers.path_with_params(URI.join(#{base_url.inspect}, base).to_s, params)
-          end
-        )
-      }.join("\n"), __FILE__, __LINE__
-
-      self
-    end
-
     class << self
       def params_from(args)
         if args.last.is_a?(Hash)
@@ -66,6 +35,52 @@ module El
         end
         path
       end
+    end
+
+    def initialize(routes, base_url)
+      @routes = routes
+      @base_url = base_url
+      super()
+    end
+
+    def inspect
+      'RouteHelpers'
+    end
+
+    def generate_methods!
+      generate_helper_methods!
+      generate_helper_meta_method!
+
+      self
+    end
+
+    private
+
+    attr_reader :routes, :base_url
+
+    def generate_helper_methods!
+      module_eval routes.map { |r|
+        %(
+          def #{r.path_method_name}(*args)
+            args, params = El::RouteHelpers.params_from(args)
+            El::RouteHelpers.path_with_params(El::RouteHelpers.base_path(#{r.path.inspect}, *args), params)
+          end
+
+          def #{r.url_method_name}(*args)
+            args, params = El::RouteHelpers.params_from(args)
+            base = El::RouteHelpers.base_path(#{r.path.inspect}, *args)
+            El::RouteHelpers.path_with_params(URI.join(#{base_url.inspect}, base).to_s, params)
+          end
+        )
+      }.join("\n"), __FILE__, __LINE__
+    end
+
+    def generate_helper_meta_method!
+      module_eval <<~CODE, __FILE__, __LINE__ + 1
+        def helpers
+          @helpers ||= #{routes.flat_map { |r| [r.path_method_name.to_sym, r.url_method_name.to_sym] }.sort.inspect}
+        end
+      CODE
     end
   end
 end

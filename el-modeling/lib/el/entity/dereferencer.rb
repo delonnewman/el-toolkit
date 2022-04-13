@@ -8,6 +8,11 @@ module El
 
     def call(entity_data)
       entity_data.each_with_object({}) do |(name, value), data|
+        unless entity_class.attribute?(name)
+          data[name] = value
+          next
+        end
+
         attr = entity_class.attribute(name)
 
         data[name] =

@@ -18,7 +18,7 @@ module El
       end
     end
 
-    RegExpType = ->(regex) { ->(v) { regex =~ v } }
+    RegExpType = ->(regex) { ->(v) { v.is_a?(String) && regex =~ v } }
     SetType = ->(set) { ->(v) { set.include?(v) } }
 
     UUID_REGEXP = /\A[0-9A-Fa-f]{8,8}-[0-9A-Fa-f]{4,4}-[0-9A-Fa-f]{4,4}-[0-9A-Fa-f]{4,4}-[0-9A-Fa-f]{12,12}\z/.freeze

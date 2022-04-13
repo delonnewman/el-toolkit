@@ -69,7 +69,10 @@ module El
         logger.info 'Reloading...'
         settings.unload!
         loader.reload!
+
         @routes = El::Routes.new
+        @routes.extend(route_helpers) if base_url?
+
         @initialized = false
 
         init!
