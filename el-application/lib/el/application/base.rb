@@ -134,7 +134,7 @@ module El
       end
 
       def route_helpers(&block)
-        @route_helpers ||= RouteHelpers.new(routes, request.base_url!).generate_methods!
+        @route_helpers ||= RouteHelpers.new(routes, base_url!).generate_methods!
 
         @route_helpers.module_eval(&block) if block_given?
 
