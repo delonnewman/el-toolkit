@@ -6,6 +6,7 @@ module El
     class Service
       include Servicable
       include Dependency
+      extend  Pluggable
 
       class << self
         attr_reader :loader, :unloader

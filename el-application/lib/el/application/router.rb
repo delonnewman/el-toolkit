@@ -5,6 +5,7 @@ module El
     class Router
       include Dependency
       include Routable
+      extend  Pluggable
 
       # Common Media Types
       # (see https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types, and

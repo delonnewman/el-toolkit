@@ -3,6 +3,8 @@
 require 'el/routable'
 require 'el/routes'
 
+require 'el/pluggable'
+
 require_relative 'application/dependency'
 require_relative 'application/servicable'
 require_relative 'application/service'

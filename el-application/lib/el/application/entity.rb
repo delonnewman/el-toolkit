@@ -12,7 +12,9 @@ module El
   module Application
     class Entity < El::Entity
       include Dependency
+      extend  Pluggable
 
+      # TODO: Make these into plugins
       extend Entity::Associations
       extend Entity::Repositories
       extend Entity::Email

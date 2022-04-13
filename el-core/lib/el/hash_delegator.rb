@@ -32,6 +32,8 @@ module El
   #
   #   Employee.new(age: 32, employee_id: 1234) # => Error, first_name attribute is required
   #   Employee.new(first_name: "John", last_name: "Smith", age: 23, employee_id: 3456) # => #<Employee ...>
+  # TODO: Make a subclass of Delegator, rename MapDelegator, make HashDelegator mutable
+  # perhaps another variant that would be good is AtomicMapDelegator, that wraps an Atom that wraps a Map
   class HashDelegator
     class << self
       # Return required attributes or nil

@@ -5,6 +5,7 @@ module El
     # Represents the application state
     class Base
       extend ClassMethods
+      extend Pluggable['Application']
 
       configure :development do
         enable :logging_request_history
