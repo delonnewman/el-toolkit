@@ -23,34 +23,39 @@ module El
         def add_to!(app_class)
           super(app_class)
 
-          name = self.name.split('::').last.to_sym
-          app_class.add_dependency!(name, self, kind: :entities)
+          app_class.register_dependency(canonical_name, self, depends_on: :database)
+          define_repository_accessor!(app_class, self)
+          define_entity_accessor!(app_class, self)
 
-          app_class.attr_reader :model
+          define_model_accessor!(app_class) unless app_class.public_method_defined?(:model)
         end
 
-        def init_app!(app, entity_class)
+        def init_app!(app)
           app.instance_variable_set(:@model, El::Model.new(app.database, app)) unless app.instance_variable_defined?(:@model)
 
-          app.model.register_entity(entity_class)
-          define_repository_accessor!(app, entity_class)
-          define_entity_accessor!(app, entity_class)
+          app.model.register_entity(self)
 
-          entity_class
+          self
         end
 
         private
 
-        def define_repository_accessor!(app, entity_class)
+        def define_model_accessor!(app_class)
+          app_class.define_method(:model) do
+            @model or raise 'the application model has not been initialized, perhaps call `app.init!`'
+          end
+        end
+
+        def define_repository_accessor!(app_class, entity_class)
           name = El::Modeling::Utils.repository_name(entity_class.name).to_sym
-          app.define_singleton_method name do
+          app_class.define_method(name) do
             model.repository(name)
           end
         end
 
-        def define_entity_accessor!(app, entity_class)
+        def define_entity_accessor!(app_class, entity_class)
           entity_name = El::Modeling::Utils.entity_name(entity_class.name.split('::').last).to_sym
-          app.define_singleton_method entity_name do
+          app_class.define_method(entity_name) do
             model.entity_class(entity_name)
           end
         end

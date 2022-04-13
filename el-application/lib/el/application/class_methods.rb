@@ -82,23 +82,27 @@ module El
         @entity_class ||= Application::Entity.create(self)
       end
 
-      DEPENDENCY_KINDS = %i[services routers entities].freeze
-
       def dependencies
-        @dependencies ||= DEPENDENCY_KINDS.reduce({}) { |h, kind| h.merge(kind => {}) }
+        @dependencies ||= {}
       end
 
-      def add_dependency!(name, object, kind:, init: true)
-        dependencies[kind] ||= {}
-        dependencies[kind][name] = { object: object, init: init }
+      def dependency_graph
+        dependencies.each_with_object({}) do |(name, dep), h|
+          h[dep[:depends_on]] ||= []
+          h[dep[:depends_on]] << name
+        end
       end
 
-      def dependency(kind, name)
-        dependencies.dig(kind, name)
+      def register_dependency(name, object, init: true, depends_on: nil)
+        dependencies[name] = { object: object, init: init, depends_on: depends_on }
       end
 
-      def dependency!(kind, name)
-        dependencies.fetch(kind).fetch(name)
+      def dependency(name)
+        dependencies[name]
+      end
+
+      def dependency!(name)
+        dependencies.fetch(name)
       end
     end
   end

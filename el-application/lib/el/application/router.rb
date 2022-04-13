@@ -41,16 +41,19 @@ module El
       def self.add_to!(app_class)
         super(app_class)
 
-        parts = name.split('::')
-        name = StringUtils.underscore(parts[parts.length - 2]).to_sym
-        app_class.add_dependency!(name, self, kind: :routers)
+        app_class.register_dependency(canonical_name, self)
+
+        app_class.define_method(:routes) do
+          @routes or raise 'application routes are not initialized, perhaps call `app.init`.'
+        end
       end
 
-      def self.init_app!(app, router_class)
-        router = router_class.new(app)
-        router_class.freeze
+      def self.init_app!(app)
+        router = new(app)
+        freeze
 
-        app.routes.merge!(router_class.routes)
+        app.instance_variable_set(:@routes, El::Routes.new) unless app.instance_variable_get(:@routes)
+        app.routes.merge!(routes)
 
         router
       end
@@ -58,7 +61,7 @@ module El
       def self.canonical_name
         parts = name.split('::')
         ident = parts.last == 'Router' ? parts[parts.length - 2] : parts.last
-        StringUtils.underscore(ident)
+        StringUtils.underscore(ident).to_sym
       end
 
       attr_reader :app

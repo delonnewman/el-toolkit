@@ -35,34 +35,34 @@ module El
       end
 
       def self.freeze
-        dependencies[:routers].each(&:freeze)
         self
       end
 
       def self.rack
-        init!.rack_app
+        init!.rack
       end
 
-      ClassMethods::DEPENDENCY_KINDS.each do |kind|
-        define_singleton_method kind do
-          dependencies.fetch(kind)
-        end
-
-        define_method kind do
-          dependencies.fetch(kind)
-        end
-      end
-
-      attr_reader :env, :logger, :root_path, :request, :settings, :loader, :dependencies, :server, :rack_app, :routes
+      attr_reader :env, :logger, :root_path, :environment, :loader, :dependencies, :rack
 
       def initialize(env)
-        @env          = env # development, test, production, ci, etc.
-        @logger       = Logger.new($stdout, level: log_level)
-        @root_path    = Pathname.new(self.class.root_path || Dir.pwd)
-        @settings     = Settings.new(self)
-        @loader       = Loader.new(self)
-        @dependencies = ClassMethods::DEPENDENCY_KINDS.reduce({}) { |h, kind| h.merge(kind => {}) }
-        @routes       = El::Routes.new
+        @env         = env # development, test, production, ci, etc.
+        @logger      = Logger.new($stdout, level: log_level)
+        @root_path   = Pathname.new(self.class.root_path || Dir.pwd)
+        @environment = Settings.new(self)
+        @loader      = Loader.new(self)
+      end
+
+      alias settings environment
+
+      # Base URL
+      attr_accessor :base_url
+
+      def base_url!
+        base_url or raise 'base_url has not be set'
+      end
+
+      def base_url?
+        !!base_url
       end
 
       def reload!
@@ -81,16 +81,10 @@ module El
         case env
         when :test
           :warn
-        when :production
-          :error
-        else
+        when :development
           :info
-        end
-      end
-
-      %i[production development test ci].each do |env|
-        define_method :"#{env}?" do
-          self.env == env
+        else
+          :error
         end
       end
 
@@ -121,15 +115,30 @@ module El
 
         reload! if settings[:autoreload] && initialized?
 
-        # dispatch routes
-        request = routes.match(env)
+        dispatch_request(routes.match(env))
+      end
+
+      def dipatch_request(request)
         request_history << request if settings[:logging_request_history]
+
+        unless base_url?
+          self.base_url = request.base_url
+          routes.extend(route_helpers)
+        end
 
         if settings[:raise_server_errors]
           request.respond!(self)
         else
           request.respond(self)
         end
+      end
+
+      def route_helpers(&block)
+        @route_helpers ||= RouteHelpers.new(routes, request.base_url!).generate_methods!
+
+        @route_helpers.module_eval(&block) if block_given?
+
+        @route_helpers
       end
 
       def request_history
@@ -140,7 +149,7 @@ module El
         raise 'An application can only be initialized once' if initialized? && !settings[:autoreload]
 
         notify
-        settings.load!
+        envrionment.load!
         loader.load! unless loader.loaded?
 
         initialize_dependencies!
@@ -178,15 +187,21 @@ module El
         @initialized = true
       end
 
-      def initialize_dependencies!
-        ClassMethods::DEPENDENCY_KINDS.each do |kind|
-          self.class.dependencies[kind].each_with_object(dependencies[kind]) do |(name, opts), deps|
-            if opts[:init]
-              deps.merge!(name => opts[:object].init_app!(self, opts[:object]))
-            else
-              deps.merge!(name => opts[:object])
-            end
-          end
+      def initialize_dependencies!(graph = nil)
+        subgraph = self.class.dependency_graph[graph]
+        return unless subgraph
+
+        subgraph.each_with_object(@dependencies ||= {}) do |name, deps|
+          deps.merge!(name => init_dependency(self.class.dependency!(name)))
+          initialize_dependencies!(name)
+        end
+      end
+
+      def init_dependency(dep)
+        if dep[:init]
+          dep[:object].init_app!(self)
+        else
+          dep[:object]
         end
       end
 
@@ -201,7 +216,7 @@ module El
         app = self
         middleware = self.middleware
 
-        @rack_app = Rack::Builder.new do
+        @rack = Rack::Builder.new do
           middleware.each do |(middle, options)|
             use middle, options
             run app

@@ -11,6 +11,10 @@ module El
       module ClassMethods
         attr_reader :app_class
 
+        def canonical_name
+          name.split('::').last.to_sym
+        end
+
         def app_class=(klass)
           if app_class?
             warn "A package's app_class can only be set once"
@@ -33,8 +37,8 @@ module El
           self.app_class = app_class
         end
 
-        def init_app!(app, dep_class)
-          dep_class.new(app)
+        def init_app!(app)
+          new(app)
         end
 
         def inherited(dep_class)

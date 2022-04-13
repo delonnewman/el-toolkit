@@ -13,6 +13,12 @@ module El
         @settings = {} # TODO: wrap in an atom
       end
 
+      %i[production development test ci].each do |env|
+        define_method :"#{env}?" do
+          app.env == env
+        end
+      end
+
       def [](key)
         @settings[normalize_key(key)]
       end
