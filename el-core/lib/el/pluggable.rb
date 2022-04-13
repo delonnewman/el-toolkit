@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module El
-  # Make a class work with plugins
+  # Enable a class to work with plugins
   #
   #  @example
   #     class Controller
@@ -38,7 +38,7 @@ module El
   #     end
   #
   #     class MyApplication < Application
-  #        plugin Authentication
+  #       plugin Authentication
   #     end
   #
   module Pluggable
