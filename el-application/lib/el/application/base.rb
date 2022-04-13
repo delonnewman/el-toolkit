@@ -149,7 +149,7 @@ module El
         raise 'An application can only be initialized once' if initialized? && !settings[:autoreload]
 
         notify
-        envrionment.load!
+        environment.load!
         loader.load! unless loader.loaded?
 
         initialize_dependencies!
