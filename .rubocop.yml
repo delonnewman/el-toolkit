@@ -12,11 +12,14 @@ Style/StringLiteralsInInterpolation:
 Layout/LineLength:
   Max: 150
 
+Metrics/MethodLength:
+  Enabled: false
+
 Metrics/ClassLength:
   Enabled: false
 
 Metrics/ModuleLength:
-  Enabled: False
+  Enabled: false
 
 Layout/HashAlignment:
   Enabled: true

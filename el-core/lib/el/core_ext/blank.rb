@@ -6,11 +6,21 @@ class Object
   def present?
     !blank?
   end
+
+  def presence
+    return if blank?
+
+    self
+  end
 end
 
 class NilClass
   def blank?
     true
+  end
+
+  def presence
+    self
   end
 end
 

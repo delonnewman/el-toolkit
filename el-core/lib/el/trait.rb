@@ -30,13 +30,28 @@ module El
       @required_methods ||= []
     end
 
-    def self.extended(base)
-      base.extend(SelfDescribing)
+    def self.extended(obj)
+      if obj.is_a?(Module)
+        obj.extend(SelfDescribing)
+        return
+      end
+
+      required_methods.each do |method|
+        raise "`#{method}` must be defined to use the #{self} trait" unless obj.respond_to?(method)
+      end
+
+      instance_methods.each do |method|
+        warn "`#{method}` is already defined in #{obj.inspect}" if obj.respond_to?(method)
+      end
     end
 
-    def self.included(_base)
+    def self.included(base)
       required_methods.each do |method|
-        raise "#{method} must be defined to use this trait: #{self}" unless method_defined?(method)
+        raise "`#{method}` must be defined to use the #{self} trait" unless base.method_defined?(method)
+      end
+
+      instance_methods.each do |method|
+        warn "`#{method}` is already defined in #{base}" if base.method_defined?(method)
       end
     end
   end
