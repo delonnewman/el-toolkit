@@ -7,6 +7,9 @@ module El
       extend ClassMethods
       extend Pluggable['Application']
 
+      set :not_found_path, '404.html'
+      set :error_path, '505.html'
+
       configure :development do
         enable :logging_request_history
         enable :autoreload
@@ -45,6 +48,8 @@ module El
 
       attr_reader :env, :logger, :root_path, :environment, :loader, :dependencies, :rack
 
+      alias settings environment
+
       def initialize(env)
         @env         = env # development, test, production, ci, etc.
         @logger      = Logger.new($stdout, level: log_level)
@@ -53,26 +58,22 @@ module El
         @loader      = Loader.new(self)
       end
 
-      alias settings environment
-
       # Base URL
-      attr_accessor :base_url
+      attr_reader :base_url
 
-      def base_url!
-        base_url or raise 'base_url has not be set'
+      def base_url=(url)
+        @base_url = url
+        routes.helpers.generate_methods!(url)
       end
 
-      def base_url?
-        !!base_url
-      end
+      private :base_url=
 
       def reload!
         logger.info 'Reloading...'
         settings.unload!
         loader.reload!
 
-        @routes = El::Routes.new
-        @routes.extend(route_helpers) if base_url?
+        @routes = El::Routes.new # TODO: We'll want to formalize the sematics around reloading do dependencies can opt-in
 
         @initialized = false
 
@@ -113,36 +114,56 @@ module El
         public_path.opendir.children
       end
 
+      def not_found(_request)
+        unless (path = public_path.join(settings[:not_found_path])).exist?
+          raise "specified file for error page does not exist, perhaps set :not_found_path setting or create #{path.to_s.inspect} file?"
+        end
+
+        [404, { 'Content-Type' => 'text/html' }, path]
+      end
+
+      def error(_request, err)
+        logger.error(err)
+
+        unless (path = public_path.join(settings[:error_path])).exist?
+          raise "specified file for error page does not exist, perhaps set :error_path setting or create #{path.to_s.inspect} file?"
+        end
+
+        [505, { 'Content-Type' => 'text/html' }, path]
+      end
+
       # Rack interface
       def call(env)
         env['rack.logger'] = logger
 
         reload! if settings[:autoreload] && initialized?
 
-        dispatch_request(routes.match(env))
+        request = routes.match(env)
+        request_history << request if settings[:logging_request_history]
+
+        return not_found(request) if request.not_found?
+
+        dispatch_request(request)
       end
 
       def dispatch_request(request)
-        request_history << request if settings[:logging_request_history]
-
-        unless base_url?
-          self.base_url = request.base_url
-          routes.extend(route_helpers)
-        end
+        self.base_url = request.base_url if base_url.nil?
 
         if settings[:raise_server_errors]
           request.respond!(self)
         else
-          request.respond(self)
+          begin
+            request.respond!(self)
+          rescue StandardError => e
+            error(request, e)
+          end
         end
       end
 
       def route_helpers(&block)
-        @route_helpers ||= RouteHelpers.new(routes, base_url!).generate_methods!
+        routes.helpers.module_eval(&block) if block_given?
 
-        @route_helpers.module_eval(&block) if block_given?
-
-        @route_helpers
+        routes.helpers
       end
 
       def request_history
@@ -152,12 +173,12 @@ module El
       def init!
         raise 'An application can only be initialized once' if initialized? && !settings[:autoreload]
 
-        notify
         environment.load!
         loader.load! unless loader.loaded?
 
         initialize_dependencies!
         initialize_middleware!
+        after_init_dependencies!
 
         initialized!
 
@@ -189,6 +210,12 @@ module El
 
       def initialized!
         @initialized = true
+      end
+
+      def after_init_dependencies!
+        self.class.dependencies.each_value do |dep|
+          dep[:object].after_init_app(self)
+        end
       end
 
       def initialize_dependencies!(graph = nil)

@@ -42,6 +42,16 @@ module El
   #     end
   #
   module Pluggable
+    # TODO: add accepting a hash or array argument that maps namespaces to core classes
+    # to describe a plugin "system".
+    #
+    # module El::Routable
+    #   extend Pluggable[self, El::Request, El::Routes, El::RequestNotFound]
+    # end
+    #
+    # module El::Routable
+    #   extend Pluggable[Routable: self, Request: El::Request, Routes: El::Routes, RequestNotFound: El::RequestNotFound]
+    # end
     def self.[](prefix)
       Module.new.tap do |mod|
         mod.extend(self)

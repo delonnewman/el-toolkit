@@ -37,29 +37,26 @@ module El
       end
     end
 
-    def initialize(routes, base_url)
-      @routes = routes
-      @base_url = base_url
+    attr_reader :routes
+
+    def initialize(routes)
       super()
+      @routes = routes
     end
 
     def inspect
-      'RouteHelpers'
+      "RouteHelpers(#{helper_method_names.map(&:inspect).join(", ")})"
     end
 
-    def generate_methods!
-      generate_helper_methods!
-      generate_helper_meta_method!
-
-      self
+    def extended(object)
+      object.instance_variable_set(:@route_helpers, self)
+      def object.helper_method_names
+        @route_helpers.helper_method_names
+      end
     end
 
-    private
-
-    attr_reader :routes, :base_url
-
-    def generate_helper_methods!
-      module_eval routes.map { |r|
+    def helper_method_code(base_url)
+      routes.map do |r|
         %(
           def #{r.path_method_name}(*args)
             args, params = El::RouteHelpers.params_from(args)
@@ -72,15 +69,18 @@ module El
             El::RouteHelpers.path_with_params(URI.join(#{base_url.inspect}, base).to_s, params)
           end
         )
-      }.join("\n"), __FILE__, __LINE__
+      end.join("\n")
+    end
+    alias code helper_method_code
+
+    def helper_method_names
+      @helper_method_names ||= routes.flat_map { |r| [r.path_method_name.to_sym, r.url_method_name.to_sym] }.sort
     end
 
-    def generate_helper_meta_method!
-      module_eval <<~CODE, __FILE__, __LINE__ + 1
-        def helpers
-          @helpers ||= #{routes.flat_map { |r| [r.path_method_name.to_sym, r.url_method_name.to_sym] }.sort.inspect}
-        end
-      CODE
+    def generate_methods!(base_url = '')
+      module_eval helper_method_code(base_url), __FILE__, __LINE__
+
+      self
     end
   end
 end

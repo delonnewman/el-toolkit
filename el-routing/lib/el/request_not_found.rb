@@ -1,11 +1,9 @@
 # frozen_string_literal: true
 
-module El
-  class RequestNotFound
-    def initialize(env)
-      @env = env
-    end
+require_relative 'request'
 
+module El
+  class RequestNotFound < Request
     DEFAULT_RESPONSE = [505, { 'Content-Type' => 'text/html' }, ['Not Found'].freeze].freeze
 
     def respond(*)

@@ -4,6 +4,7 @@ require 'el/core_ext/hash'
 require 'el/constants'
 
 require_relative 'request_not_found'
+require_relative 'route_helpers'
 require_relative 'route'
 
 module El
@@ -51,12 +52,31 @@ module El
       self
     end
 
+    def helpers
+      @helpers ||= RouteHelpers.new(self)
+    end
+
+    def include_helpers!(base_url)
+      helpers.generate_methods!(base_url)
+      extend(helpers)
+    end
+
     def size
       @routes.size
     end
 
     def to_a
       @routes.dup
+    end
+
+    def to_h
+      @routes.reduce({}) do |h, r|
+        h.merge!([r.method, r.path] => r.action)
+      end
+    end
+
+    def inspect
+      "El::Routes[#{to_h.inspect}]"
     end
 
     # Find routes by method, path, alias or numerical index

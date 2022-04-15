@@ -49,6 +49,9 @@ module El
         end
       end
 
+      # TODO: guess based on configuration, then set once a request has been made
+      DEFAULT_BASE_URL = 'http://localhost:3000'
+
       def self.init_app!(app)
         router = new(app)
         freeze
@@ -57,6 +60,11 @@ module El
         app.routes.merge!(routes)
 
         router
+      end
+
+      def self.after_init_app(app)
+        app.routes.include_helpers!(DEFAULT_BASE_URL)
+        super(app)
       end
 
       def self.canonical_name

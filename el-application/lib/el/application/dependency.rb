@@ -41,6 +41,10 @@ module El
           new(app)
         end
 
+        def after_init_app(app)
+          app
+        end
+
         def inherited(dep_class)
           super
           return unless app_class?

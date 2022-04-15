@@ -2,6 +2,8 @@
 
 require_relative 'request_error'
 
+# TODO: Make requests pluggable
+
 module El
   class Request
     include Enumerable
@@ -224,6 +226,16 @@ module El
 
     def url
       url_for(path)
+    end
+
+    def redirect(url, status: 302)
+      r = Rack::Response.new
+      r.redirect(url, status)
+      r.finish
+    end
+
+    def redirect_to(path, **options)
+      redirect(url_for(path), **options)
     end
   end
 end
