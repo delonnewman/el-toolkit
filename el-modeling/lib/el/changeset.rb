@@ -1,30 +1,37 @@
-require_relative 'validators/length_validator'
+# frozen_string_literal: true
+
+require_relative 'validators'
 
 module El
   class Changeset
-    class << self
-      def validations
-        @validations ||= {}
-      end
+    extend Forwardable
+    
+    def_delegators 'self.class', :validators
 
-      def register_validation(name, validator)
-        validations[name] = validator
-      end
+    attr_reader :errors, :changes, :constraints, :validations, :action
 
-      register_validation :length, Validators::LengthValidator
-
-      validations.each do |name, validator|
-        define_method :"validate_#{name}" do |field, opts|
-          validators << [field, validator.new(opts)]
-        end
-      end
+    def self.from_entity(entity, changes = {})
+      ch = from_entity_class(entity.class, entity, changes)
     end
 
-    attr_reader :errors, :changes, :constraints, :validations
+    def self.from_entity_class(klass, data = {}, changes = {}, action: :create)
+      ch = new(data, changes, action)
 
-    def initialize(changes)
+      required = []
+      klass.attributes.each do |attr|
+        required << attr.name if attr.required?
+      end
+      ch.validate(:required, required)
+
+      ch
+    end
+
+    def initialize(data, changes, action)
+      @action = action
+      @data = data
       @changes = changes
       @errors = []
+      @validations = []
     end
 
     def valid?
@@ -43,11 +50,18 @@ module El
       validations.each(&block)
     end
 
+    def validate(validator, options)
+      validations << validators.fetch(validator, validator).new(options)
+      self
+    end
+
     def apply_action(action); end
 
     def apply_action!(action); end
 
-    def apply_changes(data); end
+    def apply_changes(data)
+      
+    end
 
     def remove_change(key); end
 

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module El
   # TODO: make into a plugin
   module Entity::Repositories
@@ -11,15 +13,19 @@ module El
       return @repository_class if @repository_class
 
       class_name = repository_class_name
-      @repository_class = const_get(class_name) if const_defined?(
-        class_name
-      )
+      @repository_class = const_get(class_name) if const_defined?(class_name)
       @repository_class || Repository
     end
 
     def repository_table_name
       Utils.table_name(name)
     end
+
+    def model?
+      !@model.nil?
+    end
+
+    attr_accessor :model
 
     # When no arguments are given it will return a repository instance. When the class argument
     # is given the value will be used to generate repository instances. When the class_name argument
@@ -86,6 +92,10 @@ module El
         repository_class Class.new(Repository)
         repository_class.class_eval(&block)
       end
+
+      return unless model?
+
+      @repository ||= repository_class.new(model, self)
     end
   end
 end

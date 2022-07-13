@@ -38,6 +38,8 @@ module El
     end
 
     def [](attributes)
+      return attributes unless attributes.is_a?(Hash)
+
       new(attributes)
     end
     alias call []
@@ -47,15 +49,9 @@ module El
     end
 
     def canonical_name
+      return unless name
+
       StringUtils.underscore(name.split('::').last)
-    end
-
-    def dereferencer
-      @dereferencer ||= Entity::Dereferencer.new(self)
-    end
-
-    def validator
-      @validator ||= Entity::Validator.new(self)
     end
 
     def errors(entity_data)
@@ -73,12 +69,22 @@ module El
       raise errs.first[1]
     end
 
+    # Services
+
     def normalizer
       @normalizer ||= Entity::DataNomalizer.new(self)
     end
 
     def dehydrator
       @dehydrator ||= Entity::DataDehydrator.new(self)
+    end
+
+    def dereferencer
+      @dereferencer ||= Entity::Dereferencer.new(self)
+    end
+
+    def validator
+      @validator ||= Entity::Validator.new(self)
     end
   end
 end

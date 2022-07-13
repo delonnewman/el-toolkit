@@ -6,29 +6,31 @@ require 'el/modeling/utils'
 module El
   class Model
     include Modeling::Utils
+    extend  Forwardable
 
-    attr_reader :database, :app
+    attr_reader :app
 
-    def initialize(database, app = nil)
-      @entities = {}
-      @repositories = {}
-      @database = database
+    def_delegators :app, :database
+
+    def initialize(app)
       @app = app
+      @entities = {}
     end
 
+    private
+
+    attr_reader :entities
+
+    public
+
     def register_entity(entity_class)
-      @entities[entity_name(entity_class.name).to_sym] = entity_class
-      self
+      entities[entity_name(entity_class.name).to_sym] = entity_class
+      entity_class.model = self
     end
     alias << register_entity
 
     def entity_class(name)
-      name = name.is_a?(Symbol) || name.is_a?(Class) ? name.name : name
-      @entities.fetch(entity_name(name).to_sym)
-    end
-
-    def entity_classes
-      @entities.values
+      entities.fetch(entity_name(name).to_sym)
     end
 
     def repository_class(name)
@@ -36,19 +38,30 @@ module El
     end
 
     def repository(name)
-      entity = entity_class(name)
-      @repositories[entity] ||= entity.repository_class.new(self, entity)
+      entity_class(name).repository
+    end
+
+    def entity_table_name(name)
+      table_name(entity_class(name))
+    end
+
+    def entity_table(name)
+      database[entity_table_name(name).to_sym]
+    end
+
+    def entity_classes
+      entities.values
     end
 
     def schema
-      @entities.values.flat_map(&:attributes)
+      entities.values.flat_map(&:attributes)
     end
 
     # TODO: Add diffs
     def schema_version
       schema.reduce(hash) do |hash, a|
         El::Utils.hash_combine(hash, a.hash)
-      end.to_s(36)
+      end.to_s(36).upcase!
     end
   end
 end

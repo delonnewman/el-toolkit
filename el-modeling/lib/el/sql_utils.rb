@@ -69,8 +69,8 @@ module El
     end
 
     # TODO: for performance this would be better as opt-in
-    def process_record(entity_class, record)
-      h = record.to_h.dup
+    def process_record(entity_class, hash_record)
+      h = hash_record.dup
 
       attrs = entity_class.attributes
 
@@ -81,11 +81,11 @@ module El
       comps = attrs.select(&:component?)
 
       comps.each do |attr|
-        id_key = entity_class.attributes_reference_key(attr)
+        id_key = attr.reference_key.to_sym
 
-        if !record.key?(id_key) && (id_val = record[attr.name].id)
+        if !h.key?(id_key) && (id_val = h[attr.name].id)
           h[id_key] = id_val
-        elsif !record.key?(id_key) && attr.required?
+        elsif !h.key?(id_key) && attr.required?
           raise "#{id_key.inspect} is required for storage but is missing: #{record.inspect}:#{entity_class}"
         end
 

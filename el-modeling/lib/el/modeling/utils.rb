@@ -1,14 +1,18 @@
+# frozen_string_literal: true
+
 module El
   module Modeling
     module Utils
       extend self
 
       def entity_name(string, namespace: false)
+        string = string.name if string.respond_to?(:name) # works for classes or symbols
         string = string.split('::').last unless namespace
         Inflection.singular(StringUtils.camelcase(string))
       end
 
       def table_name(string, namespace: false)
+        string = string.name if string.respond_to?(:name) # works for classes or symbols
         string = string.split('::').last unless namespace
         Inflection.plural(StringUtils.underscore(string))
       end

@@ -33,7 +33,7 @@ module El
         end
 
         def init_app!(app)
-          app.instance_variable_set(:@model, El::Model.new(app.database, app)) unless app.instance_variable_defined?(:@model)
+          app.instance_variable_set(:@model, El::Model.new(app)) unless app.instance_variable_defined?(:@model)
 
           app.model.register_entity(self)
 

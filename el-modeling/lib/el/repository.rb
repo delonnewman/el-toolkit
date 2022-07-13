@@ -21,8 +21,6 @@ module El
 
     attr_reader :entity_class, :model
 
-    def_delegators :model, :app, :database
-
     def initialize(model, entity_class)
       @model = model
       @entity_class = entity_class
@@ -202,7 +200,8 @@ module El
     end
 
     def store_all!(records)
-      table.multi_insert(records.map { |r| SqlUtils.process_record(entity_class, resolve_entity(r)) })
+      insert_data = records.map { |r| SqlUtils.process_record(entity_class, resolve_entity(r)) }
+      table.multi_insert(insert_data)
     end
 
     def delete_where!(predicates)
@@ -213,37 +212,49 @@ module El
       table.delete
     end
 
-    def find(value)
+    def fetch(id, *args, id_attribute: :id, &block)
+      data = table.first(id_attribute => id)
+
+      return entity(data) if data
+      return block.call   if block_given?
+
+      raise "couldn't find #{entity_class} with id #{id.inspect}" if args.empty?
+
+      args.first
+    end
+
+    def get(id)
+      fetch(id, nil)
+    end
+    alias [] get
+
+    def get!(id)
+      fetch(id)
+    end
+
+    def cast(value)
       return value if value.is_a?(entity_class)
       return entity(value) if value.is_a?(Hash)
 
       entity_class.reference_mapping.each do |type, ref|
-        return find_by(ref => value) if type.call(value)
-      rescue Dry::Types::ConstraintError
-        next
+        return fetch(value, id_attribute: ref) if type.call(value)
       end
 
       nil
     end
-    alias [] find
-    alias call find
 
     def to_proc
       ->(value) { find(value) }
     end
 
-    def find!(value)
-      find(value) or raise TypeError, "#{value.inspect}:#{value.class} cannot be coerced into #{entity_class}"
+    def cast!(value)
+      cast(value) or raise TypeError, "#{value.inspect}:#{value.class} cannot be coerced into #{entity_class}"
     end
 
     protected
 
-    # delegate logger and db to Mentoring.app
-    %i[logger database].each do |method|
-      define_method method do
-        app.send(method)
-      end
-    end
+    def_delegators :model, :app, :database
+    def_delegators :app, :logger
 
     def where(predicates)
       dataset.where(predicates).map(&method(:entity))
@@ -257,21 +268,18 @@ module El
 
     def resolve_entity(entity)
       data = entity.to_h
-
-      attrs = entity.class.attributes
-      attrs.reject { |a| a.default.nil? }.each_with_object(data) do |attr, h|
-        h.merge!(attr.name => entity.value_for(attr.name))
-      end
-
       data = data.except(*entity.class.exclude_for_storage)
-      attrs.select(&:optional?).each_with_object(data) do |attr, h|
-        h.delete(attr.name) if entity.value_for(attr.name).nil?
-      end
 
       return data if component_attributes.empty?
 
+      resolve_component_attributes(entity, data)
+    end
+
+    def resolve_component_attributes(entity, data)
       component_attributes.reduce(data) do |h, comp|
-        h.merge!(Modeling::Utils.reference_key(comp.name).to_sym => model.repository(comp.value_class).find!(entity.value_for(comp.name)).id)
+        key = Modeling::Utils.reference_key(comp.name).to_sym
+        val = model.repository(comp.value_class).cast!(entity[comp.name]).id
+        h.merge!(key => val)
       end
     end
   end

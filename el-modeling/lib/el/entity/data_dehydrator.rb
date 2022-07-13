@@ -12,15 +12,21 @@ module El
     attr_reader :entity_class
 
     def hydrate_default_values!(attrs, data, entity)
-      attrs.reject { |a| a.default.nil? }.each_with_object(data.dup) do |attr, values|
-        values.merge!(attr.name => entity.value_for(attr.name))
+      attrs.select(&:default).each_with_object(data) do |attr, values|
+        values.merge!(attr.name => entity[attr.name] || eval_default(entity, attr))
       end
     end
 
-    def remove_nil_values!(attrs, data, entity)
-      attrs
-        .select(&:optional?)
-        .each { |attr| data.delete(attr.name) if entity.value_for(attr.name).nil? }
+    def eval_default(entity, attr)
+      return attr.default unless attr.default.respond_to?(:to_proc)
+
+      entity.instance_exec(&attr.default)
+    end
+
+    def remove_nil_values!(attrs, data)
+      attrs.select(&:optional?).each do |attr|
+        data.delete(attr.name) if data[attr.name].nil?
+      end
     end
 
     def remove_ignored_attributes(data)
@@ -28,11 +34,9 @@ module El
     end
 
     def hydrate_component_attributes!(data, entity)
-      if (comps = entity_class.attributes.select(&:component?)).empty?
-        data
-      else
-        comps.reduce(data) { |h, comp| h.merge!(comp.reference_key => entity.public_send(comp.name).id) }
-      end
+      return data if (comps = entity_class.attributes.select(&:component?)).empty?
+
+      comps.reduce(data) { |h, comp| h.merge!(comp.reference_key => entity.public_send(comp.name).id) }
     end
 
     public
@@ -40,11 +44,10 @@ module El
     def call(data, entity)
       attrs = entity.class.attributes
 
-      hydrate_default_values!(attrs, data, entity)
-      remove_nil_values!(attrs, data, entity)
+      data = hydrate_default_values!(attrs, data.dup, entity)
+      remove_nil_values!(attrs, data)
       # data = remove_ignored_attributes(data)
-
-      hydrate_component_attributes!(data, entity)
+      # hydrate_component_attributes!(data, entity)
 
       data
     end

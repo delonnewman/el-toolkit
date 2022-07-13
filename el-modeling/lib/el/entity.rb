@@ -43,9 +43,10 @@ module El
       ->(name) { public_send(name) }
     end
 
-    def to_h
+    def dehydrate
       dehydrator.call(__hash__, self)
     end
+    alias to_h dehydrate
 
     def ===(other)
       other.is_a?(self.class) && other.id == id

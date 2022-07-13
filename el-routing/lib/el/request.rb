@@ -14,13 +14,17 @@ module El
       'Content-Type' => 'text/html'
     }.freeze
 
+    def self.for(*args)
+      new(Rack::MockRequest.env_for(*args))
+    end
+
     attr_reader :route_params, :route
 
-    def initialize(env, route = nil, route_params: nil, params: nil)
-      @env = env.dup # take a snapshot of the rack request
-      @route = route
+    def initialize(env, route = nil, route_params: EMPTY_HASH, params: EMPTY_HASH)
+      @env          = env
+      @route        = route
       @route_params = route_params
-      @params = params
+      @params       = params
     end
 
     def not_found?
@@ -128,7 +132,7 @@ module El
     end
 
     def to_h
-      @env
+      @env.dup
     end
 
     def options
