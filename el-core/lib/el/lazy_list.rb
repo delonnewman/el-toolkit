@@ -9,6 +9,12 @@ module El
     include Enumerable
     include Sequential
 
+    def self.from_enumerator(enum)
+      LazyList do
+        enum.next
+      end
+    end
+
     # @param thunk [#call]
     def initialize(thunk)
       raise TypeError, 'lazy proc should respond to :call' unless thunk.respond_to?(:call)

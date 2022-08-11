@@ -1,14 +1,16 @@
 # frozen_string_literal: true
 
 module El
+  class Entity::ValidationError < RuntimeError; end
+
   # Class methods for El::Entity
   module Entity::ClassMethods
     def define_attribute(name, type = :any, **options, &block)
       raise 'name should be a symbol' unless name.is_a?(Symbol)
       raise 'name should not include special characters' if name.name =~ /\W/
 
-      meta = { name: name, namespace: self.name, type: type }
-      meta.merge(definition: block) if block_given?
+      meta = { name: name, namespace: self.name, type: type, required: true }
+      meta.merge!(definition: block) if block_given?
 
       attribute = Entity::Attribute.new(meta.merge(options)).define_on!(self)
 
@@ -58,6 +60,10 @@ module El
       validator.call(entity_data)
     end
 
+    def errors?(entity_data)
+      !valid?(entity_data)
+    end
+
     def valid?(entity_data)
       errors(entity_data).empty?
     end
@@ -66,7 +72,7 @@ module El
       errs = errors(entity_data)
       return entity_data if errs.empty?
 
-      raise errs.first[1]
+      raise Entity::ValidationError, errs.first[1]
     end
 
     # Services

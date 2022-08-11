@@ -13,7 +13,7 @@ module El
     end
 
     def required?
-      try(:required) == true
+      self[:required] == true
     end
 
     def optional?
@@ -21,24 +21,24 @@ module El
     end
 
     def component?
-      try(:cardinality) == :many_to_one
+      self[:cardinality] == :many_to_one
     end
 
     def deref?
-      try(:deref) == true
+      self[:deref] == true
     end
 
     def reference?
-      try(:reference) == true
+      self[:reference] == true
     end
 
     def exclude_for_storage?
-      try(:exclude_for_storage) == true
+      self[:exclude_for_storage] == true
     end
 
-    # TODO: Define sematics around this
+    # TODO: Define semantics around this
     def mutable?
-      try(:mutable) == true
+      self[:mutable] == true
     end
 
     def boolean?
@@ -46,7 +46,7 @@ module El
     end
 
     def serialize?
-      try(:serialize) == true
+      self[:serialize] == true
     end
 
     def entity?
@@ -55,9 +55,10 @@ module El
     end
 
     def value_class
-      type = try(:type)
-      return type                          if type.is_a?(Class)
-      return StringUtils.constantize(type) if type.is_a?(String)
+      type = self[:type]
+      return type if type.is_a?(Class)
+
+      StringUtils.constantize(type) if type.is_a?(String)
     end
 
     def reference_key
@@ -87,14 +88,14 @@ module El
     DEFAULT_DISPLAY_ORDER = 99
 
     def display_order
-      display = try(:display)
+      display = self[:display]
       return DEFAULT_DISPLAY_ORDER unless display
 
       display.fetch(:order, DEFAULT_DISPLAY_ORDER)
     end
 
     def display_name
-      display = try(:display)
+      display = self[:display]
       return StringUtils.titlecase(name) unless display
 
       display.fetch(:order, StringUtils.titlecase(name))

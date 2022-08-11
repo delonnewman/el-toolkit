@@ -2,7 +2,7 @@
 
 module El
   # A collection of utilities for working with strings
-  # mostly blantantly stolen from active-support
+  # mostly blatantly stolen from active-support
   module StringUtils
     module_function
 
@@ -34,7 +34,6 @@ module El
       humanize(string).split(' ').map!(&:capitalize).join(' ')
     end
 
-    # rubocop:disable Metrics/MethodLength
     def camelcase(string, uppercase_first: true)
       string = string.to_s
       string = if uppercase_first

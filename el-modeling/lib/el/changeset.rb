@@ -5,71 +5,84 @@ require_relative 'validators'
 module El
   class Changeset
     extend Forwardable
-    
-    def_delegators 'self.class', :validators
 
-    attr_reader :errors, :changes, :constraints, :validations, :action
+    def_delegators 'self.class', :validator
 
-    def self.from_entity(entity, changes = {})
-      ch = from_entity_class(entity.class, entity, changes)
-    end
+    require_relative 'changeset/change'
 
-    def self.from_entity_class(klass, data = {}, changes = {}, action: :create)
-      ch = new(data, changes, action)
-
-      required = []
-      klass.attributes.each do |attr|
-        required << attr.name if attr.required?
-      end
-      ch.validate(:required, required)
-
-      ch
-    end
-
-    def initialize(data, changes, action)
-      @action = action
-      @data = data
-      @changes = changes
-      @errors = []
+    # @param model [El::Model]
+    def initialize(model)
+      @model = model
       @validations = []
+      @changes = []
     end
 
-    def valid?
-      errors.empty?
+    # @param entity [Hash, El::Entity]
+    def errors(entity)
+      errors = {}
+
+      validations.each do |v|
+        errors.merge!(v.call(entity))
+      end
+
+      errors
     end
 
-    def add_error(key, message, info = EMPTY_HASH)
-      errors << [key, message, info]
+    # @param entity [Hash, El::Entity]
+    def valid?(entity)
+      errors(entity).empty?
     end
 
-    def each_error(&block)
-      errors.each(&block)
+    # @param entity [Hash, El::Entity]
+    def errors?(entity)
+      !valid?(entity)
     end
 
-    def each_validation(&block)
-      validations.each(&block)
+    # @param entity_class [Class]
+    def add_all_validations(entity_class)
+      required = entity_class.attributes.filter_map { |a| a.name if a.required? }
+      add_validation(:required, fields: required)
     end
 
-    def validate(validator, options)
-      validations << validators.fetch(validator, validator).new(options)
+    # @param name [Symbol]
+    #
+    # @return [Changeset]
+    def add_validation(name, **options)
+      validations << validator(name).new(options)
       self
     end
 
-    def apply_action(action); end
-
-    def apply_action!(action); end
-
-    def apply_changes(data)
-      
+    # TODO: take change instances of various kinds each will implement the apply method
+    # i.e. AddAttributeChange, RemoveAttributeChange, BulkChange
+    # @param change [:add, :remove]
+    # @param attribute [Symbol]
+    # @param options [Hash]
+    #
+    # @return [Changeset]
+    def add_changes(change, attribute, value = nil, **options)
+      changes << Change.new(change, attribute, value, options)
+      self
     end
 
-    def remove_change(key); end
+    # TODO: apply changesets to model
+    # @param entity_class [Class < El::Entity]
+    # @param entities [Array<El::Entity>]
+    #
+    # @return [false, Array<El::Entity>]
+    def apply(entity_class, *entities)
+      return entities if changes.empty?
 
-    def get_change(key); end
+      changed = entities.map do |entity|
+        changes.reduce(entity.to_h) { |h, ch| ch.apply!(h) }
+      end
 
-    def get_change!(key); end
+      return false unless changed.all?(&method(:valid?))
 
-    # TODO: Add Entity#change
-    def change(entity, changes = EMPTY_HASH); end
+      changed.map(&entity_class.method(:new))
+    end
+
+    private
+
+    attr_reader :model, :entity_class, :validations, :changes
   end
 end

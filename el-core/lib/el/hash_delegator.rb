@@ -252,7 +252,7 @@ module El
     # @return [Hash, HashDelegator]
     def slice(*keys)
       required = required_attributes
-      common   = keys & required
+      common   = keys.to_set & required
 
       if keys.size == common.size && common.size == required.size
         self.class.new(@__hash__.slice(*keys))

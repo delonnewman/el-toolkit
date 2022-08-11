@@ -6,7 +6,7 @@ module El
   module Callable
     extend Trait
 
-    moduledoc %{
+    module_doc %{
       This module attempts to generalize the notion of a first class function or Procs as they are often called
       in Ruby. It enables any class and it's objects to be treated as first-class functions.
 
@@ -27,7 +27,7 @@ module El
 
     requires :call, 'When defined will enable this object to behave like a Proc'
 
-    doc "Return a Proc that resresents this object, works with Ruby's '&' interface."
+    doc "Return a Proc that represents this object, works with Ruby's '&' interface."
     def to_proc
       lambda do |*args, **kwargs|
         call(*args, **kwargs)

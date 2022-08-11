@@ -91,6 +91,14 @@ module El
       from_array(hash.to_a)
     end
 
+    def self.from_string(string)
+      list = empty
+      string.each_codepoint do |pt|
+        list = list << pt
+      end
+      list
+    end
+
     attr_reader :this, :other, :length
 
     alias size length
@@ -170,7 +178,7 @@ module El
       val  = first
       list = other
 
-      i    = 0
+      i = 0
       until i == index
         val = list.first
         list = list.other

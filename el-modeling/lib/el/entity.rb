@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'forwardable'
+
 require 'el/constants'
 require 'el/hash_delegator'
 
@@ -8,7 +9,7 @@ require_relative 'types'
 
 module El
   # Represents a domain entity that will be modeled. Provides dynamic checks and
-  # meta objects for relfection which is used to drive productivity and inspection tools.
+  # meta objects for reflection which is used to drive productivity and inspection tools.
   # TODO: Untie this from HashDelegator, perhaps should be a MapDelegator?
   class Entity < HashDelegator
     transform_keys(&:to_sym)
@@ -24,7 +25,6 @@ module El
     extend Forwardable
     extend ClassMethods
 
-    def_delegators 'self.class', :dehydrator, :normalizer, :attribute, :validate!, :dereferencer
     def_delegators :to_h, :to_a, :to_json, :to_query
     def_delegators :id, :to_param
 
@@ -34,6 +34,10 @@ module El
       record = normalizer.call(validate!(dereferencer.call(attributes)), self).freeze
 
       super(record)
+    end
+
+    def valid?
+      true
     end
 
     # TODO: remove
@@ -48,6 +52,7 @@ module El
     end
     alias to_h dehydrate
 
+    # TODO: need to work out equality semantics
     def ===(other)
       other.is_a?(self.class) && other.id == id
     end
@@ -60,5 +65,9 @@ module El
     def to_ruby
       "#{self.class}[#{to_h.inspect}]"
     end
+
+    private
+
+    def_delegators 'self.class', :dehydrator, :normalizer, :attribute, :validate!, :dereferencer
   end
 end

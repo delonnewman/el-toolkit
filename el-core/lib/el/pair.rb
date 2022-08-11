@@ -23,5 +23,10 @@ module El
       block.call(cdr)
       self
     end
+
+    def inspect
+      "Pair(#{car.inspect}, #{cdr.inspect})"
+    end
+    alias to_s inspect
   end
 end
