@@ -3,21 +3,21 @@
 require_relative 'validators'
 
 module El
-  class Changeset
+  class ChangeSet
     extend Forwardable
 
     def_delegators 'self.class', :validator
 
-    require_relative 'changeset/change'
+    require_relative 'change_set/change'
 
-    # @param model [El::Model]
-    def initialize(model)
-      @model = model
+    def initialize
       @validations = []
       @changes = []
     end
 
     # @param entity [Hash, El::Entity]
+    #
+    # @return [Hash{Symbol, String}] error messages on attributes
     def errors(entity)
       errors = {}
 
@@ -26,6 +26,15 @@ module El
       end
 
       errors
+    end
+
+    class ValidationError < RuntimeError; end
+
+    def validate!(entity)
+      errs = errors(entity)
+      return if errs.empty?
+
+      raise ValidationError, "#{errs.first[0]} #{errs.first[1]}"
     end
 
     # @param entity [Hash, El::Entity]
@@ -46,7 +55,7 @@ module El
 
     # @param name [Symbol]
     #
-    # @return [Changeset]
+    # @return [ChangeSet]
     def add_validation(name, **options)
       validations << validator(name).new(options)
       self
@@ -54,35 +63,40 @@ module El
 
     # TODO: take change instances of various kinds each will implement the apply method
     # i.e. AddAttributeChange, RemoveAttributeChange, BulkChange
-    # @param change [:add, :remove]
-    # @param attribute [Symbol]
-    # @param options [Hash]
+    # @param change [#run, #apply]
     #
-    # @return [Changeset]
-    def add_changes(change, attribute, value = nil, **options)
-      changes << Change.new(change, attribute, value, options)
+    # @return [ChangeSet]
+    def add_change(change)
+      changes << change
       self
     end
 
-    # TODO: apply changesets to model
-    # @param entity_class [Class < El::Entity]
-    # @param entities [Array<El::Entity>]
+    # TODO: apply changes to model
+    # @param model [El::Model]
     #
-    # @return [false, Array<El::Entity>]
-    def apply(entity_class, *entities)
-      return entities if changes.empty?
+    # @return [ChangeSet]
+    def apply(model)
+      valid = []
+      errs  = []
+      changes.map do |ch|
+        changed = ch.run(model)
+        err     = errors(changed)
 
-      changed = entities.map do |entity|
-        changes.reduce(entity.to_h) { |h, ch| ch.apply!(h) }
+        errs << err      unless err.empty?
+        valid << changed if     err.empty?
       end
 
-      return false unless changed.all?(&method(:valid?))
+      self
+    end
 
-      changed.map(&entity_class.method(:new))
+    def applied?
+      @applied == true
     end
 
     private
 
-    attr_reader :model, :entity_class, :validations, :changes
+    attr_reader :validations, :changes
+
+    attr_writer :applied
   end
 end

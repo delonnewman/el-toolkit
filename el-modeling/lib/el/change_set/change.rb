@@ -1,5 +1,5 @@
 module El
-  class Changeset::Change
+  class ChangeSet::Change
     CHANGES = Set[:add, :remove].freeze
 
     attr_reader :change, :attribute, :options
