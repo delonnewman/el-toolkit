@@ -34,7 +34,7 @@ GEM
     minitest-server (1.0.6)
       minitest (~> 5.0)
     path_expander (1.1.0)
-    rack (2.2.3)
+    rack (3.0.0)
 
 PLATFORMS
   arm64-darwin-21
@@ -48,4 +48,4 @@ DEPENDENCIES
   minitest-autotest
 
 BUNDLED WITH
-   2.3.8
+   2.3.11
