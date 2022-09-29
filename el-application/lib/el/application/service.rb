@@ -7,6 +7,7 @@ module El
       include Servicable
       include Dependency
       extend  Pluggable
+      extend  Advising
 
       class << self
         attr_reader :loader, :unloader

@@ -2,6 +2,7 @@
 
 require 'el/routable'
 require 'el/routes'
+require 'el/advising'
 
 require 'el/pluggable'
 

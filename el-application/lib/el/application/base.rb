@@ -73,7 +73,7 @@ module El
         settings.unload!
         loader.reload!
 
-        @routes = El::Routes.new # TODO: We'll want to formalize the sematics around reloading do dependencies can opt-in
+        @routes = El::Routes.new # TODO: We'll want to formalize the semantics around reloading do dependencies can opt-in
 
         @initialized = false
 
