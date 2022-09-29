@@ -51,11 +51,15 @@ module El
     # @param as [Symbol, nil] the name of the generated method, if nil will use the default name
     # @param delegating [Array<Symbol>] a list of methods to delegate to the generated method
     def advised_by(klass, *args, as: nil, delegating: EMPTY_ARRAY, **options)
-      meth = as || advising_class_method_name(klass)
+      method = as || advising_class_method_name(klass)
 
-      define_advising_method(meth, klass, args, **options.slice(:calling, :memoize))
+      define_advising_method(method, klass, args, **options.slice(:calling, :memoize))
 
-      delegate(*delegating, to: meth) unless delegating.empty?
+      unless delegating.empty?
+        require 'forwardable' unless defined?(Forwardable)
+        extend Forwardable
+        def_instance_delegators(method, *delegating)
+      end
     end
 
     private

@@ -21,7 +21,8 @@ module El
 
         return advised_class if delegating.empty?
 
-        require 'forwardable'
+        require 'forwardable' unless defined?(Forwardable)
+        extend Forwardable
         def_instance_delegators(:advised_object, *delegating)
 
         advised_class
