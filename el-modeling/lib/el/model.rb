@@ -13,7 +13,7 @@ module El
 
     def_delegators :app, :database
 
-    EVENTS = %i[create bulk_create update bulk_update].freeze
+    EVENTS = %i[create bulk_create update bulk_update register_entity].freeze
 
     def initialize(app)
       @app = app
@@ -27,43 +27,60 @@ module El
 
     public
 
+    # @param [Class<Entity>] entity_class
+    #
+    # @return [Model] this model
     def register_entity(entity_class)
-      entities[Modeling::Utils.entity_name(entity_class.name).to_sym] = entity_class
-      entity_class.model = self
+      entities[entity_name(entity_class.name).to_sym] = entity_class
+
+      publisher.publish_event(:register_entity, { entity_class: entity_class })
+
+      self
     end
     alias << register_entity
 
-    def on(event, subscriber)
-      publisher.add_subscriber(subscriber, event_name: event)
+    # @param [Symbol] event
+    # @param [#call] subscriber
+    #
+    # @return [Model] this model
+    def on(event, subscriber = nil, &block)
+      publisher.add_subscriber(subscriber || block, event_name: event)
 
       self
     end
 
+    # @return [Class<Entity>]
     def entity_class(name)
-      entities.fetch(Modeling::Utils.entity_name(name).to_sym)
+      entities.fetch(entity_name(name).to_sym)
     end
 
+    # @return [Class<Repository>]
     def repository_class(name)
       entity_class(name).repository_class
     end
 
+    # @return [Repository]
     def repository(name)
       entity_class(name).repository
     end
     alias [] repository
 
+    # @return [String]
     def entity_table_name(name)
       table_name(entity_class(name))
     end
 
+    # @return [Sequel::Dataset]
     def entity_table(name)
       database[entity_table_name(name).to_sym]
     end
 
+    # @return [Array<Class<Entity>>]
     def entity_classes
       entities.values
     end
 
+    # @return [Array<El::Entity::Attribute>]
     def schema
       entities.values.flat_map(&:attributes)
     end
@@ -92,8 +109,8 @@ module El
 
     def create_one(entity_class, data)
       klass       = self.entity_class(entity_class)
-      entity      = Modeling::Utils.build_entity(self, klass, data)
-      insert_data = SqlUtils.process_record(klass, Modeling::Utils.resolve_entity(self, entity))
+      entity      = build_entity(self, klass, data)
+      insert_data = SqlUtils.process_record(klass, resolve_entity(self, entity))
       id          = entity_table(klass).insert(insert_data)
 
       publisher.publish_event(:create, { entity: entity })
@@ -103,8 +120,8 @@ module El
 
     def create_all(entity_class, data)
       klass       = self.entity_class(entity_class)
-      entities    = data.map { |attrs| Modeling::Utils.build_entity(self, klass, attrs) }
-      insert_data = entities.map! { |e| SqlUtils.process_record(klass, Modeling::Utils.resolve_entity(self, e)) }
+      entities    = data.map { |attrs| build_entity(self, klass, attrs) }
+      insert_data = entities.map! { |e| SqlUtils.process_record(klass, resolve_entity(self, e)) }
       ids         = entity_table(klass).multi_insert(insert_data)
 
       publisher.publish_event(:bulk_create, { entities: entities })
@@ -150,9 +167,9 @@ module El
       klass      = self.entity_class(entity_class)
       table      = entity_table(entity_class)
       table_name = entity_table_name(entity_class)
-      data       = Modeling::Utils.dataset(klass, table_name, table).first(id_attribute => id)
+      data       = dataset(klass, table_name, table).first(id_attribute => id)
 
-      return Modeling::Utils.build_entity(self, klass, data) if data
+      return build_entity(self, klass, data) if data
       return block.call if block_given?
 
       raise "couldn't find #{entity_class} with id #{id.inspect}" if args.empty?
@@ -172,7 +189,7 @@ module El
       return entity_or_data if entity_or_data.is_a?(entity_class)
 
       data = entity_or_data
-      return Modeling::Utils.build_entity(self, entity_class, data) if data.is_a?(Hash)
+      return build_entity(self, entity_class, data) if data.is_a?(Hash)
 
       ident = entity_or_data
       entity_class.reference_mapping.each do |type, ref|

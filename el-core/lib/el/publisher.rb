@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'async'
+
 require_relative 'constants'
 require_relative 'core_ext/blank'
 
@@ -19,13 +21,15 @@ module El
     class InvalidEvent < RuntimeError; end
 
     class Event
-      attr_reader :name, :data
+      attr_reader :name, :data, :publisher
 
       # @param [Symbol] name
       # @param [Hash] data
-      def initialize(name, data)
+      # @param [Publisher] publisher
+      def initialize(name, data, publisher)
         @name = name
         @data = data
+        @publisher = publisher
         freeze
       end
 
@@ -59,10 +63,15 @@ module El
 
       validate_event!(event)
 
-      Event.new(event, data)
+      Event.new(event, data, self)
     end
 
     public
+
+    def to_s
+      "#<#{self.class} #{event_names.map(&:inspect).join(', ')}>"
+    end
+    alias inspect to_s
 
     def subscriptions?(event_name: nil)
       return !subscriptions.empty? if event_name.nil?
@@ -98,9 +107,21 @@ module El
     # @param [Object] key
     #
     # @return [Publisher] this publisher
-    def remove_subscriber(key)
+    def delete_subscriber(key)
       subscriptions.each_pair do |(_name, subscriptions)|
         subscriptions.delete_if { |(k, _, _)| k == key }
+      end
+
+      self
+    end
+
+    def clear_subscriptions(event_name = nil)
+      if event_name
+        subscriptions[event_name].clear
+      else
+        subscriptions.each_pair do |_, subs|
+          subs.clear
+        end
       end
 
       self
@@ -119,8 +140,10 @@ module El
       subs  = subscriptions[event.name]
       return if subs.blank?
 
-      subs.each do |(_, subscriber, _)|
-        subscriber.call(event)
+      Async do |task|
+        subs.each do |(_, subscriber, _)|
+          task.async { subscriber.call(event) }
+        end
       end
 
       event

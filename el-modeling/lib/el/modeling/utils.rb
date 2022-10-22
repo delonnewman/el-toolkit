@@ -7,12 +7,21 @@ module El
     module Utils
       extend self
 
+      # @param [String, #name] string
+      # @param [Boolean] namespace
+      #
+      # @return [String]
       def entity_name(string, namespace: false)
         string = string.name if string.respond_to?(:name) # works for classes or symbols
         string = string.split('::').last unless namespace
+
         Inflection.singular(StringUtils.camelcase(string))
       end
 
+      # @param [String, #name] string
+      # @param [Boolean] namespace
+      #
+      # @return [String]
       def table_name(string, namespace: false)
         string = string.name if string.respond_to?(:name) # works for classes or symbols
         string = string.split('::').last unless namespace
@@ -31,6 +40,7 @@ module El
 
       def reference_key(string)
         string = string.name if string.is_a?(Symbol)
+
         "#{Inflection.singular(string)}_id"
       end
 
