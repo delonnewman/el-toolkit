@@ -46,8 +46,9 @@ module El
         init!.rack
       end
 
-      attr_reader :env, :logger, :root_path, :environment, :loader, :dependencies, :rack
+      attr_reader :env, :logger, :root_path, :environment, :loader, :dependencies, :rack, :base_url, :initialized
 
+      alias initialized? initialized
       alias settings environment
 
       def initialize(env)
@@ -57,9 +58,6 @@ module El
         @environment = Settings.new(self)
         @loader      = Loader.new(self)
       end
-
-      # Base URL
-      attr_reader :base_url
 
       def base_url=(url)
         @base_url = url
@@ -73,9 +71,9 @@ module El
         settings.unload!
         loader.reload!
 
-        @routes = El::Routes.new # TODO: We'll want to formalize the semantics around reloading do dependencies can opt-in
+        @routes = El::Routes.new # TODO: We'll want to formalize the semantics around reloading so dependencies can opt-in
 
-        @initialized = false
+        self.initialized = false
 
         init!
 
@@ -185,10 +183,6 @@ module El
         self
       end
 
-      def initialized?
-        !!@initialized
-      end
-
       def middleware
         @middleware ||= self.class.middleware.dup
       end
@@ -204,12 +198,14 @@ module El
 
       private
 
-      def notify
-        logger.info "#{self.class} is being initialized in a #{env} environment"
-      end
+      attr_writer :initialized
 
       def initialized!
-        @initialized = true
+        self.initialized = true
+      end
+
+      def notify
+        logger.info "#{self.class} is being initialized in a #{env} environment"
       end
 
       def after_init_dependencies!

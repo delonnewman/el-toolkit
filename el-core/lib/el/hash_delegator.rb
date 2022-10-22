@@ -38,7 +38,7 @@ module El
     class << self
       # Return required attributes or nil
       #
-      # @return [Array, nil]
+      # @return [Set]
       def required_attributes
         return @required_attributes if @required_attributes
         return superclass.required_attributes if superclass.respond_to?(:required_attributes)
@@ -49,7 +49,7 @@ module El
       # Specifiy required attributes
       #
       # @param attributes [Array]
-      # @return [HashDelegator]
+      # @return [Class<HashDelegator>]
       def requires(*attributes)
         @required_attributes =
           if superclass.respond_to?(:required_attributes) && !superclass.required_attributes.nil?
@@ -58,12 +58,12 @@ module El
             attributes.to_set
           end
 
-        attributes
+        self
       end
 
       # Return optional attributes or nil
       #
-      # @return [Array, nil]
+      # @return [Set]
       def optional_attributes
         return @optional_attributes if @optional_attributes
         return superclass.optional_attributes if superclass.respond_to?(:optional_attributes)
@@ -74,7 +74,7 @@ module El
       # Specifiy optional attributes
       #
       # @param attributes [Array]
-      # @return [HashDelegator]
+      # @return [Class<HashDelegator>]
       def optional(*attributes)
         @optional_attributes =
           if superclass.respond_to?(:optional_attributes) && !superclass.optional_attributes.nil?
@@ -83,7 +83,7 @@ module El
             attributes.to_set
           end
 
-        attributes
+        self
       end
 
       def validate!(data)
@@ -98,7 +98,7 @@ module El
       #
       # @param value [Object] default value
       # @param block [Proc] default proc
-      # @return [HashDelegator]
+      # @return [Class<HashDelegator>]
       def default(value = nil, &block)
         if block
           @default_value = block

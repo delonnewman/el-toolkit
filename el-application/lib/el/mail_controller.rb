@@ -1,19 +1,29 @@
 # frozen_string_literal: true
 
-require 'el/advice'
 require_relative 'templating'
 
 module El
-  class Messenger < Advice
-    advises Application, as: :app, delegating: %i[logger]
-
+  # A controller for
+  class MailController
+    extend Forwardable
     include Templating
+
+    def initialize(app)
+      @app = app
+    end
 
     def deliver!(message, *args)
       public_send(message, *args).wait!
     end
 
+    protected
+
+    attr_reader :app
+
+    def_delegator :app, :logger
+
     DEFAULT_FROM = 'contact@delonnewman.name'
+    private_constant :DEFAULT_FROM
 
     def mail(name, view = EMPTY_HASH, to:, subject:, from: DEFAULT_FROM)
       content = render_template(name, view)

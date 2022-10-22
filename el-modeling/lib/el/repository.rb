@@ -94,7 +94,7 @@ module El
       return lazy unless block
 
       dataset.each do |row|
-        block&.call(entity(row))
+        block.call(entity(row))
       end
 
       self

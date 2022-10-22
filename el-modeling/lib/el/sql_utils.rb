@@ -136,8 +136,8 @@ module El
     def query_fields(entity_class, db)
       fields =
         query_attribute_map(entity_class)
-        .reject { |(name, _)| entity_class.exclude_for_storage.include?(name) }
-        .map { |(_, ident)| db.literal(ident) }
+          .reject { |(name, _)| entity_class.exclude_for_storage.include?(name) }
+          .map { |(_, ident)| db.literal(ident) }
 
       entity_class.component_attributes.each_with_index do |comp, i|
         comp.value_class.storable_attributes.each do |attr|

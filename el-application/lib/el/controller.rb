@@ -3,7 +3,9 @@
 require 'forwardable'
 require 'el/memoize'
 require 'el/pluggable'
+
 require_relative 'templating'
+require_relative 'data_view'
 
 module El
   class Controller
@@ -201,7 +203,7 @@ module El
     def init_view(view, options)
       if view.is_a?(Symbol)
         data = options.delete(:with) || EMPTY_HASH
-        HashView.new(self, view, data, options)
+        DataView.new(self, view, data, options)
       else
         view.new(self, options)
       end

@@ -2,6 +2,8 @@
 
 require 'el/memoize'
 require 'el/string_utils'
+
+require_relative 'view'
 require_relative 'templates'
 require_relative 'template_helpers'
 

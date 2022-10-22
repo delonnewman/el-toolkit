@@ -18,7 +18,7 @@ module El
     end
 
     def eval_default(entity, attr)
-      return attr.default unless attr.default.respond_to?(:to_proc)
+      return attr.default unless attr.default.is_a?(Proc)
 
       entity.instance_exec(&attr.default)
     end

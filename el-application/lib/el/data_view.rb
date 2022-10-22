@@ -2,7 +2,7 @@ require_relative 'page_view'
 
 module El
   # An anonymous view based on hash data
-  class HashView < PageView
+  class DataView < PageView
     attr_reader :template_name
 
     def initialize(controller, name, data, options)
