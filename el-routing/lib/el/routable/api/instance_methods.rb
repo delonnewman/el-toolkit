@@ -26,7 +26,8 @@ module El
           routable = self
           Rack::Builder.new do
             middleware.each do |middle|
-              use middle
+              klass, args = middle
+              use klass, *args
             end
             run routable
           end

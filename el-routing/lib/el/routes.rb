@@ -119,6 +119,8 @@ module El
 
     # Merge routing tables into one
     def merge!(other)
+      raise TypeError, "no implicit conversion of #{other.class} to #{self.class}" unless other.is_a?(self.class)
+
       @routes += other.instance_variable_get(:@routes)
       @table.deep_merge!(other.instance_variable_get(:@table))
       @aliases.merge!(other.instance_variable_get(:@aliases))
