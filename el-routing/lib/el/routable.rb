@@ -4,14 +4,14 @@ require 'set'
 require 'cgi'
 require 'rack'
 require 'stringio'
+require 'forwardable'
 
 require 'el/constants'
 
 require_relative 'route'
 require_relative 'routes'
 require_relative 'request'
-require_relative 'routable/instance_methods'
-require_relative 'routable/dsl'
+require_relative 'request_evaluator'
 
 module El
   # Provides a light-weight DSL for routing over Rack, and instances implement
@@ -64,9 +64,17 @@ module El
   #     mount '/admin', AdminApp
   #   end
   module Routable
+    # Valid methods for routes
+    HTTP_METHODS = %i[get post delete put head link unlink].to_set.freeze
+
+    require_relative 'routable/api'
+    require_relative 'routable/dsl'
+
     def self.included(base)
-      base.extend(DSL)
-      base.include(InstanceMethods)
+      base.extend(DSL::ClassMethods)
+      base.extend(API::ClassMethods)
+      base.include(DSL::InstanceMethods)
+      base.include(API::InstanceMethods)
     end
   end
 end

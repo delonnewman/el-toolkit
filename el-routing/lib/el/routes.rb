@@ -1,16 +1,15 @@
 # frozen_string_literal: true
 
 require 'el/core_ext/hash'
+require 'el/core_ext/symbol'
 require 'el/constants'
 
-require_relative 'request_not_found'
 require_relative 'route_helpers'
 require_relative 'route'
 
 module El
   # A routing table--collects routes, and matches them against a given Rack environment.
   #
-  # @api private
   # @todo Add header matching
   class Routes
     include Enumerable
@@ -84,6 +83,15 @@ module El
     # @param first [String, Integer, Symbol] a path, method, alias or number
     # @param second [String, nil] a path if a method is specified
     #
+    # @example
+    #   routes[1] # returns second route
+    #   # returns all routes that match
+    #   routes[:get]
+    #   routes[:post]
+    #   routes[:get, '/users/1']
+    #   routes[:get, '/users/1']
+    #   routes['/users/1']
+    #
     # @return [Route, Array<Route>]
     def [](first, second = nil)
       if first.is_a?(Integer)
@@ -128,11 +136,10 @@ module El
 
     # Add a route to the table.
     #
-    # @param Route [Route]
+    # @param route [Route]
     #
     # @return [Routes] this object
     def <<(route)
-      # TODO: Add Symbol#name for older versions of Ruby
       method = route.method.name.upcase
       scope = route.parsed_path[:path].reduce(@table) do |tree, part|
         tree[part] ||= {}
@@ -178,12 +185,7 @@ module El
     #
     # @param env [Hash]
     #
-    # @return [[Route, Hash]] the route and it's params or an empty array
-    # @api private
-
-    # rubocop: disable Metrics/CyclomaticComplexity
-    # rubocop: disable Metrics/AbcSize
-    # rubocop: disable Metrics/PerceivedComplexity
+    # @return [Request, Array<Request>, nil]
     def match(env)
       _match(parsed_request(env), env)
     end
@@ -210,6 +212,11 @@ module El
       path.split(%r{/+})
     end
 
+    # @param parts
+    # @param env [Hash, nil]
+    # @param splat_methods [Boolean]
+    #
+    # @return [Request, Array<Request>, nil]
     def _match(parts, env = nil, splat_methods: false)
       scope  = @table
       prev   = nil
@@ -253,7 +260,7 @@ module El
       return prev if splat_methods
       return unless env
 
-      RequestNotFound.new(env)
+      nil
     end
   end
 end

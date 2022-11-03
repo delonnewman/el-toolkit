@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'routing/utils'
+
 module El
   # All the data associated with a route
   class Route
@@ -35,23 +37,7 @@ module El
     NAME_PATTERN = /\A[\w\-]+\z/i.freeze
     private_constant :NAME_PATTERN
 
-    def controller_action?(action)
-      action.is_a?(Array) && action[0].is_a?(Class) && action[1].is_a?(Symbol)
-    end
-
-    def call_controller_action(action, routeable, request)
-      action[0].call(routeable, request).call(action[1])
-    end
-
     public
-
-    # @api private
-    def call_action(routable, request)
-      return call_controller_action(action, routable, request) if controller_action?(action)
-      return action.call unless action.arity.positive?
-
-      action.call(request)
-    end
 
     def route_alias
       path_method_prefix.to_sym
@@ -68,7 +54,9 @@ module El
       return 'root' if path_parts.length.zero? || path_parts[1].start_with?(':')
 
       parts = []
-      parts << action[1].name if !IGNORED_PREFIXES.include?(action[1].name) && controller_action?(action)
+      if Routing::Utils.controller_action?(action) && !IGNORED_PREFIXES.include?(action[1].name)
+        parts << action[1].name
+      end
 
       path.split('/').each do |part|
         next if IGNORED_SEGMENTS.include?(part)

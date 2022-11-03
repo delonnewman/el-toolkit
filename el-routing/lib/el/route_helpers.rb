@@ -50,7 +50,7 @@ module El
 
     def extended(object)
       object.instance_variable_set(:@route_helpers, self)
-      def object.helper_method_names
+      object.define_method(:helper_method_names) do
         @route_helpers.helper_method_names
       end
     end

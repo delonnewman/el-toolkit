@@ -1,18 +1,11 @@
 # frozen_string_literal: true
 
-require_relative 'request_error'
-
-# TODO: Make requests pluggable
+require 'el/data_utils'
 
 module El
   class Request
     include Enumerable
     include Rack::Request::Helpers
-
-    # The default headers for responses
-    DEFAULT_HEADERS = {
-      'Content-Type' => 'text/html'
-    }.freeze
 
     def self.for(*args)
       new(Rack::MockRequest.env_for(*args))
@@ -20,7 +13,7 @@ module El
 
     attr_reader :route_params, :route
 
-    def initialize(env, route = nil, route_params: EMPTY_HASH, params: EMPTY_HASH)
+    def initialize(env, route = nil, route_params: EMPTY_HASH, params: nil)
       @env          = env
       @route        = route
       @route_params = route_params
@@ -34,33 +27,6 @@ module El
     def error?
       false
     end
-
-    def respond(context = nil)
-      evaluate(context)
-    rescue StandardError => e
-      RequestError.new(@env, e).respond(context)
-    end
-
-    def evaluate(context = nil)
-      res = catch(:halt) { route.call_action(context, self) }
-
-      if (is_array_res = res.is_a?(Array) && res[0].is_a?(Integer)) && res.size == 3
-        res
-      elsif is_array_res && res.size == 2
-        [res[0], DEFAULT_HEADERS.dup, res[2]]
-      elsif res.is_a?(Integer)
-        [res, DEFAULT_HEADERS.dup, EMPTY_ARRAY]
-      elsif res.is_a?(Rack::Response)
-        res.finish
-      elsif res.is_a?(Hash) && res.key?(:status)
-        [res[:status], res.fetch(:headers, DEFAULT_HEADERS.dup), res.fetch(:body, EMPTY_ARRAY)]
-      elsif res.respond_to?(:each)
-        [200, DEFAULT_HEADERS.dup, res]
-      else
-        [200, DEFAULT_HEADERS.dup, StringIO.new(res.to_s)]
-      end
-    end
-    alias respond! evaluate
 
     def with_params(new_params)
       self.class.new(@env, route, params: new_params)

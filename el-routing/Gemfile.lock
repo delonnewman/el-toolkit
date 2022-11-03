@@ -6,6 +6,9 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
+    coderay (1.1.3)
+    ffi (1.15.5-java)
+    method_source (1.0.0)
     minitest (5.15.0)
     minitest-autotest (1.1.1)
       minitest-server (~> 1.0)
@@ -13,10 +16,20 @@ GEM
     minitest-server (1.0.6)
       minitest (~> 5.0)
     path_expander (1.1.0)
+    pry (0.14.1)
+      coderay (~> 1.1)
+      method_source (~> 1.0)
+    pry (0.14.1-java)
+      coderay (~> 1.1)
+      method_source (~> 1.0)
+      spoon (~> 0.0)
     rack (2.2.3.1)
+    spoon (0.0.6)
+      ffi
 
 PLATFORMS
   arm64-darwin-21
+  universal-java-18
   x86_64-darwin-20
   x86_64-linux
 
@@ -24,7 +37,8 @@ DEPENDENCIES
   el-core!
   minitest
   minitest-autotest
+  pry
   rack
 
 BUNDLED WITH
-   2.3.8
+   2.3.25

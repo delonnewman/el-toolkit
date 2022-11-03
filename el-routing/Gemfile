@@ -4,3 +4,4 @@ gem 'el-core', path: "../el-core"
 gem 'rack'
 gem 'minitest'
 gem 'minitest-autotest'
+gem 'pry'

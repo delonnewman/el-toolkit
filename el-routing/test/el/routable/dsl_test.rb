@@ -7,21 +7,17 @@ module El
     end
 
     def test_namespace
-      @routable.namespace '/test'
-      route = @routable.get '/:id', -> {}
+      @routable.namespace('/test').get('/:id', ->{})
 
-      assert_equal route.path, '/test/:id'
-      assert_equal @routable.namespace[:path], '/test'
+      assert !@routable.routes.fetch(:get, '/test/1').nil?
     end
 
     def test_namespace_scoping
-      route = nil
       @routable.namespace '/scoped' do
-        route = @routable.get '/:id', -> {}
+        @routable.get('/:id', -> {})
       end
 
-      assert_equal route.path, '/scoped/:id'
-      assert_nil @routable.namespace
+      assert !@routable.routes.fetch(:get, '/scoped/1').nil?
     end
 
     def test_media_type_aliases
