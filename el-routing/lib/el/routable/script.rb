@@ -80,7 +80,7 @@ module El
         end
       end
 
-      def run(**options, &block)
+      def start(args = ARGV, **options, &block)
         handler = Script.handler
         raise "unable to find a suitable handler" unless handler
 

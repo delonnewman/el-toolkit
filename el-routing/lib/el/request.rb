@@ -20,10 +20,12 @@ module El
       @params       = params
     end
 
+    # FIXME: do we need this any more?
     def not_found?
       false
     end
 
+    # FIXME: do we need this any more?
     def error?
       false
     end
@@ -82,19 +84,19 @@ module El
     end
 
     def []=(_, _)
-      raise 'Mutating parameters is not supported'
+      raise NotImplementedError, 'Mutating parameters is not supported'
     end
 
     def delete_param(_)
-      raise 'Mutating parameters is not supported'
+      raise NotImplementedError, 'Mutating parameters is not supported'
     end
 
     def update_param(_, _)
-      raise 'Mutating parameters is not supported'
+      raise NotImplementedError, 'Mutating parameters is not supported'
     end
 
     def path_info=(_)
-      raise 'Mutating parameters is not supported'
+      raise NotImplementedError, 'Mutating parameters is not supported'
     end
 
     def to_h
@@ -125,7 +127,7 @@ module El
     end
 
     def hijack?
-      @env['rack.hijack?']
+      !!@env['rack.hijack?']
     end
 
     def hijack

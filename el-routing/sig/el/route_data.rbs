@@ -1,6 +1,6 @@
 module El
   # All the data associated with a route
-  class Route
+  class RouteData
     NAME_PATTERN: Regexp
     IGNORED_PREFIXES: Set[String]
     IGNORED_SEGMENTS: Set[String]

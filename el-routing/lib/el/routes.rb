@@ -5,7 +5,7 @@ require 'el/core_ext/symbol'
 require 'el/constants'
 
 require_relative 'route_helpers'
-require_relative 'route'
+require_relative 'route_data'
 
 module El
   # A routing table--collects routes, and matches them against a given Rack environment.
@@ -32,16 +32,16 @@ module El
     def self.[](map)
       new do |r|
         map.each_pair do |(method, path, options), action|
-          r << Route.new(method, path, action, options || EMPTY_HASH)
+          r << RouteData.new(method, path, action, options || EMPTY_HASH)
         end
       end
     end
 
-    def initialize(&block)
+    def initialize
       @table = {}
       @routes = []
       @aliases = {}
-      block.call(self) if block_given?
+      yield self if block_given?
     end
 
     def freeze
@@ -95,7 +95,7 @@ module El
     #   routes[:get, '/users/1']
     #   routes['/users/1']
     #
-    # @return [Route, Array<Route>]
+    # @return [RouteData, Array<RouteData>]
     def [](first, second = nil)
       if first.is_a?(Integer)
         @routes[first]
@@ -111,7 +111,7 @@ module El
     # Iterate over each route in the routes table passing it's information along
     # to the given block.
     #
-    # @yield [Route]
+    # @yield [RouteData]
     #
     # @return [Routes] this object
     def each_route(&block)
@@ -141,7 +141,7 @@ module El
 
     # Add a route to the table.
     #
-    # @param route [Route]
+    # @param route [RouteData]
     #
     # @return [Routes] this object
     def <<(route)
@@ -217,11 +217,11 @@ module El
       path.split(%r{/+})
     end
 
-    # @param parts
+    # @param parts [Array<String>]
     # @param env [Hash, nil]
     # @param splat_methods [Boolean]
     #
-    # @return [Request, Array<Request>, nil]
+    # @return [Request, Array<RouteData>, nil]
     def _match(parts, env = nil, splat_methods: false)
       scope  = @table
       prev   = nil

@@ -4,7 +4,7 @@ require_relative 'routing/utils'
 
 module El
   # All the data associated with a route
-  class Route
+  class RouteData
     # @!attribute method
     #   @return [Symbol]
     attr_reader :method
@@ -35,9 +35,13 @@ module El
       @action      = action
       @options     = options
       @parsed_path = parse_path(path)
+      freeze
     end
 
     private
+
+    NAME_PATTERN = /\A[\w\-]+\z/i
+    private_constant :NAME_PATTERN
 
     def parse_path(str)
       str = str.start_with?('/') ? str[1, str.size] : str
@@ -56,8 +60,6 @@ module El
 
       { names: names, path: route }
     end
-    NAME_PATTERN = /\A[\w\-]+\z/i.freeze
-    private_constant :NAME_PATTERN
 
     public
 
@@ -65,8 +67,8 @@ module El
       path_method_prefix.to_sym
     end
 
-    IGNORED_PREFIXES = %w[index show create remove update].to_set.freeze
-    IGNORED_SEGMENTS = %w[new].to_set.freeze
+    IGNORED_PREFIXES = Set.new(%w[index show create remove update]).freeze
+    IGNORED_SEGMENTS = Set.new(%w[new]).freeze
 
     def path_method_prefix
       return 'root' if path == '/'

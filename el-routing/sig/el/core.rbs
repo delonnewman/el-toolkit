@@ -1,0 +1,7 @@
+module El
+  interface _Callable
+    def call: -> untyped
+  end
+
+  type rack_response = [Integer, Hash[String, untyped], _Each[untyped]]
+end

@@ -1,0 +1,37 @@
+module El
+  class Routes
+    def self.[]: (Hash[[Symbol, String] | [Symbol, String, Hash[Symbol, untyped]], _Callable | [Class, Symbol]]) -> Routes
+
+    @table: Hash[]
+    @routes: Array[RouteData]
+    @aliases: Hash[]
+    @helpers: RouteHelpers
+
+    def helpers: -> RouteHelpers
+    def include_helpers!: (String) -> void
+    def size: -> Integer
+    def to_a: -> Array[RouteData]
+    def to_h: -> Hash[[Symbol, String], _Callable | [Class, Symbol]]
+
+    def []: (Integer | Symbol | String, String?) -> (Array[RouteData] | RouteData)?
+
+    def each_route: { (RouteData) -> void } -> Routes
+    alias each each_route
+
+    def merge!: (Routes) -> Routes
+    def merge: (Routes) -> Routes
+    def list: -> Array[[Symbol, String, Symbol]]
+    def <<: (RouteData) -> Routes
+    def alias?: (Symbol) -> bool
+    def alias!: (Symbol) -> RouteData
+    def route: (Symbol) -> RouteData?
+    def aliases: -> Array[Symbol]
+    def fetch: (Symbol | String, String) -> Request?
+    def match_path: (String) -> Array[RouteData]
+    def match: (Hash[String, untyped]) -> Request?
+
+    def parsed_path: (String) -> Array[String]
+    def parsed_request: (Hash[String, untyped]) -> Array[String]
+    def _match: (Array[String], Hash[String, untyped]?, splat_methods: bool) -> (Request | Array[RouteData])?
+  end
+end

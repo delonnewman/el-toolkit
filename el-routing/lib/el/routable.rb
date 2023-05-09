@@ -8,7 +8,7 @@ require 'forwardable'
 
 require 'el/constants'
 
-require_relative 'route'
+require_relative 'route_data'
 require_relative 'routes'
 require_relative 'request'
 require_relative 'request_evaluator'

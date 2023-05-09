@@ -1,0 +1,5 @@
+module El
+  class RouteHelpers < Module
+
+  end
+end

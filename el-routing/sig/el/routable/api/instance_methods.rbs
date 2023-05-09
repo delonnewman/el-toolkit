@@ -1,0 +1,14 @@
+module El
+  module Routable
+    module API
+      module InstanceMethods
+        def rack: -> _Callable
+
+        @request_evaluator: RequestEvaluator
+        def request_evaluator: -> RequestEvaluator
+
+        def call: (Hash[String, untyped]) -> rack_response
+      end
+    end
+  end
+end

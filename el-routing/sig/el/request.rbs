@@ -1,0 +1,78 @@
+module El
+  class Request
+    def self.for: (*untyped) -> Request
+
+    attr_reader route_params: Hash[Symbol, String]
+    attr_reader route: RouteData
+
+    def initialize: (Hash[String, untyped], RouteData?, route_params: Hash[Symbol, untyped], params: Hash[Symbol, untyped]) -> void
+    @env: Hash[String, untyped]
+    @route: RouteData?
+    @route_params: Hash[Symbol, String]
+    @params: Hash[Symbol, String]?
+
+    def with_params: (Hash[Symbol, String]) -> Request
+    def include_params(Hash[Symbol, String]) -> Request
+
+    JSON_MEDIA_TYPES: Set[String]
+
+    type json_params = Hash[String | Symbol, String | Numeric | bool]
+    def json_body: (symbolize_names: bool, force: bool) -> json_params
+    alias json json_body
+    @json_body: json_params
+
+    def params: -> Hash[Symbol, untyped]
+
+    type string_params = Hash[Symbol, String]
+    def query_params: -> string_params
+    @query_params: string_params
+
+    FORM_DATA_MEDIA_TYPES: Set[String]
+
+    def body_params: -> string_params
+    @body_params: string_params
+
+    def to_h: -> Hash[String, untyped]
+    def options: -> Hash[Symbol, untyped]
+    def headers: -> Array[String]
+    alias keys headers
+
+    def each_header: { (String, untyped) -> void } -> Request
+    alias each each_header
+
+    def request_method: -> String
+    def session: -> Hash[untyped, untyped]
+    def hijack?: -> bool
+    def hijack: -> untyped?
+    def hijack_io: -> IO
+    def path: -> String
+    def content_type: -> String
+    def body: -> IO
+    def errors: -> IO
+    def script_name: -> String
+    def server_name: -> String
+    def server_port: -> (String | Integer)
+
+    def []: (Symbol | String) -> untyped
+    def get_header: (String) -> untyped
+
+    def values_at: (*(String | Symbol)) -> Array[untyped]
+    def get_headers(*String) -> Array[untyped]
+
+    def media_params: -> Hash[String, String]
+    def media_type: -> String?
+
+    def url_for: (String) -> String
+
+    def url: -> String
+
+    def redirect: (String, status: Integer) -> rack_response
+    def redirect_to: (String, **Hash[untyped, untyped]) -> rack_response
+
+    # These are only there to override mutating helpers from Rack::Request::Helpers when run that just raise and exception
+    def []=: (untyped, untyped) -> void
+    def delete_param: (untyped) -> void
+    def update_param: (untyped, untyped) -> void
+    def path_info=: (untyped) -> void
+  end
+end

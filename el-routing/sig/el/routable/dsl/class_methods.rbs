@@ -2,10 +2,6 @@ module El
   module Routable
     module DSL
       module ClassMethods
-        interface _Callable
-          def call: -> untyped
-        end
-
         type namespace = { path: String, options: Hash[Symbol, untyped] }
 
         attr_accessor current_namespace: namespace

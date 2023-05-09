@@ -1,0 +1,16 @@
+module El
+  module Routable
+    module API
+      module ClassMethods
+        @media_type_aliases: Hash[Symbol, String]
+        @middleware: Array[[Class, Array[untyped]]]
+        @routes: Routes
+
+        def middleware: -> Array[[Class, Array[untyped]]]
+        def media_type_aliases: -> Hash[Symbol, String]
+        alias content_type_aliases media_type_aliases
+        def routes: -> Routes
+      end
+    end
+  end
+end

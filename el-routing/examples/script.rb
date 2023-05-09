@@ -7,4 +7,4 @@ routes do
   end
 end
 
-run
+start
