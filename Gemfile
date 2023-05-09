@@ -13,4 +13,5 @@ group :development do
   gem 'rake'
   gem 'yard'
   gem 'rubocop'
+  gem 'rbs'
 end
