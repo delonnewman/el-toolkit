@@ -46,6 +46,7 @@ module El
       @dataset = field_info.reduce(@dataset) { |ds, data| ds.join(data[:table], id: data[:ref]) }.select(*fields)
     end
 
+    # @return [Hash]
     def field_info
       @field_info ||= SqlUtils.all_component_attribute_query_info(entity_class)
     end
@@ -149,7 +150,7 @@ module El
       false
     end
 
-    # TODO: add database oriented validations like uniqness here
+    # TODO: add database oriented validations like uniqueness here
     def validate!(entity)
       entity_class.validate!(entity)
     end
