@@ -4,19 +4,14 @@
         <title>WebSocket Test</title>
     </head>
     <script>
-        const socket = new WebSocket('ws://127.0.0.1:2000');
+        const socket = new WebSocket('ws://localhost:2000');
 
-        socket.addEventListener('open', (event) => {
-            console.log("Open event", event);
-            setInterval(() => {
-                console.log("sending...");
-                socket.send("Testing... Testing... 1-2-3");
-            }, 500);
+        socket.addEventListener('open', () => {
+            socket.send("Can you hear me?")
         });
 
         socket.addEventListener('message', (event) => {
-            console.log("Message", event);
-            document.writeln(event.data);
+            console.log("Message", event.data);
         });
     </script>
 </html>

@@ -36,26 +36,23 @@ module El
 
       frame = ::WebSocket::Frame::Incoming::Client.new(version: handshake.version)
       frame << bytes
-      puts "FRAME: #{frame.inspect}"
 
-      buffer = StringIO.new
+      buffer = StringIO.new(frame.to_s)
       while (f = frame.next)
         if f.type == :close
           socket.close
           return buffer.string
         else
-          buffer.write(f)
+          buffer.write(f.to_s)
         end
       end
-
-      puts "BUFFER: #{buffer.string.inspect}"
 
       buffer.string
     end
 
     def write(data)
       frame = ::WebSocket::Frame::Outgoing::Client.new(version: handshake.version, data: data, type: :text)
-      socket.write(frame)
+      socket.write(frame.to_s)
       socket.flush
     end
   end
@@ -88,7 +85,7 @@ module El
 
       unless handshake.valid?
         socket.close
-        return nil
+        return
       end
 
       socket.write(handshake)
