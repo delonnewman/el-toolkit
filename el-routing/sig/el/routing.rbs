@@ -1,0 +1,37 @@
+module El
+  # All the data associated with a route
+  class Route
+    NAME_PATTERN: Regexp
+    IGNORED_PREFIXES: Set[String]
+    IGNORED_SEGMENTS: Set[String]
+
+    # Returns the value of attribute method.
+    attr_accessor method: Symbol
+
+    # Returns the value of attribute path.
+    attr_accessor path: String
+
+    # Returns the value of attribute options.
+    attr_accessor options: ::Hash[Symbol, Object]
+
+    # Returns the value of attribute action.
+    attr_accessor action: ([Class, Symbol] | Proc)
+
+    # Returns the value of attribute parsed_path.
+    attr_accessor parsed_path: { names: Array[Symbol?], path: String }
+
+    def parse_path: (String str) -> { names: Array[Symbol?], path: String }
+
+    def initialize: (
+                      Symbol method,
+                      String path,
+                      ([Class, Symbol] | Proc) action,
+                      ?Hash[Symbol, Object] options
+                    ) -> void
+
+    def route_alias: () -> Symbol
+    def path_method_prefix: () -> String
+    def path_method_name: () -> String
+    def url_method_name: () -> String
+  end
+end

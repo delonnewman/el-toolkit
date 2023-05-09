@@ -1,0 +1,46 @@
+module El
+  class Repository
+    @dataset: untyped
+
+    @field_info: Hash[Symbol, untyped]
+
+    @fields: Array[untyped]
+
+    attr_reader self.order_by_attribute_name: Symbol
+
+    def self.order_by: -> Symbol
+
+    attr_reader entity_class: Class
+    attr_reader model: El::Model
+
+    def all: -> Array[El::Entity]
+
+    def each: -> Array[El::Entity]
+
+    def empty?: -> RBS::Types::Bases::Bool
+
+    def find_by: -> El::Entity | nil
+
+    def find_by!: -> El::Entity
+
+    def pluck: -> Array[untyped]
+
+    def table: -> untyped
+
+    def table_exists?: -> RBS::Types::Bases::Bool
+
+    def table_name: -> Symbol
+
+    def valid?: -> RBS::Types::Bases::Bool
+
+    private
+
+    def dataset: -> untyped
+
+    def db: -> untyped
+
+    def field_info: -> Hash[Symbol, untyped]
+
+    def fields: -> Array[untyped]
+  end
+end

@@ -1,0 +1,32 @@
+module El
+  module Routable
+    module DSL
+      module ClassMethods
+        interface _Callable
+          def call: -> untyped
+        end
+
+        type namespace = { path: String, options: Hash[Symbol, untyped] }
+
+        attr_accessor current_namespace: namespace
+
+        def media_type: (Symbol, *String) -> ClassMethods
+        alias content_type media_type
+
+        def namespace: (String?, **Hash[Symbol, untyped]) { () -> void } -> ClassMethods
+
+        type verbs = :get | :post | :delete | :put | :head | :link | :unlink
+
+        def route: (verbs, String, Proc | [Class, Symbol]?, Symbol, **Hash[Symbol, untyped]) { () -> untyped } -> ClassMethods
+
+        def use: (Class, *untyped) -> ClassMethods
+
+        private
+
+        def resolve_action: (Class, Symbol) -> ([Class, Symbol] | _Callable)
+
+        def resolve_path: (namespace, String) -> String
+      end
+    end
+  end
+end

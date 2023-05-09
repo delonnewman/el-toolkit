@@ -5,8 +5,30 @@ require_relative 'routing/utils'
 module El
   # All the data associated with a route
   class Route
-    attr_reader :method, :path, :options, :action, :parsed_path
+    # @!attribute method
+    #   @return [Symbol]
+    attr_reader :method
 
+    # @!attribute path
+    #   @return [String]
+    attr_reader :path
+
+    # @!attribute options
+    #   @return [Hash{Symbol, Object}]
+    attr_reader :options
+
+    # @!attribute action
+    #   @return [Array<(Class<#call>, Symbol)>, #call]
+    attr_reader :action
+
+    # @!attribute parsed_path
+    #   @return [{:name => Array<Symbol, nil>, :path => String }]
+    attr_reader :parsed_path
+
+    # @param method [Symbol]
+    # @param path [String]
+    # @param action [Array<(Class<#call>, Symbol)>, #call]
+    # @param options [Hash{Symbol, Object}]
     def initialize(method, path, action, options = EMPTY_HASH)
       @method      = method
       @path        = path

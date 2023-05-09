@@ -1,0 +1,21 @@
+module El
+  module Routable
+    module DSL
+      module InstanceMethods
+        interface _Each[T]
+          def each: { (T) -> void } -> Array[T]
+        end
+
+        type rack_response = [Integer, Hash[String, untyped], _Each[untyped]]
+
+        def error: -> rack_response
+
+        def halt: -> void
+
+        def not_found: -> rack_response
+
+        def rack_env: -> Symbol
+      end
+    end
+  end
+end

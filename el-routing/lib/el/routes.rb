@@ -16,6 +16,8 @@ module El
 
     # Build routes declaratively from a hash.
     #
+    # @param map [Hash{Array<(Symbol, String, Hash)>, Array<(Symbol, String)> => Array<(Class<#call>, Symbol)>, #call}]
+    #
     # @example
     #   Routes[
     #     [:get,    '/']          => [MainController,  :index],
@@ -51,6 +53,7 @@ module El
       self
     end
 
+    # @return [RouteHelpers]
     def helpers
       @helpers ||= RouteHelpers.new(self)
     end

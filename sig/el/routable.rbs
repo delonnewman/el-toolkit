@@ -1,0 +1,5 @@
+module El
+  module Routable
+    HTTP_METHODS: Set[Symbol]
+  end
+end
