@@ -1,0 +1,11 @@
+GEM
+  specs:
+
+PLATFORMS
+  universal-java-18
+  universal-java-20
+
+DEPENDENCIES
+
+BUNDLED WITH
+   2.3.25

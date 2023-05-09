@@ -38,6 +38,8 @@ GEM
 
 PLATFORMS
   arm64-darwin-21
+  universal-java-18
+  universal-java-20
 
 DEPENDENCIES
   el-application!
