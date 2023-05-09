@@ -4,3 +4,5 @@ vendor/
 doc/
 .DS_Store
 pkg/
+/.idea/
+/.project
