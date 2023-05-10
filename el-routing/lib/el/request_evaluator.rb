@@ -53,7 +53,7 @@ module El
       action = request.route&.action
       raise InvalidRequest, "a route has not been set for this request" unless action
 
-      return call_controller_action(action, request, self) if controller_action?(action)
+      return call_controller_action(action, request, context) if controller_action?(action)
       return action.call unless action.arity.positive?
 
       action.call(request)

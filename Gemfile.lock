@@ -1,38 +1,55 @@
+PATH
+  remote: .
+  specs:
+    el-application (0.0.1)
+      el-core (= 0.0.1)
+      el-modeling (= 0.0.1)
+      el-routing (= 0.0.1)
+    el-components (0.0.1)
+    el-core (0.0.1)
+    el-modeling (0.0.1)
+      el-core (= 0.0.1)
+    el-routing (0.0.1)
+      el-core (= 0.0.1)
+      rack
+    el-toolkit (0.0.1)
+      el-application (= 0.0.1)
+      el-components (= 0.0.1)
+      el-core (= 0.0.1)
+      el-modeling (= 0.0.1)
+      el-routing (= 0.0.1)
+
 GEM
   remote: https://rubygems.org/
   specs:
     ast (2.4.2)
-    concurrent-ruby (1.1.8)
-    crass (1.0.6)
-    diff-lcs (1.4.4)
-    minitest (5.14.4)
-    minitest-autotest (1.1.1)
-      minitest-server (~> 1.0)
-      path_expander (~> 1.0)
-    minitest-server (1.0.6)
-      minitest (~> 5.0)
+    diff-lcs (1.5.0)
+    docile (1.4.0)
+    nio4r (2.5.9)
     parallel (1.20.1)
     parser (3.0.2.0)
       ast (~> 2.4.1)
-    path_expander (1.1.0)
+    puma (6.2.2)
+      nio4r (~> 2.0)
+    rack (3.0.7)
     rainbow (3.0.0)
     rake (13.0.6)
     rbs (2.7.0)
     regexp_parser (2.1.1)
     rexml (3.2.5)
-    rspec (3.10.0)
-      rspec-core (~> 3.10.0)
-      rspec-expectations (~> 3.10.0)
-      rspec-mocks (~> 3.10.0)
-    rspec-core (3.10.1)
-      rspec-support (~> 3.10.0)
-    rspec-expectations (3.10.1)
+    rspec (3.12.0)
+      rspec-core (~> 3.12.0)
+      rspec-expectations (~> 3.12.0)
+      rspec-mocks (~> 3.12.0)
+    rspec-core (3.12.2)
+      rspec-support (~> 3.12.0)
+    rspec-expectations (3.12.3)
       diff-lcs (>= 1.2.0, < 2.0)
-      rspec-support (~> 3.10.0)
-    rspec-mocks (3.10.2)
+      rspec-support (~> 3.12.0)
+    rspec-mocks (3.12.5)
       diff-lcs (>= 1.2.0, < 2.0)
-      rspec-support (~> 3.10.0)
-    rspec-support (3.10.2)
+      rspec-support (~> 3.12.0)
+    rspec-support (3.12.0)
     rubocop (1.20.0)
       parallel (~> 1.10)
       parser (>= 3.0.0.0)
@@ -44,23 +61,35 @@ GEM
       unicode-display_width (>= 1.4.0, < 3.0)
     rubocop-ast (1.11.0)
       parser (>= 3.0.1.1)
+    rubocop-performance (1.17.1)
+      rubocop (>= 1.7.0, < 2.0)
+      rubocop-ast (>= 0.4.0)
+    rubocop-rspec (2.11.1)
+      rubocop (~> 1.19)
     ruby-progressbar (1.11.0)
+    simplecov (0.22.0)
+      docile (~> 1.1)
+      simplecov-html (~> 0.11)
+      simplecov_json_formatter (~> 0.1)
+    simplecov-html (0.12.3)
+    simplecov_json_formatter (0.1.4)
     unicode-display_width (2.0.0)
     yard (0.9.26)
 
 PLATFORMS
-  ruby
+  arm64-darwin-22
 
 DEPENDENCIES
-  concurrent-ruby
-  crass
-  minitest
-  minitest-autotest
+  el-toolkit!
+  puma
   rake
   rbs
   rspec
   rubocop
+  rubocop-performance
+  rubocop-rspec
+  simplecov
   yard
 
 BUNDLED WITH
-   2.2.16
+   2.4.12

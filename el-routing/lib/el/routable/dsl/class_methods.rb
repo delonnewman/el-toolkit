@@ -72,7 +72,7 @@ module El
           path    = resolve_path(current_namespace, path)
           options = resolve_options(current_namespace, options)
 
-          Route.new(request_method, path, action, options).tap do |r|
+          RouteData.new(request_method, path, action, options).tap do |r|
             routes << r
           end
 

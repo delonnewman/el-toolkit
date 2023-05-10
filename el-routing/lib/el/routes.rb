@@ -237,7 +237,7 @@ module El
 
         i += 1
 
-        if scope.is_a?(Route)
+        if scope.is_a?(RouteData)
           params = {}
           scope.parsed_path[:names].each_with_index do |name, j|
             next unless name

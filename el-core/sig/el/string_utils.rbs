@@ -1,0 +1,12 @@
+module El
+  module StringUtils
+    def constantize: (String) -> untyped
+    def underscore: (String) -> String
+    def humanize: (String) -> String
+    def titlecase: (String) -> String
+    def camelcase: (String, uppercase_first: bool) -> String
+    def dasherize: (String) -> String
+    def squish!: (String) -> String
+    def squish: (String) -> String
+  end
+end

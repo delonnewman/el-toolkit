@@ -66,8 +66,6 @@ module El
       "#{self.class}[#{to_h.inspect}]"
     end
 
-    private
-
-    def_delegators 'self.class', :dehydrator, :normalizer, :attribute, :validate!, :dereferencer
+    private def_delegators 'self.class', :dehydrator, :normalizer, :attribute, :validate!, :dereferencer
   end
 end

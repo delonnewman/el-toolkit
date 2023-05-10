@@ -5,6 +5,8 @@ module El
   require_relative 'duration'
 
   # Represent a money value and it's currency
+  #
+  # @see https://metacpan.org/pod/Data::Money
   class Money < Numeric
     class << self
       def [](magnitude, currency)
@@ -19,7 +21,7 @@ module El
 
     CONVERSIONS = {
       dollars: { dollars: 1, cents: 100 },
-      cents:   { cents: 1, dollars: Rational(1, 100) }
+      cents:   { cents: 1, dollars: 1/100r }
     }.freeze
 
     attr_reader :magnitude, :currency

@@ -2,12 +2,12 @@ require 'date'
 require 'el/hash_delegator'
 
 class Person < El::HashDelegator
-  required :name, :age
+  requires :name, :age
   transform_keys(&:to_sym)
 end
 
 class Employee < Person
-  required :employee_id
+  requires :employee_id
   default :sorry
 end
 

@@ -1,0 +1,6 @@
+module El
+  EMPTY_STRING: ''
+  EMPTY_ARRAY: []
+  EMPTY_HASH: {}
+  EMPTY_SET: Set[untyped]
+end

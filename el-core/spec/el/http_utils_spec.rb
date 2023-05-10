@@ -1,6 +1,6 @@
-require "el/http_utils"
+require_relative "../../lib/el/data_utils"
 
-RSpec.describe El::HTTPUtils do
+RSpec.describe El::DataUtils do
   describe ".parse_form_encoded_data" do
     it "will parse form encoded data into a hash of nested values" do
       examples = [

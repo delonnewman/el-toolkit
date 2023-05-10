@@ -1,0 +1,9 @@
+module El
+  module StatUtils
+    def probabilities: (Array[untyped]) -> Hash[untyped, Float]
+    alias probability probabilities
+
+    def entropy: (Array[untyped]) -> Float
+    def ideal_entropy: (Array[untyped]) -> Float
+  end
+end

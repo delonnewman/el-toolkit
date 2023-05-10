@@ -2,9 +2,9 @@ module El
   class Routes
     def self.[]: (Hash[[Symbol, String] | [Symbol, String, Hash[Symbol, untyped]], _Callable | [Class, Symbol]]) -> Routes
 
-    @table: Hash[]
+    @table: Hash[String, RouteData | Hash[String | Regexp, untyped]]
     @routes: Array[RouteData]
-    @aliases: Hash[]
+    @aliases: Hash[Symbol, RouteData]
     @helpers: RouteHelpers
 
     def helpers: -> RouteHelpers

@@ -1,0 +1,19 @@
+module El
+  module SelfDescribing
+    type metadata = Hash[Symbol, untyped]
+
+    def class_doc: (String) -> metadata
+    alias module_doc class_doc
+
+    @metadata: metadata
+    def class_meta: (metadata) -> metadata
+    alias module_meta class_meta
+
+    def metadata: -> metadata
+    def doc: (String) -> metadata
+    def meta: (String) -> metadata
+
+    def add_method_metadata: (Symbol, metadata) -> metadata
+    def method_metadata: (Symbol?) -> metadata
+  end
+end

@@ -1,0 +1,8 @@
+module El
+  module Trait
+
+    def requires: (Symbol, String?) -> Symbol
+    def required_methods: -> Array[Symbol]
+    @required_methods: Array[Symbol]
+  end
+end

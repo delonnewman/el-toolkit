@@ -148,14 +148,18 @@ module El
         self.base_url = request.base_url if base_url.nil?
 
         if settings[:raise_server_errors]
-          request.respond!(self)
+          request_evaluator.evaluate(request)
         else
           begin
-            request.respond!(self)
+            request_evaluator.evaluate(request)
           rescue StandardError => e
             error(request, e)
           end
         end
+      end
+
+      def request_evaluator
+        @request_evaluator ||= RequestEvaluator.new(self)
       end
 
       def route_helpers(&block)

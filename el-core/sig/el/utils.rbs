@@ -1,0 +1,5 @@
+module El
+  module Utils
+    def self.hash_combine: (Integer, Integer) -> Integer
+  end
+end
