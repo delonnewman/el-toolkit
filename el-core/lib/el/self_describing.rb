@@ -43,7 +43,7 @@ module El
     def method_added(method)
       super
 
-      add_method_metadata(method, @_metadata)
+      add_method_metadata(method, @_metadata) if @_metadata
 
       @_metadata = nil
     end
