@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ['Delon Newman']
   spec.email         = ['contact@delonnewman.name']
 
-  spec.summary       = 'Utilities for application routing'
+  spec.summary       = 'Utilities for web application routing'
   spec.description   = spec.summary
   spec.homepage      = 'https://github.com/delonnewman/el-toolkit'
   spec.license       = 'MIT'
@@ -18,11 +18,13 @@ Gem::Specification.new do |spec|
 
   spec.metadata['homepage_uri'] = spec.homepage
   spec.metadata['source_code_uri'] = spec.homepage
-  spec.metadata['changelog_uri'] = "#{spec.homepage}#changelog"
+  spec.metadata['changelog_uri'] = "#{spec.homepage}/blob/master/CHANGLOG.md"
 
   spec.files = Dir['README.md', 'lib/**/*']
   spec.require_paths = ['lib']
 
   spec.add_dependency 'el-core', version
   spec.add_dependency 'rack'
+
+  spec.add_development_dependency 'rspec'
 end

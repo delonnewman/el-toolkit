@@ -46,7 +46,7 @@ module El
         EMPTY_SET
       end
 
-      # Specifiy required attributes
+      # Specify required attributes
       #
       # @param attributes [Array]
       # @return [Class<HashDelegator>]
@@ -234,7 +234,7 @@ module El
     # @param keys [Array]
     # @return [Hash, HashDelegator]
     def except(*keys)
-      common = keys & known_attributes
+      common = keys.to_set & known_attributes
 
       if common.empty?
         self.class.new(@__hash__.except(*keys))
@@ -312,9 +312,11 @@ module El
     #
     # @param other
     def ===(other)
+      return false unless other.is_a?(Hash) || other.is_a?(HashDelegator)
+
       required = required_attributes
 
-      other.respond_to?(:keys) && (common = other.keys & required) &&
+      other.respond_to?(:keys) && (common = other.keys.to_set & required) &&
         common.size == other.keys.size && common.size == required.size
     end
 

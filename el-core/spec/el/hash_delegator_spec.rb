@@ -25,7 +25,7 @@ class Friend < Person
   default ->{ DateTime.now }
 end
 
-RSpec.describe El::HashDelegator do
+describe El::HashDelegator do
   it 'should raise an exception if a required attribute is missing' do
     expect { Person.new(name: 'Tester') }.to raise_error(/age/)
     expect { Person.new(age: 12) }.to raise_error(/name/)

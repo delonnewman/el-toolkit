@@ -1,4 +1,4 @@
-desc "Generate documentation for all gems"
+desc 'Generate documentation for all gems'
 task :doc do
-  sh "yard doc el-*/lib/**/*.rb"
+  sh 'yard doc el-*/lib/**/*.rb'
 end
