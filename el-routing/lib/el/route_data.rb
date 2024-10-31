@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require_relative 'routing/utils'
-
 module El
   # All the data associated with a route
   class RouteData
@@ -40,7 +38,7 @@ module El
 
     private
 
-    NAME_PATTERN = /\A[\w\-%\.]+\z/i
+    NAME_PATTERN = /\A[\w\-%.]+\z/i.freeze
     private_constant :NAME_PATTERN
 
     def parse_path(str)
@@ -67,24 +65,15 @@ module El
       path_method_prefix.to_sym
     end
 
-    IGNORED_PREFIXES = Set.new(%w[index show create remove update]).freeze
-    IGNORED_SEGMENTS = Set.new(%w[new]).freeze
-
     def path_method_prefix
       return 'root' if path == '/'
       return options[:as].name if options.key?(:as)
 
       path_parts = path.split('/')
-      return 'root' if path_parts.length.zero? || path_parts[1].start_with?(':')
+      return 'root' if path_parts.empty? || path_parts[1].start_with?(':')
 
       parts = []
-      if Routing::Utils.controller_action?(action) && !IGNORED_PREFIXES.include?(action[1].name)
-        parts << action[1].name
-      end
-
       path.split('/').each do |part|
-        next if IGNORED_SEGMENTS.include?(part)
-
         parts << part.gsub(/\W+/, '_') unless part.start_with?(':') || part.empty?
       end
       parts.join('_')

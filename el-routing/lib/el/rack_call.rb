@@ -1,13 +1,10 @@
 # frozen_string_literal: true
 
 require_relative 'invalid_request'
-require_relative 'routing/utils'
 
 module El
   # Negotiate Rack invocations
   class RackCall
-    include Routing::Utils
-
     # The default headers for responses
     DEFAULT_HEADERS = {
       'content-type' => 'text/html'
@@ -31,7 +28,14 @@ module El
       request.nil? || request.route.nil?
     end
 
-    # Evaluate the request and return a Rack response while negotiating error handling.
+    def action
+      return if invalid?
+
+      request.route.action
+    end
+
+    # Evaluate the request and return a Rack response. Will delegate this and
+    # error handling to context if present.
     #
     # @return [Array(Integer, Hash{String, #to_s}, #each)]
     def evaluate
@@ -79,12 +83,12 @@ module El
     # @raise [InvalidRequest] if the request does not have an associated route
     def call_action
       raise InvalidRequest, "the request is invalid" if invalid?
-      action = request.route.action
 
-      return call_controller_action(action, request, context) if controller_action?(action)
-      return action.call unless action.arity.positive?
-
-      action.call(request)
+      if context.respond_to?(:receive)
+        context.public_send(:receive, request)
+      else
+        action.call(request)
+      end
     end
 
     private
