@@ -32,7 +32,7 @@ module El
       end
 
       def self.call(env)
-        RackCall.new(env, collected_routes, suppress_errors: rack_env == :production).evaluate(self)
+        RackCall.new(env, collected_routes, context: self, suppress_errors: rack_env == :production).evaluate
       end
 
       # Return a not found response

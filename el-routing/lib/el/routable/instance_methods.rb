@@ -1,4 +1,4 @@
-# lib/instance_methods.rb
+# frozen_string_literal: true
 
 module El
   module Routable
@@ -40,7 +40,7 @@ module El
       #
       # @return [Array(Integer, Hash{String, Object}, #each)]
       def call(env)
-        RackCall.new(env, routes, suppress_errors: rack_env == :production).evaluate(self)
+        RackCall.new(env, routes, context: self, suppress_errors: rack_env == :production).evaluate
       end
 
       #
@@ -63,12 +63,12 @@ module El
 
       # Return a not found response
       def not_found
-        [404, RequestEvaluator::DEFAULT_HEADERS.dup, StringIO.new('Not Found')]
+        [404, RackCall::DEFAULT_HEADERS.dup, StringIO.new('Not Found')]
       end
 
       # Return an error response
       def error(_)
-        [500, RequestEvaluator::DEFAULT_HEADERS.dup, StringIO.new('Server Error')]
+        [500, RackCall::DEFAULT_HEADERS.dup, StringIO.new('Server Error')]
       end
     end
   end
