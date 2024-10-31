@@ -200,6 +200,17 @@ module El
       url_for(path)
     end
 
+    def original_path
+      query = @env['QUERY_STRING']
+      return path unless query && query.length != 0
+
+      "#{path}?#{query}"
+    end
+
+    def original_url
+      url_for(original_path)
+    end
+
     def redirect(url, status: 302)
       r = Rack::Response.new
       r.redirect(url, status)
