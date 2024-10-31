@@ -20,12 +20,12 @@ module El
 
         # Return a not found response
         def not_found
-          [404, Request::DEFAULT_HEADERS.dup, StringIO.new('Not Found')]
+          [404, RequestEvaluator::DEFAULT_HEADERS.dup, StringIO.new('Not Found')]
         end
 
         # Return an error response
         def error(_)
-          [500, Request::DEFAULT_HEADERS.dup, StringIO.new('Server Error')]
+          [500, RequestEvaluator::DEFAULT_HEADERS.dup, StringIO.new('Server Error')]
         end
       end
     end

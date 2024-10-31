@@ -10,7 +10,7 @@ module El
 
     # The default headers for responses
     DEFAULT_HEADERS = {
-      'Content-Type' => 'text/html'
+      'content-type' => 'text/html'
     }.freeze
 
     attr_reader :context
