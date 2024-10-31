@@ -4,8 +4,8 @@ require_relative 'invalid_request'
 require_relative 'routing/utils'
 
 module El
-  # Encapsulates request evaluation
-  class RequestEvaluator
+  # Negotiate Rack invocations
+  class RackCall
     include Routing::Utils
 
     # The default headers for responses
@@ -13,18 +13,47 @@ module El
       'content-type' => 'text/html'
     }.freeze
 
-    attr_reader :context
+    def initialize(env, routes, supress_errors: false)
+      @env = env
+      @routes = routes
+      @suppress_errors = suppress_errors
+    end
 
-    def initialize(context = nil)
-      @context = context
+    def suppress_errors? = @suppress_errors
+    def raise_errors? = !suppress_errors?
+
+    def request
+      @request ||= routes.match(env)
+    end
+
+    def invalid?
+      request.nil? || request.route.nil?
+    end
+
+    # Evaluate the request and return a Rack response while negotiating error handling.
+    #
+    # @return [Array(Integer, Hash{String, #to_s}, #each)]
+    def evaluate(context = nil)
+      response(context)
+    rescue InvalidRequest
+      if context.respond_to?(:not_found)
+        context.public_send(:not_found)
+      elsif raise_errors?
+        raise e
+      end
+    rescue StandardError => e
+      request.errors.write(e.message)
+      if context.respond_to?(:error)
+        context.public_send(:error)
+      elsif raise_errors?
+        raise e
+      end
     end
 
     # Evaluate the request and return a Rack response.
     #
-    # @param request [Request]
-    #
     # @return [Array(Integer, Hash{String, #to_s}, #each)]
-    def evaluate(request)
+    def response(context = nil)
       res = catch(:halt) { call_action(request) }
 
       if (is_array_res = res.is_a?(Array) && res[0].is_a?(Integer)) && res.size == 3
@@ -47,11 +76,9 @@ module El
     # Invoke the action in response to this request.
     #
     # @raise [InvalidRequest] if the request does not have an associated route
-    #
-    # @param request [Request]
-    def call_action(request)
-      action = request.route&.action
-      raise InvalidRequest, "a route has not been set for this request" unless action
+    def call_action
+      raise InvalidRequest, "the request is invalid" if invalid?
+      action = request.route.action
 
       return call_controller_action(action, request, context) if controller_action?(action)
       return action.call unless action.arity.positive?

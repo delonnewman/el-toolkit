@@ -11,7 +11,7 @@ require 'el/constants'
 require_relative 'route_data'
 require_relative 'routes'
 require_relative 'request'
-require_relative 'request_evaluator'
+require_relative 'rack_call'
 
 module El
   # Provides a light-weight DSL for routing over Rack, and instances implement
@@ -67,14 +67,12 @@ module El
     # Valid methods for routes
     HTTP_METHODS = %i[get post delete put head link unlink].to_set.freeze
 
-    require_relative 'routable/api'
-    require_relative 'routable/dsl'
+    require_relative 'routable/instance_methods'
+    require_relative 'routable/class_methods'
 
     def self.included(base)
-      base.extend(DSL::ClassMethods)
-      base.extend(API::ClassMethods)
-      base.include(DSL::InstanceMethods)
-      base.include(API::InstanceMethods)
+      base.extend(ClassMethods)
+      base.include(InstanceMethods)
     end
   end
 end

@@ -23,10 +23,6 @@ module El
         self
       end
 
-      def self.request_evaluator
-        @request_evaluator ||= RequestEvaluator.new
-      end
-
       # Return the value of the RACK_ENV environment variable as a symbol.
       # If the environment variable is not set return :development.
       #
@@ -36,16 +32,7 @@ module El
       end
 
       def self.call(env)
-        request = collected_routes.match(env)
-
-        return not_found unless request
-
-        request_evaluator.evaluate(request)
-      rescue StandardError => e
-        request.errors.write(e.message) if request
-        error(e)
-
-        raise e unless rack_env == :production
+        RackCall.new(env, collected_routes, suppress_errors: rack_env == :production).evaluate(self)
       end
 
       # Return a not found response
@@ -70,11 +57,9 @@ module El
         end
       end
 
-
       def routes(&block)
         Class.new.tap do |klass|
-          klass.extend(Routable::DSL::ClassMethods)
-          klass.extend(Routable::API::ClassMethods)
+          klass.extend(Routable::ClassMethods)
           klass.class_eval(&block)
           Script.routers << klass
         end
