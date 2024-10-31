@@ -40,7 +40,7 @@ module El
 
     private
 
-    NAME_PATTERN = /\A[\w\-]+\z/i
+    NAME_PATTERN = /\A[\w\-%\.]+\z/i
     private_constant :NAME_PATTERN
 
     def parse_path(str)
