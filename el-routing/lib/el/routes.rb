@@ -199,7 +199,7 @@ module El
 
     def flatten_nested_routes(scope)
       scope.values.flat_map do |value|
-        if value.is_a?(Route)
+        if value.is_a?(RouteData)
           value
         else
           flatten_nested_routes(value)
@@ -233,7 +233,6 @@ module El
 
         part  = parts[i]
         prev  = scope
-        scope = scope[part]
 
         i += 1
 
@@ -242,12 +241,14 @@ module El
           scope.parsed_path[:names].each_with_index do |name, j|
             next unless name
 
-            params[name] = values[j]
+            params[name] = URI.decode_www_form_component(values[j])
           end
 
           return scope unless env
 
           return Request.new(env, scope, route_params: params)
+        else
+          scope = scope[part]
         end
 
         next unless scope.nil?
