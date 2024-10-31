@@ -7,4 +7,4 @@ routes do
   end
 end
 
-start
+start Host: 'localhost', Port: 3000
