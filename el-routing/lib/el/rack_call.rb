@@ -67,7 +67,7 @@ module El
         [res[0], DEFAULT_HEADERS.dup, res[2]]
       elsif res.is_a?(Integer)
         [res, DEFAULT_HEADERS.dup, EMPTY_ARRAY]
-      elsif res.is_a?(Rack::Response)
+      elsif res.respond_to?(:finish) # Rack::Response or custom response type
         res.finish
       elsif res.is_a?(Hash) && res.key?(:status)
         [res[:status], res.fetch(:headers, DEFAULT_HEADERS.dup), res.fetch(:body, EMPTY_ARRAY)]
