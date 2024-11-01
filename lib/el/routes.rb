@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-require 'el/core_ext/hash'
-require 'el/core_ext/symbol'
-require 'el/constants'
+require_relative 'core_ext/hash'
+require_relative 'core_ext/symbol'
+require_relative 'constants'
 
 require_relative 'route_helpers'
 require_relative 'route_data'

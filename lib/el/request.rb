@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'el/data_utils'
+require_relative 'data_utils'
 
 module El
   class Request

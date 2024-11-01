@@ -22,9 +22,5 @@ Gem::Specification.new do |spec|
 
   spec.files = %w[README.md]
 
-  spec.add_dependency 'el-application', version
-  spec.add_dependency 'el-components',  version
-  spec.add_dependency 'el-core',        version
-  spec.add_dependency 'el-modeling',    version
-  spec.add_dependency 'el-routing',     version
+  spec.add_dependency 'rack'
 end

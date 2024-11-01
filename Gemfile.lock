@@ -1,23 +1,8 @@
 PATH
   remote: .
   specs:
-    el-application (0.0.1)
-      el-core (= 0.0.1)
-      el-modeling (= 0.0.1)
-      el-routing (= 0.0.1)
-    el-components (0.0.1)
-    el-core (0.0.1)
-    el-modeling (0.0.1)
-      el-core (= 0.0.1)
-    el-routing (0.0.1)
-      el-core (= 0.0.1)
-      rack
     el-toolkit (0.0.1)
-      el-application (= 0.0.1)
-      el-components (= 0.0.1)
-      el-core (= 0.0.1)
-      el-modeling (= 0.0.1)
-      el-routing (= 0.0.1)
+      rack
 
 GEM
   remote: https://rubygems.org/

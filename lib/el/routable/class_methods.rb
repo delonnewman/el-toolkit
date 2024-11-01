@@ -1,4 +1,4 @@
-# lib/class_methods.rb
+# frozen_string_literal: true
 
 module El
   module Routable

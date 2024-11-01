@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'el/core_ext/to_param'
+require_relative 'core_ext/to_param'
 
 module El
   class RouteHelpers < Module

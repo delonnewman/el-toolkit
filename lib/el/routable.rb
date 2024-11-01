@@ -6,7 +6,7 @@ require 'rack'
 require 'stringio'
 require 'forwardable'
 
-require 'el/constants'
+require_relative 'constants'
 
 require_relative 'route_data'
 require_relative 'routes'
